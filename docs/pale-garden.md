@@ -32,7 +32,10 @@ the natural spawn rate; nothing here needs to be crafted dozens of times.
 
 ### 1. Resin sticky piston (first to implement)
 
-- Shapeless recipe: **piston + resin clump → sticky piston**, alongside the slimeball recipe.
+- One recipe for both: vanilla's `sticky_piston` recipe is overridden so its top ingredient is the
+  item tag `vanillareforged:sticky_piston_adhesives` (slime ball, resin clump), like planks accept
+  any log. The recipe book shows a single entry cycling both ingredients and unlocks it when the
+  player picks up either one.
 - Data-only, no balance risk, gives resin a functional use.
 
 ### 2. Heartwood Sentry (golem)
