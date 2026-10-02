@@ -125,6 +125,9 @@ the natural spawn rate; nothing here needs to be crafted dozens of times.
 
 ### 4. Pale Ruin (structure)
 
+> On hold: the structure's layout isn't decided yet. Its loot items (trim, sherds) are implemented
+> and creative-only until then.
+
 - Spawns only in Pale Gardens. **Underground or fully enclosed, with no natural light**, reached
   through a collapsed stairway or sinkhole.
 - **Ruin Sentries are always active in the dark** and guard it until killed. They don't respawn.
@@ -152,7 +155,8 @@ the natural spawn rate; nothing here needs to be crafted dozens of times.
   - **Watcher armor trim** smithing template (rare; duplicated with 7 diamonds + a block of resin).
     Implemented, but only obtainable in creative until the Ruin's loot exists. Its textures are
     placeholders to be replaced with final art;
-  - pottery sherds (eye, heart);
+  - pottery sherds: **Gaze** (eye) and **Creaking** (tree figure with a heart). Implemented with
+    placeholder textures; vanilla already has a "heart" sherd, hence the names;
   - the Pale Mask ingredient (TODO: working idea is a "Resin Eye").
 - **Lighting**: a consistent low level of artificial light (candles, glow lichen, soul lanterns,
   amethyst clusters). It's for atmosphere, not spawn-proofing: in Java Edition hostile mobs only
