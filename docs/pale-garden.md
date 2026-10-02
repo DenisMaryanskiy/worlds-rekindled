@@ -149,7 +149,9 @@ the natural spawn rate; nothing here needs to be crafted dozens of times.
   - aim: bow or trident at the heart;
   - melee: Pale Mask to slow them, then a sword on the heart.
 - **Archaeology**: suspicious gravel or mud holds:
-  - **Watcher armor trim** smithing template (duplicated with diamonds + a pale oak/resin block);
+  - **Watcher armor trim** smithing template (rare; duplicated with 7 diamonds + a block of resin).
+    Implemented, but only obtainable in creative until the Ruin's loot exists. Its textures are
+    placeholders to be replaced with final art;
   - pottery sherds (eye, heart);
   - the Pale Mask ingredient (TODO: working idea is a "Resin Eye").
 - **Lighting**: a consistent low level of artificial light (candles, glow lichen, soul lanterns,

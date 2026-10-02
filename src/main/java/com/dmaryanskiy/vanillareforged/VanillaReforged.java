@@ -21,6 +21,8 @@ public class VanillaReforged implements ModInitializer {
 		// However, some things (like resources) may still be uninitialized.
 		// Proceed with mild caution.
 
+		ModItems.initialize();
+
 		LOGGER.info("Vanilla Reforged loaded");
 	}
 

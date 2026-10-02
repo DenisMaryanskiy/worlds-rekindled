@@ -6,7 +6,8 @@
 	"environment": "*",
 	"entrypoints": {
 		"fabric-gametest": [
-			"com.dmaryanskiy.vanillareforged.test.StickyPistonRecipeTest"
+			"com.dmaryanskiy.vanillareforged.test.StickyPistonRecipeTest",
+			"com.dmaryanskiy.vanillareforged.test.WatcherArmorTrimTest"
 		]
 	},
 	"depends": {
