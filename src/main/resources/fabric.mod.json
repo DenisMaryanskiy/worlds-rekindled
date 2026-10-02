@@ -1,0 +1,34 @@
+{
+	"schemaVersion": 1,
+	"id": "vanillareforged",
+	"version": "${version}",
+	"name": "Vanilla Reforged",
+	"description": "Gives recent Minecraft updates the rewards they deserve.",
+	"authors": [
+		"dmaryanskiy"
+	],
+	"license": "All-Rights-Reserved",
+	"icon": "assets/vanillareforged/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"com.dmaryanskiy.vanillareforged.VanillaReforged"
+		],
+		"client": [
+			"com.dmaryanskiy.vanillareforged.client.VanillaReforgedClient"
+		]
+	},
+	"mixins": [
+		"vanillareforged.mixins.json",
+		{
+			"config": "vanillareforged.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": ">=0.19.5",
+		"minecraft": "~26.3",
+		"java": ">=25",
+		"fabric-api": "*"
+	}
+}
