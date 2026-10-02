@@ -1,0 +1,14 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "vanillareforged:pale_mask"
+      }
+    ],
+    "humanoid_baby": [
+      {
+        "texture": "vanillareforged:pale_mask"
+      }
+    ]
+  }
+}

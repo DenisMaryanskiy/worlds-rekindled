@@ -12,6 +12,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.SmithingTemplateItem;
+import net.minecraft.world.item.equipment.ArmorType;
 
 public final class ModItems {
 	public static final Item WATCHER_ARMOR_TRIM_SMITHING_TEMPLATE = register("watcher_armor_trim_smithing_template",
@@ -20,6 +21,10 @@ public final class ModItems {
 			Item::new, new Item.Properties().rarity(Rarity.UNCOMMON).potPattern(ModPotPatterns.GAZE));
 	public static final Item CREAKING_POTTERY_SHERD = register("creaking_pottery_sherd",
 			Item::new, new Item.Properties().rarity(Rarity.UNCOMMON).potPattern(ModPotPatterns.CREAKING));
+	public static final Item CREAKING_EYE = register("creaking_eye",
+			Item::new, new Item.Properties().rarity(Rarity.RARE));
+	public static final Item PALE_MASK = register("pale_mask",
+			Item::new, new Item.Properties().rarity(Rarity.UNCOMMON).humanoidArmor(ModArmorMaterials.PALE_MASK, ArmorType.HELMET));
 
 	private ModItems() {
 	}
@@ -28,7 +33,10 @@ public final class ModItems {
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.INGREDIENTS).register(output -> {
 			output.insertAfter(Items.SNORT_POTTERY_SHERD, GAZE_POTTERY_SHERD, CREAKING_POTTERY_SHERD);
 			output.insertAfter(Items.BOLT_ARMOR_TRIM_SMITHING_TEMPLATE, WATCHER_ARMOR_TRIM_SMITHING_TEMPLATE);
+			output.insertAfter(Items.RESIN_BRICK, CREAKING_EYE);
 		});
+		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.COMBAT).register(output ->
+				output.insertAfter(Items.TURTLE_HELMET, PALE_MASK));
 	}
 
 	private static Item register(String name, Function<Item.Properties, Item> factory, Item.Properties properties) {

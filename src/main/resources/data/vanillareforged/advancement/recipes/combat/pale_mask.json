@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_creaking_eye": {
+      "conditions": {
+        "items": [
+          {
+            "items": "vanillareforged:creaking_eye"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipes": "vanillareforged:pale_mask"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_creaking_eye"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "vanillareforged:pale_mask"
+    ]
+  }
+}

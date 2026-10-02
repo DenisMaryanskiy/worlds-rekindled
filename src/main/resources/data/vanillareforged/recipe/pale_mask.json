@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "E": "vanillareforged:creaking_eye",
+    "L": "#minecraft:pale_oak_logs"
+  },
+  "pattern": [
+    "LEL",
+    "L L"
+  ],
+  "result": {
+    "id": "vanillareforged:pale_mask"
+  }
+}
