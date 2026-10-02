@@ -53,8 +53,8 @@ the natural spawn rate; nothing here needs to be crafted dozens of times.
 **Activity rule**
 - The Sentry is active when its pedestal gets no daylight: **at night, or anywhere without sky
   access** (underground, enclosed). This rule applies to **player-built Sentries only**.
-- **Ruin Sentries ignore the rule and are always active**, day or night, wherever they stand (even
-  near the Ruin's sinkhole entrance where sky light leaks in).
+- **Ruin Sentries are afraid of sunlight** instead (see Pale Ruin): they're always active in the
+  dark, day or night, and only freeze when direct sunlight reaches them.
 - The check uses **sky light / time of day only**. Artificial light (torches, candles) doesn't put
   a Sentry to sleep.
 - In daylight it is a **statue**: a solid, decorative block that can't be damaged.
@@ -124,8 +124,22 @@ the natural spawn rate; nothing here needs to be crafted dozens of times.
 
 - Spawns only in Pale Gardens. **Underground or fully enclosed, with no natural light**, reached
   through a collapsed stairway or sinkhole.
-- **Ruin Sentries are always active** (they skip the day/night rule) and guard it until killed.
-  They don't respawn. Number per structure: TODO, decided when the structure is built.
+- **Ruin Sentries are always active in the dark** and guard it until killed. They don't respawn.
+- **Fear of sunlight** (precedent: undead burning in the sun):
+  - A Ruin Sentry standing in **direct sunlight** (daytime + sky visible at its position) turns
+    into a statue on the spot and wakes up once it's shaded again or night falls.
+  - Statues can't be damaged and turning into one **clears all cracks**, so sunlight makes a
+    Sentry harmless for a while but never easier to kill. Luring one into the sun resets your
+    progress.
+  - Its pathfinding **avoids sunlit blocks**. At the edge of a light patch it stops, **shields its
+    heart with its arms** (hits on the heart bounce off) and backs away out of line of sight. This
+    stops the player from killing it risk-free from inside a sunlit spot.
+  - Only sunlight counts. Torches and other artificial light do nothing.
+  - **Leashed to the Ruin**: it never chases the player outside the structure, so it can't be
+    lured to the surface.
+  - Removing the roof to let daylight in is allowed but deliberately expensive: the Ruin is deep
+    and built from slow-to-mine blocks (deepslate/tuff bricks). Even then it only buys safety
+    during the day, since at night the Sentries are active again. Number per structure: TODO, decided when the structure is built.
 - Drops when killed: TODO.
 - Ruin Sentries are hostile to players and ignore other mobs, same as the vanilla Creaking (which
   only targets players). Two ways to beat them:
