@@ -53,6 +53,8 @@ the natural spawn rate; nothing here needs to be crafted dozens of times.
 **Activity rule**
 - The Sentry is active when its pedestal gets no daylight: **at night, or anywhere without sky
   access** (underground, enclosed). The same rule applies to player-built and Ruin Sentries.
+- The check uses **sky light / time of day only**. Artificial light (torches, candles) doesn't put
+  a Sentry to sleep.
 - In daylight it is a **statue**: a solid, decorative block that can't be damaged.
 - The pumpkin head makes it **unaffected by gaze**: players and mobs looking at it don't freeze it.
   The only thing that slows it is a player wearing the **Pale Mask** (they look like a Creaking).
@@ -93,8 +95,9 @@ the natural spawn rate; nothing here needs to be crafted dozens of times.
 **Moving it**
 - While it's a statue, breaking it with an axe returns the **heart and the head**. Killing it with
   hits destroys the heart.
-- A Sentry with no sky access is never a statue, so it can't be taken apart that way
-  (see Open questions).
+- **Sneak + axe** on the heart takes it apart at any time (including Sentries that never see
+  daylight), returning the heart and the head. Only works on a non-hostile Sentry the player
+  built; a Sentry that's angry at the player, or a Ruin Sentry, must be killed.
 
 **Technical**
 - Heart hitbox: **multi-part entity, like the Ender Dragon**. The body is one part (ignores damage),
@@ -118,13 +121,19 @@ the natural spawn rate; nothing here needs to be crafted dozens of times.
   through a collapsed stairway or sinkhole.
 - Because there's no daylight, its **Ruin Sentries are always active** and guard it until killed.
   They don't respawn.
-- Ruin Sentries are hostile to players and ignore other mobs. Two ways to beat them:
+- Ruin Sentries are hostile to players and ignore other mobs, same as the vanilla Creaking (which
+  only targets players). Two ways to beat them:
   - aim: bow or trident at the heart;
   - melee: Pale Mask to slow them, then a sword on the heart.
 - **Archaeology**: suspicious gravel or mud holds:
   - **Watcher armor trim** smithing template (duplicated with diamonds + a pale oak/resin block);
   - pottery sherds (eye, heart);
   - the Pale Mask ingredient.
+- **Lighting**: dim artificial light only (candles, glow lichen, soul lanterns, amethyst
+  clusters), placed so every floor block has block light ≥ 1. In Java Edition hostile mobs only
+  spawn at block light 0, so the ruin stays dark and moody but spawn-free, like Trial Chambers.
+- As a guarantee, the structure's worldgen JSON sets an empty `monster` **spawn override**, so no
+  natural hostile spawns happen inside its bounds even if a spot is left unlit.
 - Mostly data-driven: structure NBT, loot tables, worldgen JSON.
 
 ## Parked for later (warrior content and extras)
@@ -138,9 +147,7 @@ the natural spawn rate; nothing here needs to be crafted dozens of times.
 
 ## Open questions
 
-1. **Moving an always-dark Sentry**: give it another way to be taken apart (e.g. sneak + axe while
-   it has no target), or accept that underground Sentries are permanent?
-2. **Ruin Sentry drops**: destroyed heart only, or a reward (cracked heart, sherd, recipe hint)?
-3. **Pale Mask passive**: should Creakings ignore the wearer's gaze (you count as one of them)?
-4. **Pale Mask ingredient** from the Ruin: which item?
-5. **Ruin Sentry count** per structure, and are hostile mobs spawning in the dark ruin intended?
+1. **Ruin Sentry drops**: destroyed heart only, or a reward (cracked heart, sherd, recipe hint)?
+2. **Pale Mask passive**: should Creakings ignore the wearer's gaze (you count as one of them)?
+3. **Pale Mask ingredient** from the Ruin: which item?
+4. **Ruin Sentry count** per structure.
