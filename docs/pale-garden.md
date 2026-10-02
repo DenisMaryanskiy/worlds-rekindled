@@ -52,7 +52,9 @@ the natural spawn rate; nothing here needs to be crafted dozens of times.
 
 **Activity rule**
 - The Sentry is active when its pedestal gets no daylight: **at night, or anywhere without sky
-  access** (underground, enclosed). The same rule applies to player-built and Ruin Sentries.
+  access** (underground, enclosed). This rule applies to **player-built Sentries only**.
+- **Ruin Sentries ignore the rule and are always active**, day or night, wherever they stand (even
+  near the Ruin's sinkhole entrance where sky light leaks in).
 - The check uses **sky light / time of day only**. Artificial light (torches, candles) doesn't put
   a Sentry to sleep.
 - In daylight it is a **statue**: a solid, decorative block that can't be damaged.
@@ -111,7 +113,10 @@ the natural spawn rate; nothing here needs to be crafted dozens of times.
   held. Costs durability per second of gazing.
 - Bosses get a weaker effect (Slowness I instead of II). Main target: Wither phase 2 (armored,
   melee), so a melee tank can fight back.
-- **The only thing that slows a Sentry** (any Sentry, player-built or Ruin).
+- **The only thing that slows a Sentry** (any Sentry, player-built or Ruin). Ruin Sentries still
+  see and attack the wearer; the gaze only slows them.
+- **Passive: hidden from Creakings.** Vanilla Creakings don't target the wearer (the mask makes
+  you look like one of them). Attacking a Creaking reveals you to it, like piglins and gold armor.
 - Recipe idea: carved pale oak + Creaking Heart + resin + an item found in the Pale Ruin (ties the
   trophy to the power-up). The exact ingredient is open.
 
@@ -119,8 +124,9 @@ the natural spawn rate; nothing here needs to be crafted dozens of times.
 
 - Spawns only in Pale Gardens. **Underground or fully enclosed, with no natural light**, reached
   through a collapsed stairway or sinkhole.
-- Because there's no daylight, its **Ruin Sentries are always active** and guard it until killed.
-  They don't respawn.
+- **Ruin Sentries are always active** (they skip the day/night rule) and guard it until killed.
+  They don't respawn. Number per structure: TODO, decided when the structure is built.
+- Drops when killed: TODO.
 - Ruin Sentries are hostile to players and ignore other mobs, same as the vanilla Creaking (which
   only targets players). Two ways to beat them:
   - aim: bow or trident at the heart;
@@ -128,12 +134,11 @@ the natural spawn rate; nothing here needs to be crafted dozens of times.
 - **Archaeology**: suspicious gravel or mud holds:
   - **Watcher armor trim** smithing template (duplicated with diamonds + a pale oak/resin block);
   - pottery sherds (eye, heart);
-  - the Pale Mask ingredient.
-- **Lighting**: dim artificial light only (candles, glow lichen, soul lanterns, amethyst
-  clusters), placed so every floor block has block light ≥ 1. In Java Edition hostile mobs only
-  spawn at block light 0, so the ruin stays dark and moody but spawn-free, like Trial Chambers.
-- As a guarantee, the structure's worldgen JSON sets an empty `monster` **spawn override**, so no
-  natural hostile spawns happen inside its bounds even if a spot is left unlit.
+  - the Pale Mask ingredient (TODO: working idea is a "Resin Eye").
+- **Lighting**: a consistent low level of artificial light (candles, glow lichen, soul lanterns,
+  amethyst clusters). It's for atmosphere, not spawn-proofing: in Java Edition hostile mobs only
+  spawn at block light 0, so lit floors stay clear while unlit corners can still spawn vanilla
+  hostiles. That's intended; Ruin Sentries ignore other mobs, so they coexist.
 - Mostly data-driven: structure NBT, loot tables, worldgen JSON.
 
 ## Parked for later (warrior content and extras)
@@ -145,9 +150,8 @@ the natural spawn rate; nothing here needs to be crafted dozens of times.
 - Watcher block for redstoners: outputs a signal while a player looks at it.
 - Other resin uses: slowing resin-coated blocks, amber preservation displays, tool handle upgrade.
 
-## Open questions
+## Open questions / TODO
 
-1. **Ruin Sentry drops**: destroyed heart only, or a reward (cracked heart, sherd, recipe hint)?
-2. **Pale Mask passive**: should Creakings ignore the wearer's gaze (you count as one of them)?
-3. **Pale Mask ingredient** from the Ruin: which item?
-4. **Ruin Sentry count** per structure.
+1. **Ruin Sentry drops**: TODO.
+2. **Pale Mask Ruin ingredient**: TODO. Working idea: "Resin Eye".
+3. **Ruin Sentry count** per structure: TODO, decided when the structure is built.
