@@ -7,7 +7,8 @@
 	"entrypoints": {
 		"fabric-gametest": [
 			"com.dmaryanskiy.vanillareforged.test.StickyPistonRecipeTest",
-			"com.dmaryanskiy.vanillareforged.test.WatcherArmorTrimTest"
+			"com.dmaryanskiy.vanillareforged.test.WatcherArmorTrimTest",
+			"com.dmaryanskiy.vanillareforged.test.PotterySherdTest"
 		]
 	},
 	"depends": {
