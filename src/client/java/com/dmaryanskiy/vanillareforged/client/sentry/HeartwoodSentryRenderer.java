@@ -1,5 +1,7 @@
 package com.dmaryanskiy.vanillareforged.client.sentry;
 
+import java.util.List;
+
 import com.dmaryanskiy.vanillareforged.VanillaReforged;
 import com.dmaryanskiy.vanillareforged.sentry.HeartwoodSentry;
 
@@ -14,12 +16,15 @@ public class HeartwoodSentryRenderer extends MobRenderer<HeartwoodSentry, Heartw
 	private static final Identifier JACK_O_LANTERN = texture("heartwood_sentry_jack_o_lantern");
 	private static final Identifier STATUE = texture("heartwood_sentry_statue");
 
-	// Only the heart is opaque in this texture.
-	private static final Identifier HEART = texture("heartwood_sentry_heart");
+	// Only the heart is opaque in these textures.
+	private static final List<Identifier> HEART_GLOW = List.of(texture("heartwood_sentry_heart"),
+			texture("heartwood_sentry_heart_cracked_1"), texture("heartwood_sentry_heart_cracked_2"));
+	private static final List<Identifier> CRACKS = List.of(texture("heartwood_sentry_cracks_1"), texture("heartwood_sentry_cracks_2"));
 
 	public HeartwoodSentryRenderer(EntityRendererProvider.Context context) {
 		super(context, new HeartwoodSentryModel(context.bakeLayer(LAYER)), 0.6F);
-		this.addLayer(new SentryHeartGlowLayer(this, HEART));
+		this.addLayer(new SentryHeartCracksLayer(this, CRACKS));
+		this.addLayer(new SentryHeartGlowLayer(this, HEART_GLOW));
 	}
 
 	private static Identifier texture(String name) {
@@ -37,6 +42,7 @@ public class HeartwoodSentryRenderer extends MobRenderer<HeartwoodSentry, Heartw
 		state.attackAnimationState.copyFrom(entity.attackAnimationState);
 		state.statue = entity.isStatue();
 		state.jackOLantern = entity.isJackOLantern();
+		state.cracks = entity.getCracks();
 		state.canMove = !state.statue;
 	}
 

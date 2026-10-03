@@ -5,6 +5,7 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.DifficultyInstance;
@@ -31,6 +32,9 @@ import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LevelEvent;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
@@ -42,6 +46,10 @@ import net.minecraft.world.phys.Vec3;
 public class HeartwoodSentry extends AbstractGolem {
 	public static final int HOME_RADIUS = 20;
 	public static final float ATTACK_DAMAGE = 6.0F;
+	public static final int MAX_CRACKS = 3;
+	public static final int HEAL_INTERVAL_TICKS = 1200;
+	private static final double HEAL_PLAYER_RANGE = 16.0;
+	private static final int CRACK_COOLDOWN_TICKS = 10;
 	private static final int RETURN_TIMEOUT_TICKS = 600;
 	private static final int ATTACK_ANIMATION_TICKS = 15;
 	private static final byte ATTACK_EVENT = 4;
@@ -50,10 +58,14 @@ public class HeartwoodSentry extends AbstractGolem {
 			EntityDataSerializers.BOOLEAN);
 	private static final EntityDataAccessor<Boolean> JACK_O_LANTERN = SynchedEntityData.defineId(HeartwoodSentry.class,
 			EntityDataSerializers.BOOLEAN);
+	private static final EntityDataAccessor<Integer> CRACKS = SynchedEntityData.defineId(HeartwoodSentry.class,
+			EntityDataSerializers.INT);
 
 	public final AnimationState attackAnimationState = new AnimationState();
 	private int attackAnimationRemainingTicks;
 	private int returnTicks;
+	private int crackCooldown;
+	private int healTicks;
 
 	public HeartwoodSentry(EntityType<? extends HeartwoodSentry> type, Level level) {
 		super(type, level);
@@ -88,6 +100,7 @@ public class HeartwoodSentry extends AbstractGolem {
 		super.defineSynchedData(builder);
 		builder.define(STATUE, false);
 		builder.define(JACK_O_LANTERN, false);
+		builder.define(CRACKS, 0);
 	}
 
 	public BlockPos getPedestal() {
@@ -115,6 +128,14 @@ public class HeartwoodSentry extends AbstractGolem {
 		this.entityData.set(JACK_O_LANTERN, jackOLantern);
 	}
 
+	public int getCracks() {
+		return this.entityData.get(CRACKS);
+	}
+
+	public void setCracks(int cracks) {
+		this.entityData.set(CRACKS, cracks);
+	}
+
 	public boolean isDaylightAtPedestal() {
 		return this.level().isBrightOutside() && this.level().canSeeSky(this.getStandingPos());
 	}
@@ -131,8 +152,9 @@ public class HeartwoodSentry extends AbstractGolem {
 	@Override
 	public void tick() {
 		super.tick();
-		if (this.level() instanceof ServerLevel) {
+		if (this.level() instanceof ServerLevel level) {
 			this.updateStatue();
+			this.healCracks(level);
 		} else {
 			this.attackAnimationState.animateWhen(this.attackAnimationRemainingTicks > 0, this.tickCount);
 		}
@@ -166,8 +188,22 @@ public class HeartwoodSentry extends AbstractGolem {
 		this.snapTo(Vec3.atBottomCenterOf(this.getStandingPos()), this.getYRot(), 0.0F);
 		this.setDeltaMovement(Vec3.ZERO);
 		this.returnTicks = 0;
+		this.setCracks(0);
 		this.entityData.set(STATUE, true);
 		this.setNoAi(true);
+	}
+
+	/** Out of combat, with no player around, the heart mends one crack a minute. */
+	private void healCracks(ServerLevel level) {
+		if (this.crackCooldown > 0) {
+			this.crackCooldown--;
+		}
+		if (this.getCracks() == 0 || level.getNearestPlayer(this, HEAL_PLAYER_RANGE) != null) {
+			this.healTicks = 0;
+		} else if (++this.healTicks >= HEAL_INTERVAL_TICKS) {
+			this.healTicks = 0;
+			this.setCracks(this.getCracks() - 1);
+		}
 	}
 
 	@Override
@@ -175,11 +211,36 @@ public class HeartwoodSentry extends AbstractGolem {
 		if (source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
 			return super.hurtServer(level, source, damage);
 		}
-		// Can't be damaged (heart cracks come later), but turns on a player who attacks it, like an iron golem.
-		if (!this.isStatue() && source.getEntity() instanceof Player player && !player.isCreative() && !player.isSpectator()) {
+		// Only players can hurt it, and only through the heart, like the Creaking only takes player damage.
+		if (this.isStatue() || !(source.getEntity() instanceof Player player)) {
+			return false;
+		}
+		if (!player.isCreative() && !player.isSpectator()) {
 			this.setTarget(player);
 		}
-		return false;
+		if (this.crackCooldown > 0 || !SentryHeart.isCrackedBy(this, player, source, damage)) {
+			return false;
+		}
+		this.crackCooldown = CRACK_COOLDOWN_TICKS;
+		this.healTicks = 0;
+		this.setCracks(this.getCracks() + 1);
+		if (this.getCracks() < MAX_CRACKS) {
+			level.broadcastDamageEvent(this, source);
+			return true;
+		}
+		level.levelEvent(LevelEvent.PARTICLES_AND_SOUND_DESTROY_BLOCK, BlockPos.containing(SentryHeart.box(this).getCenter()),
+				Block.getId(Blocks.CREAKING_HEART.defaultBlockState()));
+		return super.hurtServer(level, source, Float.MAX_VALUE);
+	}
+
+	@Override
+	protected SoundEvent getHurtSound(DamageSource source) {
+		return SoundEvents.CREAKING_HEART_HURT;
+	}
+
+	@Override
+	protected SoundEvent getDeathSound() {
+		return SoundEvents.CREAKING_DEATH;
 	}
 
 	@Override
@@ -216,6 +277,7 @@ public class HeartwoodSentry extends AbstractGolem {
 		output.store("pedestal", BlockPos.CODEC, this.getPedestal());
 		output.putBoolean("statue", this.isStatue());
 		output.putBoolean("jack_o_lantern", this.isJackOLantern());
+		output.putInt("cracks", this.getCracks());
 	}
 
 	@Override
@@ -224,5 +286,6 @@ public class HeartwoodSentry extends AbstractGolem {
 		input.read("pedestal", BlockPos.CODEC).ifPresent(this::setPedestal);
 		this.entityData.set(STATUE, input.getBooleanOr("statue", false));
 		this.setJackOLantern(input.getBooleanOr("jack_o_lantern", false));
+		this.setCracks(input.getIntOr("cracks", 0));
 	}
 }
