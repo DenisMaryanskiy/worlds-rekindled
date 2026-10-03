@@ -12,7 +12,8 @@
 			"com.dmaryanskiy.vanillareforged.test.PaleMaskTest",
 			"com.dmaryanskiy.vanillareforged.test.WatcherGazeTest",
 			"com.dmaryanskiy.vanillareforged.test.PaleMaskStealthTest",
-			"com.dmaryanskiy.vanillareforged.test.HeartwoodSentryTest"
+			"com.dmaryanskiy.vanillareforged.test.HeartwoodSentryTest",
+			"com.dmaryanskiy.vanillareforged.test.SentryHeartTest"
 		]
 	},
 	"depends": {

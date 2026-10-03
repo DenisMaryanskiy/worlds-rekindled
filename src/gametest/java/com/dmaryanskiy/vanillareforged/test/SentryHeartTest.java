@@ -1,0 +1,185 @@
+package com.dmaryanskiy.vanillareforged.test;
+
+import com.dmaryanskiy.vanillareforged.ModEntities;
+import com.dmaryanskiy.vanillareforged.sentry.HeartwoodSentry;
+
+import net.fabricmc.fabric.api.gametest.v1.GameTest;
+import net.minecraft.core.BlockPos;
+import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.arrow.Arrow;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.GameType;
+import net.minecraft.world.phys.Vec3;
+
+public class SentryHeartTest {
+	private static final String NOON = "vanillareforged-test:noon";
+	private static final String MIDNIGHT = "vanillareforged-test:midnight";
+	private static final Vec3 SENTRY = new Vec3(1.5, 1.0, 1.5);
+	private static final double HEART_Y = SENTRY.y + 1.53;
+	private static final double PLAYER_EYE_HEIGHT = 1.62;
+	// The Sentry faces south (+z), so the heart is on its +z side.
+	private static final Vec3 IN_FRONT = new Vec3(1.5, HEART_Y - PLAYER_EYE_HEIGHT, 4.0);
+	private static final Vec3 BEHIND = new Vec3(1.5, HEART_Y - PLAYER_EYE_HEIGHT, -1.0);
+
+	@GameTest(environment = MIDNIGHT)
+	public void fullSwordSwingOnTheHeartCracksIt(GameTestHelper helper) {
+		HeartwoodSentry sentry = sentry(helper);
+		Player player = swordsman(helper, IN_FRONT, 180.0F);
+
+		boolean hurt = sentry.hurtServer(helper.getLevel(), helper.getLevel().damageSources().playerAttack(player), fullDamage(player));
+
+		helper.assertTrue(hurt, "A sword hit on the heart should land");
+		helper.assertValueEqual(sentry.getCracks(), 1, "cracks");
+		helper.assertValueEqual(sentry.getHealth(), sentry.getMaxHealth(), "health");
+		helper.succeed();
+	}
+
+	@GameTest(environment = MIDNIGHT)
+	public void swordHitFromBehindMissesTheHeart(GameTestHelper helper) {
+		HeartwoodSentry sentry = sentry(helper);
+		Player player = swordsman(helper, BEHIND, 0.0F);
+
+		sentry.hurtServer(helper.getLevel(), helper.getLevel().damageSources().playerAttack(player), fullDamage(player));
+
+		helper.assertValueEqual(sentry.getCracks(), 0, "cracks");
+		helper.succeed();
+	}
+
+	@GameTest(environment = MIDNIGHT)
+	public void weakSwordSwingDoesNotCrack(GameTestHelper helper) {
+		HeartwoodSentry sentry = sentry(helper);
+		Player player = swordsman(helper, IN_FRONT, 180.0F);
+
+		sentry.hurtServer(helper.getLevel(), helper.getLevel().damageSources().playerAttack(player), 0.2F * fullDamage(player));
+
+		helper.assertValueEqual(sentry.getCracks(), 0, "cracks");
+		helper.succeed();
+	}
+
+	@GameTest(environment = MIDNIGHT)
+	public void bareHandDoesNotCrack(GameTestHelper helper) {
+		HeartwoodSentry sentry = sentry(helper);
+		Player player = swordsman(helper, IN_FRONT, 180.0F);
+		player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+
+		sentry.hurtServer(helper.getLevel(), helper.getLevel().damageSources().playerAttack(player), fullDamage(player));
+
+		helper.assertValueEqual(sentry.getCracks(), 0, "cracks");
+		helper.succeed();
+	}
+
+	@GameTest(environment = MIDNIGHT, maxTicks = 40)
+	public void chargedArrowOnTheHeartCracksIt(GameTestHelper helper) {
+		HeartwoodSentry sentry = sentry(helper);
+		shoot(helper, HEART_Y + 0.1, true);
+
+		helper.succeedWhen(() -> helper.assertValueEqual(sentry.getCracks(), 1, "cracks"));
+	}
+
+	@GameTest(environment = MIDNIGHT, maxTicks = 40)
+	public void unchargedArrowBouncesOff(GameTestHelper helper) {
+		HeartwoodSentry sentry = sentry(helper);
+		shoot(helper, HEART_Y + 0.1, false);
+
+		helper.runAfterDelay(20, () -> {
+			helper.assertValueEqual(sentry.getCracks(), 0, "cracks");
+			helper.succeed();
+		});
+	}
+
+	@GameTest(environment = MIDNIGHT, maxTicks = 40)
+	public void chargedArrowInTheLegsBouncesOff(GameTestHelper helper) {
+		HeartwoodSentry sentry = sentry(helper);
+		shoot(helper, SENTRY.y + 0.3, true);
+
+		helper.runAfterDelay(20, () -> {
+			helper.assertValueEqual(sentry.getCracks(), 0, "cracks");
+			helper.succeed();
+		});
+	}
+
+	@GameTest(environment = MIDNIGHT, maxTicks = 100)
+	public void thirdCrackDestroysTheSentry(GameTestHelper helper) {
+		HeartwoodSentry sentry = sentry(helper);
+		Player player = swordsman(helper, IN_FRONT, 180.0F);
+		Runnable hit = () -> sentry.hurtServer(helper.getLevel(), helper.getLevel().damageSources().playerAttack(player), fullDamage(player));
+
+		helper.startSequence()
+				.thenExecute(hit)
+				.thenExecuteAfter(15, hit)
+				.thenExecuteAfter(15, hit)
+				.thenExecute(() -> {
+					helper.assertFalse(sentry.isAlive(), "Sentry should collapse on the third crack");
+					helper.assertItemEntityPresent(Items.RESIN_CLUMP);
+				})
+				.thenSucceed();
+	}
+
+	@GameTest(environment = MIDNIGHT)
+	public void hitsDuringTheCrackCooldownDoNotCount(GameTestHelper helper) {
+		HeartwoodSentry sentry = sentry(helper);
+		Player player = swordsman(helper, IN_FRONT, 180.0F);
+
+		for (int i = 0; i < 3; i++) {
+			sentry.hurtServer(helper.getLevel(), helper.getLevel().damageSources().playerAttack(player), fullDamage(player));
+		}
+
+		helper.assertValueEqual(sentry.getCracks(), 1, "cracks");
+		helper.succeed();
+	}
+
+	@GameTest(environment = NOON, skyAccess = true, maxTicks = 100)
+	public void turningIntoAStatueMendsTheHeart(GameTestHelper helper) {
+		HeartwoodSentry sentry = sentry(helper);
+		sentry.setCracks(2);
+
+		helper.succeedWhen(() -> {
+			helper.assertTrue(sentry.isStatue(), "Sentry should be a statue");
+			helper.assertValueEqual(sentry.getCracks(), 0, "cracks");
+		});
+	}
+
+	// Mock players of neighboring tests within 16 blocks pause the healing, so allow extra time.
+	@GameTest(environment = MIDNIGHT, maxTicks = HeartwoodSentry.HEAL_INTERVAL_TICKS * 2)
+	public void healsACrackWithNoPlayerAround(GameTestHelper helper) {
+		HeartwoodSentry sentry = sentry(helper);
+		sentry.setCracks(2);
+
+		helper.succeedWhen(() -> helper.assertValueEqual(sentry.getCracks(), 1, "cracks"));
+	}
+
+	private static HeartwoodSentry sentry(GameTestHelper helper) {
+		HeartwoodSentry sentry = helper.spawn(ModEntities.HEARTWOOD_SENTRY, SENTRY);
+		sentry.setPedestal(helper.absolutePos(BlockPos.containing(SENTRY).below()));
+		sentry.setNoAi(true);
+		sentry.setYRot(0.0F);
+		sentry.setYHeadRot(0.0F);
+		sentry.setYBodyRot(0.0F);
+		return sentry;
+	}
+
+	private static Player swordsman(GameTestHelper helper, Vec3 pos, float yRot) {
+		Player player = helper.makeMockServerPlayer(GameType.SURVIVAL);
+		player.snapTo(helper.absoluteVec(pos), yRot, 0.0F);
+		player.setYHeadRot(yRot);
+		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.IRON_SWORD));
+		return player;
+	}
+
+	private static float fullDamage(Player player) {
+		return (float) player.getAttributeValue(Attributes.ATTACK_DAMAGE);
+	}
+
+	private static void shoot(GameTestHelper helper, double y, boolean charged) {
+		Player archer = swordsman(helper, new Vec3(1.5, 1.0, 7.0), 180.0F);
+		Arrow arrow = helper.spawn(EntityTypes.ARROW, new Vec3(1.5, y, 5.0));
+		arrow.setOwner(archer);
+		arrow.setCritArrow(charged);
+		arrow.shoot(0.0, 0.0, -1.0, 3.0F, 0.0F);
+	}
+}

@@ -52,7 +52,7 @@ the natural spawn rate; nothing here needs to be crafted dozens of times.
 - The heart and head are consumed; **the log stays as the pedestal** and the Sentry stands on it.
 
 **Build order**: (1) entity, building, night guard AI, day statue, done; (2) heart cracks with a
-separate heart hitbox, healing; (3) sneak + axe to take it apart, jack o'lantern glow, Pale Mask
+heart hitbox, healing, done; (3) sneak + axe to take it apart, jack o'lantern glow, Pale Mask
 slowing it.
 
 **Appearance**
@@ -80,18 +80,21 @@ slowing it.
 - Attacks hostile mobs (not creepers, like the iron golem) within **20 blocks** of its pedestal.
 - Melee with long arms and an iron-golem-style upward launch.
 - **Lower damage than an iron golem**: a flat **6**, a night/dark deterrent, not a tank.
-- Until heart cracks exist (step 2) it can't be damaged at all except by `/kill`.
 - Turns hostile when the player attacks it, like an iron golem.
 
 **Damage model: heart cracks**
 - **Only players can damage the heart.** Mob attacks, mob projectiles and explosions do nothing
   (knockback at most). Precedent: the vanilla Creaking only takes player damage.
-- The body can't be damaged; only hits on the heart count.
-- Heart damage shows as **visible crack stages** (like anvils, turtle/sniffer eggs).
+- The body can't be damaged; only hits on the heart count, and the heart can only be hit **from
+  the front**. Any player hit still turns the Sentry against them.
+- Heart damage shows as **visible crack stages** (like the iron golem's cracks): dark cracks spread
+  from the core through the bark, and the core's glow shrinks and dims.
 - One crack per:
-  - fully charged arrow on the heart (partly charged arrows bounce off);
+  - fully charged arrow on the heart (crossbow bolts count; partly charged arrows bounce off);
   - thrown trident on the heart;
-  - sword hit on the heart (riskier because of the Sentry's reach and launch).
+  - full-strength sword hit on the heart (riskier because of the Sentry's reach and launch).
+    Swords are the item tag `vanillareforged:cracks_sentry_hearts`, so packs can add weapons.
+- At most one crack per 0.5 s, so multishot volleys and quick double hits count once.
 - Crack count:
 
   | Difficulty | Ruin Sentry | Player's Sentry |
@@ -100,7 +103,8 @@ slowing it.
   | Normal | 3 | 3 |
   | Hard   | 4 | 3 |
 
-- Last crack: the heart is destroyed and the Sentry collapses into resin and pale oak.
+- Last crack: the heart is destroyed and the Sentry collapses into 1–3 resin clumps and a pale oak
+  log (loot table `vanillareforged:entities/heartwood_sentry`).
 - Possible later addition, if fights feel slow: a fully charged arrow from a Power IV+ bow cracks 2.
 
 **Healing**
@@ -118,8 +122,11 @@ slowing it.
   built; a Sentry that's angry at the player, or a Ruin Sentry, must be killed.
 
 **Technical**
-- Heart hitbox: **multi-part entity, like the Ender Dragon**. The body is one part (ignores damage),
-  the heart is a small separate part in the chest that receives player hits.
+- Heart hitbox: a small box (0.5 blocks) in the chest, front side. Hits on the Sentry are traced
+  through it: the attacker's look ray for melee, the projectile's flight path for arrows and
+  tridents. A separate part entity like the Ender Dragon's was the first idea, but vanilla
+  hard-codes part entities to the dragon in several places (level lookups, networking, player
+  attacks), so it would take a handful of Mixins for the same result.
 
 ### 3. Pale Mask (tank helmet)
 
