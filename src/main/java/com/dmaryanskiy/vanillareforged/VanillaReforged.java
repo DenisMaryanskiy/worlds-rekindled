@@ -22,6 +22,7 @@ public class VanillaReforged implements ModInitializer {
 		// Proceed with mild caution.
 
 		ModItems.initialize();
+		WatcherGaze.initialize();
 
 		LOGGER.info("Vanilla Reforged loaded");
 	}

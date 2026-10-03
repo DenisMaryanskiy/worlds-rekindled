@@ -131,13 +131,17 @@ the natural spawn rate; nothing here needs to be crafted dozens of times.
     Ender Dragon and the Wither) so the eye can be farmed.
 - **Watcher's Gaze**: the **hostile** mob in the crosshair within ~16 blocks gets Slowness while the
   gaze is held. Costs **1 durability per second** of slowing.
-- Bosses get a weaker effect (Slowness I instead of II). Main target: Wither phase 2 (armored,
-  melee), so a melee tank can fight back.
+- Bosses (`#vanillareforged:gaze_resistant`: Wither, Warden, Elder Guardian) get a weaker effect:
+  Slowness I plus a drag on their horizontal velocity (x0.85 per tick). Main target: Wither phase 2
+  (armored, melee), so a melee tank can fight back. The Wither ignores all status effects and
+  chases with hard-coded acceleration, so for it the drag is the whole effect (about 20-25% slower
+  chase). The Ender Dragon is immune to effects and moves by phases, so the gaze doesn't affect it.
+- Walls block the gaze. Slowness lasts 0.5 s after looking away.
 - **The only thing that slows a Sentry** (any Sentry, player-built or Ruin). Ruin Sentries still
   see and attack the wearer; the gaze only slows them.
 - **Passive: hidden from Creakings.** Vanilla Creakings don't target the wearer (the mask makes
   you look like one of them). Attacking a Creaking reveals you to it, like piglins and gold armor.
-- **Build order**: (1) Creaking Eye + wearable mask with recipe, done; (2) Watcher's Gaze;
+- **Build order**: (1) Creaking Eye + wearable mask with recipe, done; (2) Watcher's Gaze, done;
   (3) hidden from Creakings.
 
 ### 4. Pale Ruin (structure)
