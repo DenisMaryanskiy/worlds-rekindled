@@ -147,11 +147,9 @@ slowing it, done.
   L   L
   ```
 
-- **Creaking Eye** (rare ingredient, looks torn out of a Creaking). How it's obtained is TODO;
-  ideas:
-  - a rare drop from Ruin Sentries;
-  - a drop from a boss of the Pale Ruin, which players can also summon artificially (like the
-    Ender Dragon and the Wither) so the eye can be farmed.
+- **Creaking Eye** (rare ingredient): crafted from a **Watcher's Lens** set in resin, see
+  [The Watcher](#5-the-watcher-boss). The mask's durability and resin repair stay as they are: the
+  mask is strong, so each one costs a boss fight.
 - **Watcher's Gaze**: the **hostile** mob in the crosshair within ~16 blocks gets Slowness while the
   gaze is held. Costs **1 durability per second** of slowing.
 - Bosses (`#vanillareforged:gaze_resistant`: Wither, Warden, Elder Guardian) get a weaker effect:
@@ -195,7 +193,12 @@ slowing it, done.
   - Removing the roof to let daylight in is allowed but deliberately expensive: the Ruin is deep
     and built from slow-to-mine blocks (deepslate/tuff bricks). Even then it only buys safety
     during the day, since at night the Sentries are active again. Number per structure: TODO, decided when the structure is built.
-- Drops when killed: TODO (candidate: a rare Creaking Eye).
+- **Look**: a plain Creaking body (no pumpkin) with its heart visible in the chest. The pumpkin
+  marks a player's own, peaceful Sentry; a bare Creaking with a glowing heart is a Ruin guard.
+- **Story**: the ancient builders' simpler work on the same idea as the Watcher: Creakings with an
+  isolated heart, bound to guard. The Watcher's gaze doesn't affect them (they share its heart);
+  the Pale Mask still slows them.
+- Drops when killed: TODO (resin; the Creaking Eye now comes from the Watcher).
 - Ruin Sentries are hostile to players and ignore other mobs, same as the vanilla Creaking (which
   only targets players). Two ways to beat them:
   - aim: bow or trident at the heart;
@@ -206,18 +209,60 @@ slowing it, done.
     placeholders to be replaced with final art;
   - pottery sherds: **Gaze** (eye) and **Creaking** (tree figure with a heart). Implemented with
     placeholder textures; vanilla already has a "heart" sherd, hence the names;
-  - the Pale Mask ingredient (TODO: working idea is a "Resin Eye").
 - **Lighting**: a consistent low level of artificial light (candles, glow lichen, soul lanterns,
   amethyst clusters). It's for atmosphere, not spawn-proofing: in Java Edition hostile mobs only
   spawn at block light 0, so lit floors stay clear while unlit corners can still spawn vanilla
   hostiles. That's intended; Ruin Sentries ignore other mobs, so they coexist.
 - Mostly data-driven: structure NBT, loot tables, worldgen JSON.
 
+### 5. The Watcher (boss)
+
+The source of the Creaking Eye, and so of the Pale Mask. A mid-game boss (iron/diamond gear,
+roughly Elder Guardian tier) with a boss bar.
+
+**Story**
+- Creakings are natural creatures with a prey instinct: under a gaze, they freeze.
+- **The Watcher** is the oldest of them, a natural Creaking grown huge over ages. An ancient
+  civilization couldn't destroy it, so they **improved it to control it**: they fitted it with
+  copper braces and resin joints and set a **lens** in its eye socket that turns the freeze
+  outward. Its gaze now freezes others.
+- To keep it under control they **cut out its heart**. Without one it sleeps, and over the ages it
+  has come to look like a dead pale oak held together by old copper.
+- The player wakes it by **putting a Creaking Heart back in**: the same craft as the Heartwood
+  Sentry, done long ago and on a much larger scale.
+- The Ruin Sentries are the builders' simpler copies (see Pale Ruin). The names connect: the
+  **Watcher** armor trim, **Watcher's Gaze** on the mask (the reversed gaze, inherited through its
+  lens) and Creakings ignoring the mask's wearer (you look like one of them).
+
+**Summoning** (farmable anywhere, since Pale Gardens are hard to find)
+- Like the Wither and the golems, the dormant body is a **block pattern** the player builds, and
+  the **Creaking Heart is placed last** to wake it. It wakes only at night or in darkness, like
+  any Creaking. The heart is consumed.
+- Materials, all renewable once a Pale Garden is known: **pale oak logs** (saplings grow
+  anywhere), **copper blocks** for the builders' braces (any oxidation stage; weathered fits the
+  look), **resin blocks** for the joints, and the Creaking Heart.
+- The shape is TODO: candidates are compared in-game. Requirements: it reads as a sleeping
+  creature (or a dead tree with a hollow for the heart), it's clearly different from the Sentry
+  (log + heart + pumpkin) and from vanilla's two-log Creaking Heart setup, and it costs enough to
+  make each eye a goal (on the order of a few copper blocks and a few resin blocks).
+
+**The woken Watcher**
+- A Creaking several blocks tall, with weathered copper plates, resin joints and a glowing lens
+  for an eye. Placeholder textures.
+- Fight mechanics: TODO, ideas are being collected. Starting points from the discussion: a gaze
+  that slows and then freezes whoever it sees; a shield-reflected gaze that briefly freezes the
+  Watcher itself; things it looks at turning into temporary statues; a single-lens blind spot.
+
+**Drops: the craft chain** (as deep as netherite; each step has a meaning)
+1. **Watcher's Lens**: one per kill. A copper-rimmed disc of resin glass, clearly made by the
+   builders.
+2. **Creaking Eye**: the lens in the middle, 4 resin clumps around it (plus shape). Setting the
+   lens in living resin turns it back into an eye. Shaped recipe, 1 eye.
+3. **Pale Mask**: unchanged (`L E L` / `L _ L` with pale oak logs).
+
 ## Parked for later (warrior content and extras)
 
 - **Resin Tappers**: illager-type faction that farms resin from captive hearts, uses resin traps.
-- **Elder Creaking**: mini-boss with several hearts hidden around a structure; each destroyed
-  heart weakens it but makes it more aggressive.
 - Ambient threat: moths drawn to open eyeblossoms at night.
 - Watcher block for redstoners: outputs a signal while a player looks at it.
 - Other resin uses: slowing resin-coated blocks, amber preservation displays, tool handle upgrade.
@@ -225,5 +270,6 @@ slowing it, done.
 ## Open questions / TODO
 
 1. **Ruin Sentry drops**: TODO.
-2. **Creaking Eye source**: TODO (rare Ruin Sentry drop, or a summonable Ruin boss).
-3. **Ruin Sentry count** per structure: TODO, decided when the structure is built.
+2. **Watcher summon shape**: TODO, chosen from in-game mockups.
+3. **Watcher fight mechanics**: TODO.
+4. **Ruin Sentry count** per structure: TODO, decided when the structure is built.
