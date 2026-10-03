@@ -141,8 +141,11 @@ the natural spawn rate; nothing here needs to be crafted dozens of times.
   see and attack the wearer; the gaze only slows them.
 - **Passive: hidden from Creakings.** Vanilla Creakings don't target the wearer (the mask makes
   you look like one of them). Attacking a Creaking reveals you to it, like piglins and gold armor.
+  Implemented with a Mixin on `Creaking#canAttack` (no Fabric hook exists). Side effects: the
+  wearer's own gaze no longer freezes Creakings that ignore them (vanilla's freeze check uses the
+  same `canAttack`), and a reveal is per Creaking and isn't saved, so a reloaded Creaking forgets.
 - **Build order**: (1) Creaking Eye + wearable mask with recipe, done; (2) Watcher's Gaze, done;
-  (3) hidden from Creakings.
+  (3) hidden from Creakings, done.
 
 ### 4. Pale Ruin (structure)
 
