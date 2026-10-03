@@ -4,6 +4,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.WeakHashMap;
 
+import com.dmaryanskiy.vanillareforged.sentry.HeartwoodSentry;
+
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.tags.TagKey;
@@ -76,6 +78,14 @@ public final class WatcherGaze {
 			return Optional.empty();
 		}
 		// Ender Dragon parts aren't LivingEntities, so the dragon (immune to effects) never costs durability.
-		return hit.getEntity() instanceof LivingEntity living && living instanceof Enemy ? Optional.of(living) : Optional.empty();
+		return hit.getEntity() instanceof LivingEntity living && isHostileTo(living, player) ? Optional.of(living) : Optional.empty();
+	}
+
+	/** Sentries aren't monsters, so they're only slowed while hunting the wearer: looking at your own guard is free. */
+	private static boolean isHostileTo(LivingEntity mob, Player player) {
+		if (mob instanceof HeartwoodSentry sentry) {
+			return !sentry.isStatue() && sentry.getTarget() == player;
+		}
+		return mob instanceof Enemy;
 	}
 }
