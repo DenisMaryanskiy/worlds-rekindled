@@ -53,12 +53,14 @@ the natural spawn rate; nothing here needs to be crafted dozens of times.
 
 **Build order**: (1) entity, building, night guard AI, day statue, done; (2) heart cracks with a
 heart hitbox, healing, done; (3) sneak + axe to take it apart, jack o'lantern glow, Pale Mask
-slowing it.
+slowing it, done.
 
 **Appearance**
 - The Creaking's body (tall, long arms, its animations) with a pumpkin head and its own texture.
   Placeholder textures.
-- Jack o'lantern head: the Sentry gives off light. Carved pumpkin: it doesn't.
+- Jack o'lantern head: the Sentry gives off light (level 10) and its face glows. Carved pumpkin: it
+  doesn't. Vanilla has no light from entities, so an invisible light block follows the head
+  through the air and is cleared when the Sentry moves on, is taken apart or dies.
 - The heart is **visible in the center of the chest**, and it is the weak point.
 
 **Activity rule**
@@ -115,11 +117,12 @@ slowing it.
   progress.
 
 **Moving it**
-- While it's a statue, breaking it with an axe returns the **heart and the head**. Killing it with
+- While it's a statue, hitting it with an axe returns the **heart and the head**. Killing it with
   hits destroys the heart.
-- **Sneak + axe** on the heart takes it apart at any time (including Sentries that never see
-  daylight), returning the heart and the head. Only works on a non-hostile Sentry the player
-  built; a Sentry that's angry at the player, or a Ruin Sentry, must be killed.
+- **Sneak + use an axe** on it takes it apart at any time (including Sentries that never see
+  daylight), returning the heart and the head. Costs 1 axe durability; the pedestal log stays.
+  Doesn't work while the Sentry is hunting that player: an angry Sentry must be killed. Ruin
+  Sentries won't allow it either, once they exist.
 
 **Technical**
 - Heart hitbox: a small box (0.5 blocks) in the chest, front side. Hits on the Sentry are traced
@@ -157,8 +160,10 @@ slowing it.
   chases with hard-coded acceleration, so for it the drag is the whole effect (about 20-25% slower
   chase). The Ender Dragon is immune to effects and moves by phases, so the gaze doesn't affect it.
 - Walls block the gaze. Slowness lasts 0.5 s after looking away.
-- **The only thing that slows a Sentry** (any Sentry, player-built or Ruin). Ruin Sentries still
-  see and attack the wearer; the gaze only slows them.
+- **The only thing that slows a Sentry** (any Sentry, player-built or Ruin), with the normal
+  Slowness II. Sentries aren't monsters, so the gaze only takes a Sentry that's awake and hunting
+  the wearer; looking at your own guard costs no durability. Ruin Sentries still see and attack
+  the wearer; the gaze only slows them.
 - **Passive: hidden from Creakings.** Vanilla Creakings don't target the wearer (the mask makes
   you look like one of them). Attacking a Creaking reveals you to it, like piglins and gold armor.
   Implemented with a Mixin on `Creaking#canAttack` (no Fabric hook exists). Side effects: the

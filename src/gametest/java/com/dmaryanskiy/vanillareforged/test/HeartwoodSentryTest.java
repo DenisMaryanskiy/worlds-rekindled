@@ -4,17 +4,22 @@ import java.util.List;
 
 import com.dmaryanskiy.vanillareforged.ModEntities;
 import com.dmaryanskiy.vanillareforged.sentry.HeartwoodSentry;
+import com.dmaryanskiy.vanillareforged.sentry.SentryLantern;
 
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.animal.cow.Cow;
 import net.minecraft.world.entity.monster.zombie.Zombie;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LightBlock;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
@@ -139,6 +144,96 @@ public class HeartwoodSentryTest {
 			helper.assertTrue(sentry.isStatue(), "Sentry should be a statue");
 			helper.assertTrue(sentry.blockPosition().equals(helper.absolutePos(PEDESTAL.above())), "Statue should stand on its pedestal");
 		});
+	}
+
+	@GameTest
+	public void sneakingWithAnAxeTakesTheSentryApart(GameTestHelper helper) {
+		HeartwoodSentry sentry = build(helper, Blocks.JACK_O_LANTERN);
+		Player player = axePlayer(helper, true);
+
+		sentry.interact(player, InteractionHand.MAIN_HAND, sentry.position());
+
+		helper.assertTrue(sentry.isRemoved(), "Sentry should be taken apart");
+		helper.assertItemEntityPresent(Items.CREAKING_HEART);
+		helper.assertItemEntityPresent(Items.JACK_O_LANTERN);
+		helper.assertBlockPresent(Blocks.PALE_OAK_LOG, PEDESTAL);
+		helper.assertValueEqual(player.getMainHandItem().getDamageValue(), 1, "axe damage");
+		helper.succeed();
+	}
+
+	@GameTest
+	public void sentryHuntingThePlayerCannotBeTakenApart(GameTestHelper helper) {
+		HeartwoodSentry sentry = build(helper, Blocks.CARVED_PUMPKIN);
+		Player player = axePlayer(helper, true);
+		sentry.setTarget(player);
+
+		sentry.interact(player, InteractionHand.MAIN_HAND, sentry.position());
+
+		helper.assertFalse(sentry.isRemoved(), "An angry Sentry has to be fought");
+		helper.succeed();
+	}
+
+	@GameTest
+	public void takingApartNeedsSneaking(GameTestHelper helper) {
+		HeartwoodSentry sentry = build(helper, Blocks.CARVED_PUMPKIN);
+		Player player = axePlayer(helper, false);
+
+		sentry.interact(player, InteractionHand.MAIN_HAND, sentry.position());
+
+		helper.assertFalse(sentry.isRemoved(), "Using an axe without sneaking shouldn't take it apart");
+		helper.succeed();
+	}
+
+	@GameTest(environment = NOON, skyAccess = true, maxTicks = 40)
+	public void choppingAStatueTakesItApart(GameTestHelper helper) {
+		HeartwoodSentry sentry = build(helper, Blocks.CARVED_PUMPKIN);
+		Player player = axePlayer(helper, false);
+
+		helper.startSequence()
+				.thenWaitUntil(() -> helper.assertTrue(sentry.isStatue(), "statue first"))
+				.thenExecute(() -> {
+					sentry.hurtServer(helper.getLevel(), helper.getLevel().damageSources().playerAttack(player), 9.0F);
+					helper.assertTrue(sentry.isRemoved(), "An axe should take the statue apart");
+					helper.assertItemEntityPresent(Items.CREAKING_HEART);
+					helper.assertItemEntityPresent(Items.CARVED_PUMPKIN);
+				})
+				.thenSucceed();
+	}
+
+	// Sky access removes the test's barrier ceiling, which sits at head height.
+	@GameTest(environment = MIDNIGHT, skyAccess = true, maxTicks = 40)
+	public void jackOLanternHeadLightsUpAndCleansUp(GameTestHelper helper) {
+		HeartwoodSentry sentry = build(helper, Blocks.JACK_O_LANTERN);
+		sentry.setNoAi(true);
+		BlockPos head = PEDESTAL.above(3);
+
+		helper.startSequence()
+				.thenWaitUntil(() -> {
+					helper.assertBlockPresent(Blocks.LIGHT, head);
+					helper.assertBlockProperty(head, LightBlock.LEVEL, SentryLantern.LIGHT_LEVEL);
+				})
+				.thenExecute(sentry::discard)
+				.thenExecute(() -> helper.assertBlockPresent(Blocks.AIR, head))
+				.thenSucceed();
+	}
+
+	@GameTest(environment = MIDNIGHT, skyAccess = true)
+	public void carvedPumpkinHeadGivesNoLight(GameTestHelper helper) {
+		HeartwoodSentry sentry = build(helper, Blocks.CARVED_PUMPKIN);
+		sentry.setNoAi(true);
+		BlockPos head = PEDESTAL.above(3);
+
+		helper.runAfterDelay(5, () -> {
+			helper.assertBlockPresent(Blocks.AIR, head);
+			helper.succeed();
+		});
+	}
+
+	private static Player axePlayer(GameTestHelper helper, boolean sneaking) {
+		Player player = helper.makeMockServerPlayer(GameType.SURVIVAL);
+		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.IRON_AXE));
+		player.setShiftKeyDown(sneaking);
+		return player;
 	}
 
 	// The default test structure is empty and floats above the ground, so walking Sentries need a floor.

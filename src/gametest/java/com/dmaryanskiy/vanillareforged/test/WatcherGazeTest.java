@@ -1,7 +1,9 @@
 package com.dmaryanskiy.vanillareforged.test;
 
+import com.dmaryanskiy.vanillareforged.ModEntities;
 import com.dmaryanskiy.vanillareforged.ModItems;
 import com.dmaryanskiy.vanillareforged.WatcherGaze;
+import com.dmaryanskiy.vanillareforged.sentry.HeartwoodSentry;
 
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
@@ -104,6 +106,35 @@ public class WatcherGazeTest {
 		helper.assertValueEqual(wither.getDeltaMovement(), new Vec3(WatcherGaze.BOSS_DRAG, 0.5, WatcherGaze.BOSS_DRAG),
 				"wither velocity after drag");
 		helper.succeed();
+	}
+
+	@GameTest(environment = "vanillareforged-test:midnight")
+	public void sentryHuntingTheWearerIsSlowed(GameTestHelper helper) {
+		HeartwoodSentry sentry = spawnPinnedSentry(helper);
+		Player player = maskedPlayerLookingAt(helper, sentry);
+		sentry.setTarget(player);
+
+		WatcherGaze.tick(player);
+
+		assertSlowness(helper, sentry, 1);
+		helper.succeed();
+	}
+
+	@GameTest(environment = "vanillareforged-test:midnight")
+	public void friendlySentryIsNotSlowed(GameTestHelper helper) {
+		HeartwoodSentry sentry = spawnPinnedSentry(helper);
+		Player player = maskedPlayerLookingAt(helper, sentry);
+
+		WatcherGaze.tick(player);
+
+		helper.assertFalse(sentry.hasEffect(MobEffects.SLOWNESS), "Looking at your own Sentry shouldn't slow it");
+		helper.succeed();
+	}
+
+	private static HeartwoodSentry spawnPinnedSentry(GameTestHelper helper) {
+		HeartwoodSentry sentry = (HeartwoodSentry) spawnPinned(helper, ModEntities.HEARTWOOD_SENTRY);
+		sentry.setPedestal(sentry.blockPosition().below());
+		return sentry;
 	}
 
 	private static Mob spawnPinned(GameTestHelper helper, EntityType<? extends Mob> type) {

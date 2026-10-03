@@ -8,12 +8,16 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AnimationState;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.SpawnGroupData;
@@ -30,6 +34,8 @@ import net.minecraft.world.entity.animal.golem.AbstractGolem;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Block;
@@ -66,6 +72,7 @@ public class HeartwoodSentry extends AbstractGolem {
 	private int returnTicks;
 	private int crackCooldown;
 	private int healTicks;
+	private final SentryLantern lantern = new SentryLantern();
 
 	public HeartwoodSentry(EntityType<? extends HeartwoodSentry> type, Level level) {
 		super(type, level);
@@ -155,6 +162,7 @@ public class HeartwoodSentry extends AbstractGolem {
 		if (this.level() instanceof ServerLevel level) {
 			this.updateStatue();
 			this.healCracks(level);
+			this.lantern.tick(level, this);
 		} else {
 			this.attackAnimationState.animateWhen(this.attackAnimationRemainingTicks > 0, this.tickCount);
 		}
@@ -212,7 +220,13 @@ public class HeartwoodSentry extends AbstractGolem {
 			return super.hurtServer(level, source, damage);
 		}
 		// Only players can hurt it, and only through the heart, like the Creaking only takes player damage.
-		if (this.isStatue() || !(source.getEntity() instanceof Player player)) {
+		if (!(source.getEntity() instanceof Player player)) {
+			return false;
+		}
+		if (this.isStatue()) {
+			if (source.getDirectEntity() == player && player.getMainHandItem().is(ItemTags.AXES)) {
+				this.dismantle(level, player, InteractionHand.MAIN_HAND);
+			}
 			return false;
 		}
 		if (!player.isCreative() && !player.isSpectator()) {
@@ -231,6 +245,40 @@ public class HeartwoodSentry extends AbstractGolem {
 		level.levelEvent(LevelEvent.PARTICLES_AND_SOUND_DESTROY_BLOCK, BlockPos.containing(SentryHeart.box(this).getCenter()),
 				Block.getId(Blocks.CREAKING_HEART.defaultBlockState()));
 		return super.hurtServer(level, source, Float.MAX_VALUE);
+	}
+
+	/** Sneak + axe takes apart a Sentry that isn't hunting the player; a statue can also just be chopped. */
+	@Override
+	protected InteractionResult mobInteract(Player player, InteractionHand hand) {
+		if (!player.isSecondaryUseActive() || !player.getItemInHand(hand).is(ItemTags.AXES)) {
+			return super.mobInteract(player, hand);
+		}
+		if (this.level() instanceof ServerLevel level) {
+			if (this.getTarget() == player) {
+				return InteractionResult.FAIL;
+			}
+			this.dismantle(level, player, hand);
+		}
+		return InteractionResult.SUCCESS;
+	}
+
+	/** Returns the heart and the head; the pedestal log stays where it is. */
+	private void dismantle(ServerLevel level, Player player, InteractionHand hand) {
+		this.spawnAtLocation(level, new ItemStack(Items.CREAKING_HEART), 1.5F);
+		this.spawnAtLocation(level, new ItemStack(this.isJackOLantern() ? Items.JACK_O_LANTERN : Items.CARVED_PUMPKIN), 2.3F);
+		level.levelEvent(LevelEvent.PARTICLES_AND_SOUND_DESTROY_BLOCK, this.blockPosition().above(),
+				Block.getId(Blocks.PALE_OAK_WOOD.defaultBlockState()));
+		player.getItemInHand(hand).hurtAndBreak(1, player, hand == InteractionHand.MAIN_HAND ? EquipmentSlot.MAINHAND : EquipmentSlot.OFFHAND);
+		this.discard();
+	}
+
+	@Override
+	public void onRemoval(RemovalReason reason) {
+		super.onRemoval(reason);
+		// When only unloaded, the saved light position lets the next load move or clear the light.
+		if ((reason.shouldDestroy() || reason == RemovalReason.CHANGED_DIMENSION) && this.level() instanceof ServerLevel level) {
+			this.lantern.remove(level);
+		}
 	}
 
 	@Override
@@ -278,6 +326,7 @@ public class HeartwoodSentry extends AbstractGolem {
 		output.putBoolean("statue", this.isStatue());
 		output.putBoolean("jack_o_lantern", this.isJackOLantern());
 		output.putInt("cracks", this.getCracks());
+		this.lantern.getLightPos().ifPresent(pos -> output.store("light", BlockPos.CODEC, pos));
 	}
 
 	@Override
@@ -287,5 +336,6 @@ public class HeartwoodSentry extends AbstractGolem {
 		this.entityData.set(STATUE, input.getBooleanOr("statue", false));
 		this.setJackOLantern(input.getBooleanOr("jack_o_lantern", false));
 		this.setCracks(input.getIntOr("cracks", 0));
+		this.lantern.setLightPos(input.read("light", BlockPos.CODEC));
 	}
 }
