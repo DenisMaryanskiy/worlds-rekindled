@@ -21,8 +21,17 @@ public class HeartwoodSentryModel extends CreakingModel {
 		MeshDefinition mesh = new MeshDefinition();
 		PartDefinition root = mesh.getRoot().addOrReplaceChild("root", CubeListBuilder.create(), PartPose.offset(0.0F, 24.0F, 0.0F));
 		PartDefinition upperBody = root.addOrReplaceChild("upper_body", CubeListBuilder.create(), PartPose.offset(-1.0F, -19.0F, 0.0F));
-		upperBody.addOrReplaceChild("head", CubeListBuilder.create()
-				.texOffs(0, 0).addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F), PartPose.offset(-1.0F, -11.0F, 0.0F));
+		// Pumpkin with the Creaking's flat side branches and a few twigs on top.
+		PartDefinition head = upperBody.addOrReplaceChild("head", CubeListBuilder.create()
+				.texOffs(0, 0).addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F)
+				.texOffs(0, 40).addBox(-10.0F, -11.0F, 0.0F, 6.0F, 9.0F, 0.0F)
+				.texOffs(16, 40).addBox(4.0F, -10.0F, 0.0F, 6.0F, 9.0F, 0.0F), PartPose.offset(-1.0F, -11.0F, 0.0F));
+		head.addOrReplaceChild("left_twig", CubeListBuilder.create()
+				.texOffs(32, 40).addBox(-0.5F, -3.0F, -0.5F, 1.0F, 3.0F, 1.0F),
+				PartPose.offsetAndRotation(-2.0F, -8.0F, -1.0F, -0.3F, 0.0F, -0.35F));
+		head.addOrReplaceChild("right_twig", CubeListBuilder.create()
+				.texOffs(36, 40).addBox(-0.5F, -2.0F, -0.5F, 1.0F, 2.0F, 1.0F),
+				PartPose.offsetAndRotation(2.0F, -8.0F, 1.0F, 0.3F, 0.0F, 0.4F));
 		upperBody.addOrReplaceChild("body", CubeListBuilder.create()
 				.texOffs(32, 0).addBox(0.0F, -3.0F, -3.0F, 6.0F, 13.0F, 5.0F)
 				.texOffs(54, 0).addBox(-6.0F, -4.0F, -3.0F, 6.0F, 7.0F, 5.0F), PartPose.offset(0.0F, -7.0F, 1.0F));

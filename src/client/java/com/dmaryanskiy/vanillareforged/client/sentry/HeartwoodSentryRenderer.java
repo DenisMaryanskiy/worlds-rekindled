@@ -14,8 +14,12 @@ public class HeartwoodSentryRenderer extends MobRenderer<HeartwoodSentry, Heartw
 	private static final Identifier JACK_O_LANTERN = texture("heartwood_sentry_jack_o_lantern");
 	private static final Identifier STATUE = texture("heartwood_sentry_statue");
 
+	// Only the heart is opaque in this texture.
+	private static final Identifier HEART = texture("heartwood_sentry_heart");
+
 	public HeartwoodSentryRenderer(EntityRendererProvider.Context context) {
 		super(context, new HeartwoodSentryModel(context.bakeLayer(LAYER)), 0.6F);
+		this.addLayer(new SentryHeartGlowLayer(this, HEART));
 	}
 
 	private static Identifier texture(String name) {
