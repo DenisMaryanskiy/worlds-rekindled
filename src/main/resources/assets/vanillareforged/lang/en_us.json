@@ -1,7 +1,9 @@
 {
+  "entity.vanillareforged.heartwood_sentry": "Heartwood Sentry",
   "item.vanillareforged.creaking_eye": "Creaking Eye",
   "item.vanillareforged.creaking_pottery_sherd": "Creaking Pottery Sherd",
   "item.vanillareforged.gaze_pottery_sherd": "Gaze Pottery Sherd",
+  "item.vanillareforged.heartwood_sentry_spawn_egg": "Heartwood Sentry Spawn Egg",
   "item.vanillareforged.pale_mask": "Pale Mask",
   "item.vanillareforged.watcher_armor_trim_smithing_template": "Smithing Template",
   "item.vanillareforged.watcher_armor_trim_smithing_template.new": "Watcher Armor Trim",

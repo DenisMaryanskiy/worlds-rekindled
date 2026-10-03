@@ -1,0 +1,156 @@
+package com.dmaryanskiy.vanillareforged.test;
+
+import java.util.List;
+
+import com.dmaryanskiy.vanillareforged.ModEntities;
+import com.dmaryanskiy.vanillareforged.sentry.HeartwoodSentry;
+
+import net.fabricmc.fabric.api.gametest.v1.GameTest;
+import net.minecraft.core.BlockPos;
+import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.entity.animal.cow.Cow;
+import net.minecraft.world.entity.monster.zombie.Zombie;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
+
+public class HeartwoodSentryTest {
+	private static final BlockPos PEDESTAL = new BlockPos(1, 1, 1);
+	private static final String NOON = "vanillareforged-test:noon";
+	private static final String MIDNIGHT = "vanillareforged-test:midnight";
+
+	@GameTest
+	public void buildingSpawnsSentryAndKeepsLogAsPedestal(GameTestHelper helper) {
+		HeartwoodSentry sentry = build(helper, Blocks.CARVED_PUMPKIN);
+
+		helper.assertBlockPresent(Blocks.PALE_OAK_LOG, PEDESTAL);
+		helper.assertBlockPresent(Blocks.AIR, PEDESTAL.above());
+		helper.assertBlockPresent(Blocks.AIR, PEDESTAL.above(2));
+		helper.assertValueEqual(sentry.getPedestal(), helper.absolutePos(PEDESTAL), "pedestal");
+		helper.assertFalse(sentry.isJackOLantern(), "Carved pumpkin head");
+		helper.succeed();
+	}
+
+	@GameTest
+	public void jackOLanternHeadIsRemembered(GameTestHelper helper) {
+		HeartwoodSentry sentry = build(helper, Blocks.JACK_O_LANTERN);
+
+		helper.assertTrue(sentry.isJackOLantern(), "Jack o'lantern head");
+		helper.succeed();
+	}
+
+	@GameTest
+	public void wrongOrderBuildsNothing(GameTestHelper helper) {
+		helper.setBlock(PEDESTAL, Blocks.CREAKING_HEART);
+		helper.setBlock(PEDESTAL.above(), Blocks.PALE_OAK_LOG);
+		helper.setBlock(PEDESTAL.above(2), Blocks.CARVED_PUMPKIN);
+
+		helper.assertEntityNotPresent(ModEntities.HEARTWOOD_SENTRY);
+		helper.succeed();
+	}
+
+	@GameTest
+	public void mobsCannotDamageIt(GameTestHelper helper) {
+		HeartwoodSentry sentry = build(helper, Blocks.CARVED_PUMPKIN);
+		Zombie zombie = helper.spawn(EntityTypes.ZOMBIE, new Vec3(4.5, 1.0, 4.5));
+
+		boolean hurt = sentry.hurtServer(helper.getLevel(), helper.getLevel().damageSources().mobAttack(zombie), 10.0F);
+
+		helper.assertFalse(hurt, "Mob attacks shouldn't hurt the Sentry");
+		helper.assertValueEqual(sentry.getHealth(), sentry.getMaxHealth(), "health");
+		helper.succeed();
+	}
+
+	@GameTest
+	public void attackingPlayerBecomesTarget(GameTestHelper helper) {
+		HeartwoodSentry sentry = build(helper, Blocks.CARVED_PUMPKIN);
+		Player player = helper.makeMockServerPlayer(GameType.SURVIVAL);
+
+		sentry.hurtServer(helper.getLevel(), helper.getLevel().damageSources().playerAttack(player), 1.0F);
+
+		helper.assertValueEqual(sentry.getTarget(), player, "target after a player hit it");
+		helper.succeed();
+	}
+
+	@GameTest(environment = MIDNIGHT, skyAccess = true, maxTicks = 100)
+	public void targetsNearbyHostileMobAtNight(GameTestHelper helper) {
+		floor(helper);
+		HeartwoodSentry sentry = build(helper, Blocks.CARVED_PUMPKIN);
+		Zombie zombie = helper.spawn(EntityTypes.ZOMBIE, new Vec3(5.5, 1.0, 5.5));
+		zombie.setNoAi(true);
+
+		helper.succeedWhen(() -> helper.assertTrue(sentry.getTarget() == zombie, "Sentry should target the zombie"));
+	}
+
+	@GameTest
+	public void attackDealsFlatDamageAndLaunches(GameTestHelper helper) {
+		HeartwoodSentry sentry = build(helper, Blocks.CARVED_PUMPKIN);
+		// A cow has no armor, so the full damage lands.
+		Cow cow = helper.spawn(EntityTypes.COW, new Vec3(3.5, 1.0, 1.5));
+		cow.setNoAi(true);
+		float health = cow.getHealth();
+
+		sentry.doHurtTarget(helper.getLevel(), cow);
+
+		helper.assertValueEqual(cow.getHealth(), health - HeartwoodSentry.ATTACK_DAMAGE, "cow health");
+		helper.assertTrue(cow.getDeltaMovement().y > 0.3, "Target should be launched upward");
+		helper.succeed();
+	}
+
+	@GameTest(environment = NOON, skyAccess = true, maxTicks = 40)
+	public void turnsIntoStatueInDaylight(GameTestHelper helper) {
+		HeartwoodSentry sentry = build(helper, Blocks.CARVED_PUMPKIN);
+
+		helper.succeedWhen(() -> {
+			helper.assertTrue(sentry.isStatue(), "Sentry should be a statue in daylight");
+			helper.assertTrue(sentry.isNoAi(), "Statue shouldn't run AI");
+		});
+	}
+
+	@GameTest(environment = NOON, skyAccess = true, maxTicks = 80)
+	public void wakesUpWhenThePedestalLosesDaylight(GameTestHelper helper) {
+		HeartwoodSentry sentry = build(helper, Blocks.CARVED_PUMPKIN);
+
+		helper.startSequence()
+				.thenWaitUntil(() -> helper.assertTrue(sentry.isStatue(), "statue first"))
+				.thenExecute(() -> helper.setBlock(PEDESTAL.above(4), Blocks.STONE))
+				.thenWaitUntil(() -> helper.assertFalse(sentry.isStatue(), "Sentry should wake without daylight"))
+				.thenSucceed();
+	}
+
+	@GameTest(environment = NOON, skyAccess = true, maxTicks = 200)
+	public void walksBackToPedestalAtDawn(GameTestHelper helper) {
+		floor(helper);
+		helper.setBlock(PEDESTAL, Blocks.PALE_OAK_LOG);
+		HeartwoodSentry sentry = helper.spawn(ModEntities.HEARTWOOD_SENTRY, new Vec3(5.5, 1.0, 5.5));
+		sentry.setPedestal(helper.absolutePos(PEDESTAL));
+
+		helper.succeedWhen(() -> {
+			helper.assertTrue(sentry.isStatue(), "Sentry should be a statue");
+			helper.assertTrue(sentry.blockPosition().equals(helper.absolutePos(PEDESTAL.above())), "Statue should stand on its pedestal");
+		});
+	}
+
+	// The default test structure is empty and floats above the ground, so walking Sentries need a floor.
+	private static void floor(GameTestHelper helper) {
+		for (int x = 0; x < 8; x++) {
+			for (int z = 0; z < 8; z++) {
+				helper.setBlock(new BlockPos(x, 0, z), Blocks.STONE);
+			}
+		}
+	}
+
+	private static HeartwoodSentry build(GameTestHelper helper, Block head) {
+		helper.setBlock(PEDESTAL, Blocks.PALE_OAK_LOG);
+		helper.setBlock(PEDESTAL.above(), Blocks.CREAKING_HEART);
+		helper.setBlock(PEDESTAL.above(2), head);
+		List<HeartwoodSentry> sentries = helper.getLevel().getEntities(ModEntities.HEARTWOOD_SENTRY,
+				new AABB(helper.absolutePos(PEDESTAL)).inflate(3.0), sentry -> true);
+		helper.assertValueEqual(sentries.size(), 1, "sentries built");
+		return sentries.getFirst();
+	}
+}
