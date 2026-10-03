@@ -10,7 +10,8 @@
 			"com.dmaryanskiy.vanillareforged.test.WatcherArmorTrimTest",
 			"com.dmaryanskiy.vanillareforged.test.PotterySherdTest",
 			"com.dmaryanskiy.vanillareforged.test.PaleMaskTest",
-			"com.dmaryanskiy.vanillareforged.test.WatcherGazeTest"
+			"com.dmaryanskiy.vanillareforged.test.WatcherGazeTest",
+			"com.dmaryanskiy.vanillareforged.test.PaleMaskStealthTest"
 		]
 	},
 	"depends": {
