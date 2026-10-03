@@ -111,7 +111,8 @@ public class HeartwoodSentryTest {
 		});
 	}
 
-	@GameTest(environment = NOON, skyAccess = true, maxTicks = 80)
+	// Sky access is read from skylight, which the light engine updates lazily, so allow it time.
+	@GameTest(environment = NOON, skyAccess = true, maxTicks = 300)
 	public void wakesUpWhenThePedestalLosesDaylight(GameTestHelper helper) {
 		HeartwoodSentry sentry = build(helper, Blocks.CARVED_PUMPKIN);
 
