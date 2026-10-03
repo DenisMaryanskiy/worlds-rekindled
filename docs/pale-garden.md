@@ -111,17 +111,34 @@ the natural spawn rate; nothing here needs to be crafted dozens of times.
 ### 3. Pale Mask (tank helmet)
 
 - Head slot, modeled on the turtle shell: a unique effect, **weak armor**. Wearing it means giving
-  up a netherite helmet.
-- **Watcher's Gaze**: the mob in the crosshair within ~16 blocks gets Slowness while the gaze is
-  held. Costs durability per second of gazing.
+  up a netherite helmet. **2 armor, 275 durability**, repaired with **resin clumps**, takes helmet
+  enchantments. No armor trims: it uses its own model, so a trim wouldn't render.
+- A real mask, not a full helmet: a custom 3D model (Fabric `ArmorRenderer`) with a bark plate over
+  the face only, a few short pale twigs sticking out and a resin eye in the upper middle (the eye's
+  slot in the recipe) that glows in the dark like the Creaking's eyes. Placeholder textures.
+- **Recipe**: the helmet shape with a **Creaking Eye** in the top middle and any pale oak log or
+  wood (`#minecraft:pale_oak_logs`) around it:
+
+  ```
+  L E L
+  L   L
+  ```
+
+- **Creaking Eye** (rare ingredient, looks torn out of a Creaking). How it's obtained is TODO;
+  ideas:
+  - a rare drop from Ruin Sentries;
+  - a drop from a boss of the Pale Ruin, which players can also summon artificially (like the
+    Ender Dragon and the Wither) so the eye can be farmed.
+- **Watcher's Gaze**: the **hostile** mob in the crosshair within ~16 blocks gets Slowness while the
+  gaze is held. Costs **1 durability per second** of slowing.
 - Bosses get a weaker effect (Slowness I instead of II). Main target: Wither phase 2 (armored,
   melee), so a melee tank can fight back.
 - **The only thing that slows a Sentry** (any Sentry, player-built or Ruin). Ruin Sentries still
   see and attack the wearer; the gaze only slows them.
 - **Passive: hidden from Creakings.** Vanilla Creakings don't target the wearer (the mask makes
   you look like one of them). Attacking a Creaking reveals you to it, like piglins and gold armor.
-- Recipe idea: carved pale oak + Creaking Heart + resin + an item found in the Pale Ruin (ties the
-  trophy to the power-up). The exact ingredient is open.
+- **Build order**: (1) Creaking Eye + wearable mask with recipe, done; (2) Watcher's Gaze;
+  (3) hidden from Creakings.
 
 ### 4. Pale Ruin (structure)
 
@@ -146,7 +163,7 @@ the natural spawn rate; nothing here needs to be crafted dozens of times.
   - Removing the roof to let daylight in is allowed but deliberately expensive: the Ruin is deep
     and built from slow-to-mine blocks (deepslate/tuff bricks). Even then it only buys safety
     during the day, since at night the Sentries are active again. Number per structure: TODO, decided when the structure is built.
-- Drops when killed: TODO.
+- Drops when killed: TODO (candidate: a rare Creaking Eye).
 - Ruin Sentries are hostile to players and ignore other mobs, same as the vanilla Creaking (which
   only targets players). Two ways to beat them:
   - aim: bow or trident at the heart;
@@ -176,5 +193,5 @@ the natural spawn rate; nothing here needs to be crafted dozens of times.
 ## Open questions / TODO
 
 1. **Ruin Sentry drops**: TODO.
-2. **Pale Mask Ruin ingredient**: TODO. Working idea: "Resin Eye".
+2. **Creaking Eye source**: TODO (rare Ruin Sentry drop, or a summonable Ruin boss).
 3. **Ruin Sentry count** per structure: TODO, decided when the structure is built.
