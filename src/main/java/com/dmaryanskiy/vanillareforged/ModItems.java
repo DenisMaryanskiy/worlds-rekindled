@@ -12,6 +12,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.SmithingTemplateItem;
+import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.item.equipment.ArmorType;
 
 public final class ModItems {
@@ -25,6 +26,8 @@ public final class ModItems {
 			Item::new, new Item.Properties().rarity(Rarity.RARE));
 	public static final Item PALE_MASK = register("pale_mask",
 			Item::new, new Item.Properties().rarity(Rarity.UNCOMMON).humanoidArmor(ModArmorMaterials.PALE_MASK, ArmorType.HELMET));
+	public static final Item HEARTWOOD_SENTRY_SPAWN_EGG = register("heartwood_sentry_spawn_egg",
+			SpawnEggItem::new, new Item.Properties().spawnEgg(ModEntities.HEARTWOOD_SENTRY));
 
 	private ModItems() {
 	}
@@ -37,6 +40,8 @@ public final class ModItems {
 		});
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.COMBAT).register(output ->
 				output.insertAfter(Items.TURTLE_HELMET, PALE_MASK));
+		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.SPAWN_EGGS).register(output ->
+				output.insertAfter(Items.IRON_GOLEM_SPAWN_EGG, HEARTWOOD_SENTRY_SPAWN_EGG));
 	}
 
 	private static Item register(String name, Function<Item.Properties, Item> factory, Item.Properties properties) {

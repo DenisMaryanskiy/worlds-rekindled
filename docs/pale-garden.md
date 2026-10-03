@@ -48,8 +48,16 @@ the natural spawn rate; nothing here needs to be crafted dozens of times.
 [pale oak log]                      ← base
 ```
 
+- Any Creaking Heart works (crafted ones need resin, which only natural Creakings give).
+- The heart and head are consumed; **the log stays as the pedestal** and the Sentry stands on it.
+
+**Build order**: (1) entity, building, night guard AI, day statue, done; (2) heart cracks with a
+separate heart hitbox, healing; (3) sneak + axe to take it apart, jack o'lantern glow, Pale Mask
+slowing it.
+
 **Appearance**
-- The pumpkin head is visible on the model (carved face).
+- The Creaking's body (tall, long arms, its animations) with a pumpkin head and its own texture.
+  Placeholder textures.
 - Jack o'lantern head: the Sentry gives off light. Carved pumpkin: it doesn't.
 - The heart is **visible in the center of the chest**, and it is the weak point.
 
@@ -60,14 +68,19 @@ the natural spawn rate; nothing here needs to be crafted dozens of times.
   dark, day or night, and only freeze when direct sunlight reaches them.
 - The check uses **sky light / time of day only**. Artificial light (torches, candles) doesn't put
   a Sentry to sleep.
-- In daylight it is a **statue**: a solid, decorative block that can't be damaged.
+- In daylight it walks back onto its pedestal and freezes as a **statue**: no AI, can't be
+  damaged or pushed, drawn in stone grey. It's a frozen mob, not a real block (agreed; turning a
+  mob into a block and back would be fragile). It wakes up when the pedestal loses daylight.
+- Daylight means bright outside and open sky above the standing spot; glass and barriers let
+  skylight through, so a glass roof still counts as daylight.
 - The pumpkin head makes it **unaffected by gaze**: players and mobs looking at it don't freeze it.
   The only thing that slows it is a player wearing the **Pale Mask** (they look like a Creaking).
 
 **Behavior (player-built)**
-- Attacks hostile mobs within a leash range around its pedestal (~16–24 blocks).
+- Attacks hostile mobs (not creepers, like the iron golem) within **20 blocks** of its pedestal.
 - Melee with long arms and an iron-golem-style upward launch.
-- **Lower damage than an iron golem**: a night/dark deterrent, not a tank.
+- **Lower damage than an iron golem**: a flat **6**, a night/dark deterrent, not a tank.
+- Until heart cracks exist (step 2) it can't be damaged at all except by `/kill`.
 - Turns hostile when the player attacks it, like an iron golem.
 
 **Damage model: heart cracks**
