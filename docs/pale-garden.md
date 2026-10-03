@@ -112,9 +112,10 @@ the natural spawn rate; nothing here needs to be crafted dozens of times.
 
 - Head slot, modeled on the turtle shell: a unique effect, **weak armor**. Wearing it means giving
   up a netherite helmet. **2 armor, 275 durability**, repaired with **resin clumps**, takes helmet
-  enchantments and armor trims.
-- Looks like a Creaking's face with a single glowing resin eye in the upper middle (the eye's slot
-  in the recipe). Placeholder textures.
+  enchantments. No armor trims: it uses its own model, so a trim wouldn't render.
+- A real mask, not a full helmet: a custom 3D model (Fabric `ArmorRenderer`) with a bark plate over
+  the face only, a few short pale twigs sticking out and a resin eye in the upper middle (the eye's
+  slot in the recipe) that glows in the dark like the Creaking's eyes. Placeholder textures.
 - **Recipe**: the helmet shape with a **Creaking Eye** in the top middle and any pale oak log or
   wood (`#minecraft:pale_oak_logs`) around it:
 

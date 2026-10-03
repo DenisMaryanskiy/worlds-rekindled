@@ -43,7 +43,8 @@ public class PaleMaskTest {
 		helper.assertValueEqual(mask.get(DataComponents.ATTRIBUTE_MODIFIERS).compute(Attributes.ARMOR, 0, EquipmentSlot.HEAD),
 				2.0, "armor");
 		helper.assertValueEqual(mask.getMaxDamage(), 275, "durability");
-		helper.assertTrue(mask.is(ItemTags.HEAD_ARMOR), "Mask should be in #head_armor (enchantable, trimmable)");
+		helper.assertTrue(mask.is(ItemTags.HEAD_ARMOR_ENCHANTABLE), "Mask should take helmet enchantments");
+		helper.assertFalse(mask.is(ItemTags.TRIMMABLE_ARMOR), "Mask uses a custom model, so trims wouldn't render");
 		helper.succeed();
 	}
 
