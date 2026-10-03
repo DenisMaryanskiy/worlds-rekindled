@@ -238,17 +238,32 @@ roughly Elder Guardian tier) with a boss bar.
 - Like the Wither and the golems, the dormant body is a **block pattern** the player builds, and
   the **Creaking Heart is placed last** to wake it. It wakes only at night or in darkness, like
   any Creaking. The heart is consumed.
-- Materials, all renewable once a Pale Garden is known: **pale oak logs** (saplings grow
-  anywhere), **copper blocks** for the builders' braces (any oxidation stage; weathered fits the
-  look), **resin blocks** for the joints, and the Creaking Heart.
-- The shape is TODO: candidates are compared in-game. Requirements: it reads as a sleeping
-  creature (or a dead tree with a hollow for the heart), it's clearly different from the Sentry
-  (log + heart + pumpkin) and from vanilla's two-log Creaking Heart setup, and it costs enough to
-  make each eye a goal (on the order of a few copper blocks and a few resin blocks).
+- **Pattern: the "wide tree"**, 12 blocks in one flat plane (5 wide, 4 tall), chosen from in-game
+  mockups over a larger 18-block tree (too much to build) and 9-block versions (too small for a
+  big entity). It reads as a dead pale oak with long, drooping branches: the Creaking's long-armed
+  silhouette.
+
+  ```
+  .  .  W  .  .     W  pale oak wood: the head
+  L  L  C  L  L     L  pale oak logs lying sideways: the branches; C  copper block: the collar
+  R  .  ♥  .  R     R  resin blocks hanging from the branch tips; ♥  Creaking Heart, placed last
+  .  L  L  L  .     roots: an upright pale oak log between two lying sideways
+  ```
+
+- Materials per summon: 8 pale oak logs/wood (saplings grow anywhere), 1 copper block, 2 resin
+  blocks and the Creaking Heart (itself a resin block and pale oak logs). With the 4 resin clumps
+  for the eye that's about 31 resin per Creaking Eye: a real goal, renewable once a Pale Garden is
+  known.
+- **Any copper block works, and it shows on the Watcher**: copper, exposed, weathered or oxidized
+  (waxed or not). The woken Watcher's copper plates take the same oxidation stage as the collar,
+  so a bright new collar wakes a shiny Watcher and an oxidized one a green, ancient one. The
+  stage doesn't change during the fight.
+- The heart sits between a log below and copper above, so the pattern never matches vanilla's
+  two-log Creaking Heart setup, and nothing in it resembles the Sentry (log + heart + pumpkin).
 
 **The woken Watcher**
-- A Creaking several blocks tall, with weathered copper plates, resin joints and a glowing lens
-  for an eye. Placeholder textures.
+- A Creaking several blocks tall, with copper plates (in the collar's oxidation stage, so four
+  texture variants), resin joints and a glowing lens for an eye. Placeholder textures.
 - Fight mechanics: TODO, ideas are being collected. Starting points from the discussion: a gaze
   that slows and then freezes whoever it sees; a shield-reflected gaze that briefly freezes the
   Watcher itself; things it looks at turning into temporary statues; a single-lens blind spot.
@@ -270,6 +285,5 @@ roughly Elder Guardian tier) with a boss bar.
 ## Open questions / TODO
 
 1. **Ruin Sentry drops**: TODO.
-2. **Watcher summon shape**: TODO, chosen from in-game mockups.
-3. **Watcher fight mechanics**: TODO.
-4. **Ruin Sentry count** per structure: TODO, decided when the structure is built.
+2. **Watcher fight mechanics**: TODO.
+3. **Ruin Sentry count** per structure: TODO, decided when the structure is built.
