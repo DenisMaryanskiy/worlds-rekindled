@@ -76,14 +76,19 @@ public class HeartwoodSentryTest {
 		helper.succeed();
 	}
 
-	@GameTest(environment = MIDNIGHT, skyAccess = true, maxTicks = 100)
+	// Generous timeout: on slow CI machines the night sky can lag behind the batch's clock change.
+	@GameTest(environment = MIDNIGHT, skyAccess = true, maxTicks = 300)
 	public void targetsNearbyHostileMobAtNight(GameTestHelper helper) {
 		floor(helper);
 		HeartwoodSentry sentry = build(helper, Blocks.CARVED_PUMPKIN);
 		Zombie zombie = helper.spawn(EntityTypes.ZOMBIE, new Vec3(5.5, 1.0, 5.5));
 		zombie.setNoAi(true);
 
-		helper.succeedWhen(() -> helper.assertTrue(sentry.getTarget() == zombie, "Sentry should target the zombie"));
+		helper.startSequence()
+				.thenWaitUntil(() -> helper.assertFalse(sentry.isStatue(), "Sentry should be awake at night"))
+				.thenWaitUntil(() -> helper.assertTrue(sentry.getTarget() == zombie, "Sentry should target the zombie (statue="
+						+ sentry.isStatue() + ", daylight=" + sentry.isDaylightAtPedestal() + ", distance=" + sentry.distanceTo(zombie) + ")"))
+				.thenSucceed();
 	}
 
 	@GameTest
