@@ -85,8 +85,10 @@ slowing it, done.
 - Turns hostile when the player attacks it, like an iron golem.
 
 **Damage model: heart cracks**
-- **Only players can damage the heart.** Mob attacks, mob projectiles and explosions do nothing
-  (knockback at most). Precedent: the vanilla Creaking only takes player damage.
+- **Players, and mob projectiles, can damage the heart** (planned change; currently players only).
+  Mob melee and explosions do nothing (knockback at most): zombies always hit from the front, so
+  with melee counting a Sentry wouldn't survive a night. A skeleton or pillager arrow on the heart
+  cracks it like a charged player arrow, so a Sentry isn't near-immortal against mobs.
 - The body can't be damaged; only hits on the heart count, and the heart can only be hit **from
   the front**. Any player hit still turns the Sentry against them.
 - Heart damage shows as **visible crack stages** (like the iron golem's cracks): dark cracks spread
@@ -101,9 +103,11 @@ slowing it, done.
 
   | Difficulty | Ruin Sentry | Player's Sentry |
   |---|---|---|
-  | Easy   | 2 | 3 |
-  | Normal | 3 | 3 |
-  | Hard   | 4 | 3 |
+  | Easy   | 4 | 5 |
+  | Normal | 5 | 5 |
+  | Hard   | 6 | 5 |
+
+  Planned change, together with mob projectiles: currently 3 for a player's Sentry.
 
 - Last crack: the heart is destroyed and the Sentry collapses into 1–3 resin clumps and a pale oak
   log (loot table `vanillareforged:entities/heartwood_sentry`).
@@ -111,7 +115,8 @@ slowing it, done.
 
 **Healing**
 - **Turning into a statue** (dawn, for a Sentry with sky access) clears all cracks.
-- **Out of combat**: if no player is within 16 blocks, it regains **1 crack per minute**. This is
+- **Out of combat**: if no player is within 16 blocks (planned: and it isn't fighting), it regains
+  **1 crack per minute**. This is
   what heals Sentries that never see daylight (underground, enclosed, Ruin Sentries). Within a
   fight it doesn't heal, so a player can step back, drink a potion and return; a long break resets
   progress.
@@ -162,6 +167,10 @@ slowing it, done.
   Slowness II. Sentries aren't monsters, so the gaze only takes a Sentry that's awake and hunting
   the wearer; looking at your own guard costs no durability. Ruin Sentries still see and attack
   the wearer; the gaze only slows them.
+- **Immune to petrification** (planned, with the Watcher): the wearer looks through the same lens,
+  so the Watcher's and Ruin Sentries' petrifying gaze doesn't take hold. Blocking it costs
+  **1 durability per second** of being watched, like the mask's own gaze, so the mask makes boss
+  farming easier without making it free.
 - **Passive: hidden from Creakings.** Vanilla Creakings don't target the wearer (the mask makes
   you look like one of them). Attacking a Creaking reveals you to it, like piglins and gold armor.
   Implemented with a Mixin on `Creaking#canAttack` (no Fabric hook exists). Side effects: the
@@ -196,9 +205,13 @@ slowing it, done.
 - **Look**: a plain Creaking body (no pumpkin) with its heart visible in the chest. The pumpkin
   marks a player's own, peaceful Sentry; a bare Creaking with a glowing heart is a Ruin guard.
 - **Story**: the ancient builders' simpler work on the same idea as the Watcher: Creakings with an
-  isolated heart, bound to guard. The Watcher's gaze doesn't affect them (they share its heart);
-  the Pale Mask still slows them.
-- Drops when killed: TODO (resin; the Creaking Eye now comes from the Watcher).
+  isolated heart and a **shard of the Watcher's lens** in the eye, bound to guard. The Watcher's
+  gaze doesn't affect them (they share its heart); the Pale Mask still slows them.
+- **A weaker petrifying gaze** (see [Petrification](#5-the-watcher-boss)): it fills the meter more
+  slowly than the Watcher's.
+- **Drops**: resin and **1–2 Watcher's Lens Shards**. **9 shards craft a Watcher's Lens**, so one
+  Ruin gives roughly one lens. Ruin Sentries don't respawn: the Ruin is a one-time source found by
+  exploring, the Watcher is the repeatable farm.
 - Ruin Sentries are hostile to players and ignore other mobs, same as the vanilla Creaking (which
   only targets players). Two ways to beat them:
   - aim: bow or trident at the heart;
@@ -264,16 +277,52 @@ roughly Elder Guardian tier) with a boss bar.
 **The woken Watcher**
 - A Creaking several blocks tall, with copper plates (in the collar's oxidation stage, so four
   texture variants), resin joints and a glowing lens for an eye. Placeholder textures.
-- Fight mechanics: TODO, ideas are being collected. Starting points from the discussion: a gaze
-  that slows and then freezes whoever it sees; a shield-reflected gaze that briefly freezes the
-  Watcher itself; things it looks at turning into temporary statues; a single-lens blind spot.
+
+**Petrification** (new mechanic, shared with Ruin Sentries)
+- A **meter**, like vanilla freezing in powder snow, not a status effect: milk clears all effects,
+  which would turn every fight into "drink milk".
+- It **fills while the Watcher has line of sight** to the player and drains once sight is broken.
+  The player slows down more and more, and when it's full they're **petrified**: stuck in place.
+- **Brittle**: damage taken rises with the meter, up to about **+50%** when petrified (you're
+  slowly turning into a statue).
+- A grey, cracked stone overlay creeps in from the screen edges as it fills, like powder snow's
+  frost overlay.
+- Countered by breaking line of sight (cover) or wearing the Pale Mask (see Pale Mask).
+
+**The fight** (single player first; numbers to be tuned)
+- **Hearts**: the Watcher can only be hurt through **hearts on its body**, each with crack stages
+  like the Sentry's and traced the same way. Every heart must be reachable by one player, so none
+  is on the back (it always turns to face you):
+  - **chest and shoulder** hearts, open to arrows from the front;
+  - **arm** hearts: after a branch slam the arm stays **stuck in the ground for 1–2 s**, exposing its
+    heart. Dodging the slam is rewarded with an opening;
+  - a **core heart** that only opens once all the others are destroyed: the final phase, in which
+    its gaze fills faster.
+- **Up close**: its gaze petrifies, and its **branch slam shatters the stone shell**: the
+  petrification ends, the player takes the brittle bonus damage and is knocked away. The loop is
+  gaze, petrify, slam, back to cover.
+- **At range**: it throws **burning resin** with the Wither skull's mechanics. A hit sets the player
+  on fire but never blocks, so nothing burns in a dungeon (Fire Resistance is a fair preparation).
+- **Reflecting the resin** (risky): hitting a resin ball back, like a Ghast fireball, does no
+  damage (only hearts take damage), but if it hits the Watcher it's **stunned for a few seconds**,
+  like a Ravager whose attack is blocked. While stunned it can't gaze or turn, its arms hang and
+  its hearts are much easier to shoot; the petrification meter drains. A short stun immunity
+  afterwards prevents chain-stunning. The risk is standing close enough to a burning projectile
+  to hit it.
+- **Cover**: since it's summoned anywhere, the player picks the spot or builds cover beforehand.
 
 **Drops: the craft chain** (as deep as netherite; each step has a meaning)
 1. **Watcher's Lens**: one per kill. A copper-rimmed disc of resin glass, clearly made by the
-   builders.
+   builders. Also crafted from **9 Watcher's Lens Shards** (Ruin Sentry drops).
 2. **Creaking Eye**: the lens in the middle, 4 resin clumps around it (plus shape). Setting the
    lens in living resin turns it back into an eye. Shaped recipe, 1 eye.
 3. **Pale Mask**: unchanged (`L E L` / `L _ L` with pale oak logs).
+
+**Build order** (proposed): (1) sturdier Sentry hearts and mob projectiles (a change to the
+Sentry); (2) Watcher's Lens, Lens Shard and the new Creaking Eye recipe; (3) petrification
+meter, its overlay and the mask's immunity; (4) summon pattern and the Watcher entity with its
+gaze; (5) body hearts, branch slam and the stuck-arm window; (6) burning resin and the reflect
+stun. Ruin Sentries' petrification and shard drops come with the Ruin.
 
 ## Parked for later (warrior content and extras)
 
@@ -284,6 +333,6 @@ roughly Elder Guardian tier) with a boss bar.
 
 ## Open questions / TODO
 
-1. **Ruin Sentry drops**: TODO.
-2. **Watcher fight mechanics**: TODO.
-3. **Ruin Sentry count** per structure: TODO, decided when the structure is built.
+1. **Watcher numbers**: health per heart, stun length, gaze fill rate, resin damage: tuned when
+   implemented.
+2. **Ruin Sentry count** per structure: TODO, decided when the structure is built.
