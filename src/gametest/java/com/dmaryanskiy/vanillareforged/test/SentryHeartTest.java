@@ -6,9 +6,13 @@ import com.dmaryanskiy.vanillareforged.sentry.HeartwoodSentry;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.gametest.framework.GameTestSequence;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.monster.skeleton.Skeleton;
+import net.minecraft.world.entity.monster.zombie.Zombie;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.arrow.Arrow;
 import net.minecraft.world.item.ItemStack;
@@ -103,21 +107,46 @@ public class SentryHeartTest {
 		});
 	}
 
-	@GameTest(environment = MIDNIGHT, maxTicks = 100)
-	public void thirdCrackDestroysTheSentry(GameTestHelper helper) {
+	@GameTest(environment = MIDNIGHT, maxTicks = 120)
+	public void lastCrackDestroysTheSentry(GameTestHelper helper) {
 		HeartwoodSentry sentry = sentry(helper);
 		Player player = swordsman(helper, IN_FRONT, 180.0F);
 		Runnable hit = () -> sentry.hurtServer(helper.getLevel(), helper.getLevel().damageSources().playerAttack(player), fullDamage(player));
 
-		helper.startSequence()
-				.thenExecute(hit)
-				.thenExecuteAfter(15, hit)
-				.thenExecuteAfter(15, hit)
-				.thenExecute(() -> {
-					helper.assertFalse(sentry.isAlive(), "Sentry should collapse on the third crack");
-					helper.assertItemEntityPresent(Items.RESIN_CLUMP);
-				})
-				.thenSucceed();
+		GameTestSequence sequence = helper.startSequence().thenExecute(hit);
+		for (int i = 1; i < HeartwoodSentry.MAX_CRACKS; i++) {
+			sequence.thenExecute(() -> helper.assertTrue(sentry.isAlive(), "Sentry should survive until the last crack"))
+					.thenExecuteAfter(15, hit);
+		}
+		sequence.thenExecute(() -> {
+			helper.assertFalse(sentry.isAlive(), "Sentry should collapse on the last crack");
+			helper.assertItemEntityPresent(Items.RESIN_CLUMP);
+		}).thenSucceed();
+	}
+
+	@GameTest(environment = MIDNIGHT, maxTicks = 40)
+	public void skeletonArrowOnTheHeartCracksIt(GameTestHelper helper) {
+		HeartwoodSentry sentry = sentry(helper);
+		Skeleton skeleton = helper.spawn(EntityTypes.SKELETON, new Vec3(1.5, 1.0, 7.0));
+		skeleton.setNoAi(true);
+		shoot(helper, skeleton, HEART_Y + 0.1, false);
+
+		helper.succeedWhen(() -> {
+			helper.assertValueEqual(sentry.getCracks(), 1, "cracks");
+			helper.assertTrue(sentry.getTarget() == skeleton, "Sentry should turn on the skeleton that shot it");
+		});
+	}
+
+	@GameTest(environment = MIDNIGHT)
+	public void zombieMeleeDoesNotCrack(GameTestHelper helper) {
+		HeartwoodSentry sentry = sentry(helper);
+		Zombie zombie = helper.spawn(EntityTypes.ZOMBIE, IN_FRONT);
+		zombie.setNoAi(true);
+
+		sentry.hurtServer(helper.getLevel(), helper.getLevel().damageSources().mobAttack(zombie), 10.0F);
+
+		helper.assertValueEqual(sentry.getCracks(), 0, "cracks");
+		helper.succeed();
 	}
 
 	@GameTest(environment = MIDNIGHT)
@@ -141,6 +170,20 @@ public class SentryHeartTest {
 		helper.succeedWhen(() -> {
 			helper.assertTrue(sentry.isStatue(), "Sentry should be a statue");
 			helper.assertValueEqual(sentry.getCracks(), 0, "cracks");
+		});
+	}
+
+	@GameTest(environment = MIDNIGHT, maxTicks = HeartwoodSentry.HEAL_INTERVAL_TICKS + 100)
+	public void doesNotHealWhileFighting(GameTestHelper helper) {
+		HeartwoodSentry sentry = sentry(helper);
+		Zombie zombie = helper.spawn(EntityTypes.ZOMBIE, new Vec3(4.5, 1.0, 4.5));
+		zombie.setNoAi(true);
+		sentry.setTarget(zombie);
+		sentry.setCracks(1);
+
+		helper.runAfterDelay(HeartwoodSentry.HEAL_INTERVAL_TICKS + 20, () -> {
+			helper.assertValueEqual(sentry.getCracks(), 1, "cracks while fighting");
+			helper.succeed();
 		});
 	}
 
@@ -176,7 +219,10 @@ public class SentryHeartTest {
 	}
 
 	private static void shoot(GameTestHelper helper, double y, boolean charged) {
-		Player archer = swordsman(helper, new Vec3(1.5, 1.0, 7.0), 180.0F);
+		shoot(helper, swordsman(helper, new Vec3(1.5, 1.0, 7.0), 180.0F), y, charged);
+	}
+
+	private static void shoot(GameTestHelper helper, Entity archer, double y, boolean charged) {
 		Arrow arrow = helper.spawn(EntityTypes.ARROW, new Vec3(1.5, y, 5.0));
 		arrow.setOwner(archer);
 		arrow.setCritArrow(charged);

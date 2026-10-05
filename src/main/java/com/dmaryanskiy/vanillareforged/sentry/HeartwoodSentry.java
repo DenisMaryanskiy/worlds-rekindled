@@ -52,7 +52,7 @@ import net.minecraft.world.phys.Vec3;
 public class HeartwoodSentry extends AbstractGolem {
 	public static final int HOME_RADIUS = 20;
 	public static final float ATTACK_DAMAGE = 6.0F;
-	public static final int MAX_CRACKS = 3;
+	public static final int MAX_CRACKS = 5;
 	public static final int HEAL_INTERVAL_TICKS = 1200;
 	private static final double HEAL_PLAYER_RANGE = 16.0;
 	private static final int CRACK_COOLDOWN_TICKS = 10;
@@ -201,12 +201,12 @@ public class HeartwoodSentry extends AbstractGolem {
 		this.setNoAi(true);
 	}
 
-	/** Out of combat, with no player around, the heart mends one crack a minute. */
+	/** Out of combat (no target, no player around), the heart mends one crack a minute. */
 	private void healCracks(ServerLevel level) {
 		if (this.crackCooldown > 0) {
 			this.crackCooldown--;
 		}
-		if (this.getCracks() == 0 || level.getNearestPlayer(this, HEAL_PLAYER_RANGE) != null) {
+		if (this.getCracks() == 0 || this.getTarget() != null || level.getNearestPlayer(this, HEAL_PLAYER_RANGE) != null) {
 			this.healTicks = 0;
 		} else if (++this.healTicks >= HEAL_INTERVAL_TICKS) {
 			this.healTicks = 0;
@@ -219,20 +219,23 @@ public class HeartwoodSentry extends AbstractGolem {
 		if (source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
 			return super.hurtServer(level, source, damage);
 		}
-		// Only players can hurt it, and only through the heart, like the Creaking only takes player damage.
-		if (!(source.getEntity() instanceof Player player)) {
-			return false;
-		}
+		Entity attacker = source.getEntity();
 		if (this.isStatue()) {
-			if (source.getDirectEntity() == player && player.getMainHandItem().is(ItemTags.AXES)) {
+			if (attacker instanceof Player player && source.getDirectEntity() == player && player.getMainHandItem().is(ItemTags.AXES)) {
 				this.dismantle(level, player, InteractionHand.MAIN_HAND);
 			}
 			return false;
 		}
-		if (!player.isCreative() && !player.isSpectator()) {
-			this.setTarget(player);
+		if (attacker instanceof Player player) {
+			if (!player.isCreative() && !player.isSpectator()) {
+				this.setTarget(player);
+			}
+		} else if (attacker instanceof Enemy && attacker instanceof LivingEntity shooter && source.getDirectEntity() != attacker
+				&& this.getTarget() == null) {
+			this.setTarget(shooter);
 		}
-		if (this.crackCooldown > 0 || !SentryHeart.isCrackedBy(this, player, source, damage)) {
+		// Only through the heart: player hits and mob projectiles; mob melee and explosions do nothing.
+		if (this.crackCooldown > 0 || !SentryHeart.isCrackedBy(this, source, damage)) {
 			return false;
 		}
 		this.crackCooldown = CRACK_COOLDOWN_TICKS;
