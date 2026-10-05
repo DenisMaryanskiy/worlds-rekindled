@@ -18,9 +18,11 @@ public class HeartwoodSentryRenderer extends MobRenderer<HeartwoodSentry, Heartw
 
 	// Only the heart (or the face) is opaque in these textures.
 	private static final List<Identifier> HEART_GLOW = List.of(texture("heartwood_sentry_heart"),
-			texture("heartwood_sentry_heart_cracked_1"), texture("heartwood_sentry_heart_cracked_2"));
+			texture("heartwood_sentry_heart_cracked_1"), texture("heartwood_sentry_heart_cracked_2"),
+			texture("heartwood_sentry_heart_cracked_3"), texture("heartwood_sentry_heart_cracked_4"));
 	private static final Identifier JACK_O_LANTERN_GLOW = texture("heartwood_sentry_jack_o_lantern_glow");
-	private static final List<Identifier> CRACKS = List.of(texture("heartwood_sentry_cracks_1"), texture("heartwood_sentry_cracks_2"));
+	private static final List<Identifier> CRACKS = List.of(texture("heartwood_sentry_cracks_1"), texture("heartwood_sentry_cracks_2"),
+			texture("heartwood_sentry_cracks_3"), texture("heartwood_sentry_cracks_4"));
 
 	public HeartwoodSentryRenderer(EntityRendererProvider.Context context) {
 		super(context, new HeartwoodSentryModel(context.bakeLayer(LAYER)), 0.6F);

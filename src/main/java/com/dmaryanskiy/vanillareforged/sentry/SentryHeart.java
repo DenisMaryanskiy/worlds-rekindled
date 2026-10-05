@@ -6,6 +6,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
@@ -38,21 +39,32 @@ public final class SentryHeart {
 		return AABB.ofSize(center, SIZE, SIZE, SIZE);
 	}
 
-	/** Whether a player's hit cracks the heart: a full-strength sword swing or a charged arrow or trident on the heart. */
-	public static boolean isCrackedBy(HeartwoodSentry sentry, Player player, DamageSource source, float damage) {
+	/**
+	 * Whether a hit cracks the heart: a player's full-strength sword swing or charged arrow or trident on
+	 * the heart, or any mob's arrow or trident on the heart.
+	 */
+	public static boolean isCrackedBy(HeartwoodSentry sentry, DamageSource source, float damage) {
 		Entity direct = source.getDirectEntity();
-		if (direct == player) {
+		if (direct instanceof Player player && source.getEntity() == player) {
 			Vec3 eyes = player.getEyePosition();
 			return player.getMainHandItem().is(CRACKING_WEAPONS)
 					&& damage >= FULL_STRENGTH_DAMAGE * player.getAttributeValue(Attributes.ATTACK_DAMAGE)
 					&& isHit(sentry, eyes, eyes.add(player.getViewVector(1.0F).scale(player.entityInteractionRange())));
 		}
-		if (direct instanceof ThrownTrident || direct instanceof AbstractArrow arrow && arrow.isCritArrow()) {
+		if (direct instanceof AbstractArrow arrow && isCrackingProjectile(arrow, source.getEntity())) {
 			// By now the projectile sits where it touched the Sentry's bounding box.
 			Vec3 motion = direct.getDeltaMovement();
 			return isHit(sentry, direct.position().subtract(motion), direct.position().add(motion));
 		}
 		return false;
+	}
+
+	// Mobs can't charge a shot, so any arrow of theirs counts; a player's must be fully charged.
+	private static boolean isCrackingProjectile(AbstractArrow arrow, Entity shooter) {
+		if (shooter instanceof Player) {
+			return arrow instanceof ThrownTrident || arrow.isCritArrow();
+		}
+		return shooter instanceof Mob;
 	}
 
 	private static boolean isHit(HeartwoodSentry sentry, Vec3 from, Vec3 to) {

@@ -85,14 +85,15 @@ slowing it, done.
 - Turns hostile when the player attacks it, like an iron golem.
 
 **Damage model: heart cracks**
-- **Players, and mob projectiles, can damage the heart** (planned change; currently players only).
-  Mob melee and explosions do nothing (knockback at most): zombies always hit from the front, so
-  with melee counting a Sentry wouldn't survive a night. A skeleton or pillager arrow on the heart
-  cracks it like a charged player arrow, so a Sentry isn't near-immortal against mobs.
+- **Players, and mob projectiles, can damage the heart.** Mob melee and explosions do nothing
+  (knockback at most): zombies always hit from the front, so with melee counting a Sentry wouldn't
+  survive a night. A skeleton or pillager arrow (or a drowned's trident) on the heart cracks it
+  like a charged player arrow, so a Sentry isn't near-immortal against mobs. A monster that shoots
+  it becomes its target.
 - The body can't be damaged; only hits on the heart count, and the heart can only be hit **from
   the front**. Any player hit still turns the Sentry against them.
 - Heart damage shows as **visible crack stages** (like the iron golem's cracks): dark cracks spread
-  from the core through the bark, and the core's glow shrinks and dims.
+  from the core through the bark, and the core's glow shrinks and dims, one stage per crack.
 - One crack per:
   - fully charged arrow on the heart (crossbow bolts count; partly charged arrows bounce off);
   - thrown trident on the heart;
@@ -107,17 +108,14 @@ slowing it, done.
   | Normal | 5 | 5 |
   | Hard   | 6 | 5 |
 
-  Planned change, together with mob projectiles: currently 3 for a player's Sentry.
-
 - Last crack: the heart is destroyed and the Sentry collapses into 1–3 resin clumps and a pale oak
   log (loot table `vanillareforged:entities/heartwood_sentry`).
 - Possible later addition, if fights feel slow: a fully charged arrow from a Power IV+ bow cracks 2.
 
 **Healing**
 - **Turning into a statue** (dawn, for a Sentry with sky access) clears all cracks.
-- **Out of combat**: if no player is within 16 blocks (planned: and it isn't fighting), it regains
-  **1 crack per minute**. This is
-  what heals Sentries that never see daylight (underground, enclosed, Ruin Sentries). Within a
+- **Out of combat**: if no player is within 16 blocks and it has no target, it regains **1 crack
+  per minute**. This is what heals Sentries that never see daylight (underground, enclosed, Ruin Sentries). Within a
   fight it doesn't heal, so a player can step back, drink a potion and return; a long break resets
   progress.
 
@@ -319,7 +317,7 @@ roughly Elder Guardian tier) with a boss bar.
 3. **Pale Mask**: unchanged (`L E L` / `L _ L` with pale oak logs).
 
 **Build order** (proposed): (1) sturdier Sentry hearts and mob projectiles (a change to the
-Sentry); (2) Watcher's Lens, Lens Shard and the new Creaking Eye recipe; (3) petrification
+Sentry), done; (2) Watcher's Lens, Lens Shard and the new Creaking Eye recipe; (3) petrification
 meter, its overlay and the mask's immunity; (4) summon pattern and the Watcher entity with its
 gaze; (5) body hearts, branch slam and the stuck-arm window; (6) burning resin and the reflect
 stun. Ruin Sentries' petrification and shard drops come with the Ruin.
