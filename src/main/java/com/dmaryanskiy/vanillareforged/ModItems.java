@@ -22,6 +22,10 @@ public final class ModItems {
 			Item::new, new Item.Properties().rarity(Rarity.UNCOMMON).potPattern(ModPotPatterns.GAZE));
 	public static final Item CREAKING_POTTERY_SHERD = register("creaking_pottery_sherd",
 			Item::new, new Item.Properties().rarity(Rarity.UNCOMMON).potPattern(ModPotPatterns.CREAKING));
+	public static final Item WATCHERS_LENS_SHARD = register("watchers_lens_shard",
+			Item::new, new Item.Properties().rarity(Rarity.UNCOMMON));
+	public static final Item WATCHERS_LENS = register("watchers_lens",
+			Item::new, new Item.Properties().rarity(Rarity.RARE));
 	public static final Item CREAKING_EYE = register("creaking_eye",
 			Item::new, new Item.Properties().rarity(Rarity.RARE));
 	public static final Item PALE_MASK = register("pale_mask",
@@ -36,7 +40,7 @@ public final class ModItems {
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.INGREDIENTS).register(output -> {
 			output.insertAfter(Items.SNORT_POTTERY_SHERD, GAZE_POTTERY_SHERD, CREAKING_POTTERY_SHERD);
 			output.insertAfter(Items.BOLT_ARMOR_TRIM_SMITHING_TEMPLATE, WATCHER_ARMOR_TRIM_SMITHING_TEMPLATE);
-			output.insertAfter(Items.RESIN_BRICK, CREAKING_EYE);
+			output.insertAfter(Items.RESIN_BRICK, WATCHERS_LENS_SHARD, WATCHERS_LENS, CREAKING_EYE);
 		});
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.COMBAT).register(output ->
 				output.insertAfter(Items.TURTLE_HELMET, PALE_MASK));

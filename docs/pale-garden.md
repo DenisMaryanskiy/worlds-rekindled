@@ -316,8 +316,12 @@ roughly Elder Guardian tier) with a boss bar.
    lens in living resin turns it back into an eye. Shaped recipe, 1 eye.
 3. **Pale Mask**: unchanged (`L E L` / `L _ L` with pale oak logs).
 
+The lens, shard and both recipes are implemented (recipe book unlocks on picking up a lens or a
+shard). Until the Watcher and the Ruin exist, the lens and shard are creative-only. Placeholder
+textures: amber resin glass in a weathered copper rim.
+
 **Build order** (proposed): (1) sturdier Sentry hearts and mob projectiles (a change to the
-Sentry), done; (2) Watcher's Lens, Lens Shard and the new Creaking Eye recipe; (3) petrification
+Sentry), done; (2) Watcher's Lens, Lens Shard and the new Creaking Eye recipe, done; (3) petrification
 meter, its overlay and the mask's immunity; (4) summon pattern and the Watcher entity with its
 gaze; (5) body hearts, branch slam and the stuck-arm window; (6) burning resin and the reflect
 stun. Ruin Sentries' petrification and shard drops come with the Ruin.

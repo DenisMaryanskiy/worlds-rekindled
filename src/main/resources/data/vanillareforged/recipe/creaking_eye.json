@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "L": "vanillareforged:watchers_lens",
+    "R": "minecraft:resin_clump"
+  },
+  "pattern": [
+    " R ",
+    "RLR",
+    " R "
+  ],
+  "result": {
+    "id": "vanillareforged:creaking_eye"
+  }
+}
