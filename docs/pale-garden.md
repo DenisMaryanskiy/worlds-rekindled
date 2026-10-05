@@ -165,7 +165,7 @@ slowing it, done.
   Slowness II. Sentries aren't monsters, so the gaze only takes a Sentry that's awake and hunting
   the wearer; looking at your own guard costs no durability. Ruin Sentries still see and attack
   the wearer; the gaze only slows them.
-- **Immune to petrification** (planned, with the Watcher): the wearer looks through the same lens,
+- **Immune to petrification**: the wearer looks through the same lens,
   so the Watcher's and Ruin Sentries' petrifying gaze doesn't take hold. Blocking it costs
   **1 durability per second** of being watched, like the mask's own gaze, so the mask makes boss
   farming easier without making it free.
@@ -286,6 +286,15 @@ roughly Elder Guardian tier) with a boss bar.
 - A grey, cracked stone overlay creeps in from the screen edges as it fills, like powder snow's
   frost overlay.
 - Countered by breaking line of sight (cover) or wearing the Pale Mask (see Pale Mask).
+- Implemented (players only; creative and spectators are immune), waiting for a source:
+  - the meter runs from 0 to 100; each source decides how fast it fills it per tick (the Watcher
+    in step 4, Ruin Sentries more slowly);
+  - movement slows by up to **60%** as it fills; when full the player is petrified for **3 s**
+    (no movement, no jumping) even if the gaze breaks, then cracks free at half;
+  - without a gaze it drains **2 per tick** (a full meter clears in 2.5 s);
+  - stored as a synced Fabric data attachment, not saved: relogging clears it. The brittleness
+    needs a Mixin on `LivingEntity#hurtServer` (Fabric has no event that changes damage); it
+    applies after difficulty scaling.
 
 **The fight** (single player first; numbers to be tuned)
 - **Hearts**: the Watcher can only be hurt through **hearts on its body**, each with crack stages
@@ -322,7 +331,7 @@ textures: amber resin glass in a weathered copper rim.
 
 **Build order** (proposed): (1) sturdier Sentry hearts and mob projectiles (a change to the
 Sentry), done; (2) Watcher's Lens, Lens Shard and the new Creaking Eye recipe, done; (3) petrification
-meter, its overlay and the mask's immunity; (4) summon pattern and the Watcher entity with its
+meter, its overlay and the mask's immunity, done; (4) summon pattern and the Watcher entity with its
 gaze; (5) body hearts, branch slam and the stuck-arm window; (6) burning resin and the reflect
 stun. Ruin Sentries' petrification and shard drops come with the Ruin.
 
