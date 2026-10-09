@@ -18,5 +18,7 @@ public class VanillaReforgedClient implements ClientModInitializer {
 
 		ModelLayerRegistry.registerModelLayer(HeartwoodSentryRenderer.LAYER, HeartwoodSentryModel::createBodyLayer);
 		EntityRendererRegistry.register(ModEntities.HEARTWOOD_SENTRY, HeartwoodSentryRenderer::new);
+
+		PetrificationOverlay.register();
 	}
 }

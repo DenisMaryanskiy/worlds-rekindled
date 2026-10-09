@@ -1,5 +1,7 @@
 package com.dmaryanskiy.vanillareforged;
 
+import com.dmaryanskiy.vanillareforged.petrification.Petrification;
+
 import net.fabricmc.api.ModInitializer;
 
 import net.minecraft.resources.Identifier;
@@ -24,6 +26,7 @@ public class VanillaReforged implements ModInitializer {
 		ModEntities.initialize();
 		ModItems.initialize();
 		WatcherGaze.initialize();
+		Petrification.initialize();
 
 		LOGGER.info("Vanilla Reforged loaded");
 	}
