@@ -15,7 +15,8 @@
 			"com.dmaryanskiy.vanillareforged.test.HeartwoodSentryTest",
 			"com.dmaryanskiy.vanillareforged.test.SentryHeartTest",
 			"com.dmaryanskiy.vanillareforged.test.WatchersLensTest",
-			"com.dmaryanskiy.vanillareforged.test.PetrificationTest"
+			"com.dmaryanskiy.vanillareforged.test.PetrificationTest",
+			"com.dmaryanskiy.vanillareforged.test.WatcherTest"
 		]
 	},
 	"depends": {

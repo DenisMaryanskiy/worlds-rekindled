@@ -275,6 +275,17 @@ roughly Elder Guardian tier) with a boss bar.
 **The woken Watcher**
 - A Creaking several blocks tall, with copper plates (in the collar's oxidation stage, so four
   texture variants), resin joints and a glowing lens for an eye. Placeholder textures.
+- Implemented (step 4): the Creaking model scaled 1.6x (about 4.3 blocks tall) with copper
+  pauldrons, a chest plate and a single lens; a boss bar; it hunts players only and never
+  despawns. Its **gaze fills the petrification meter by 2 per tick** (petrified in about 2.5 s)
+  while it has line of sight to its target within 24 blocks. Melee: 10 damage with strong
+  knockback, a placeholder until the branch slam. It counts as gaze-resistant for the Pale Mask
+  (boss-strength slowing). Drops its lens and 2–4 resin clumps.
+- Until its hearts exist (step 5) it can't be hurt, except by commands like `/kill`.
+- The summon is matched like vanilla's golems: a Mixin adds a placement hook to the Creaking Heart
+  (it has none), empty cells must be air, the body's blocks are cleared with break particles, and
+  any pale oak log or wood fills a log cell. "Darkness" means not daytime with open sky above the
+  head; placing the heart in daylight does nothing, so place it again at night.
 
 **Petrification** (new mechanic, shared with Ruin Sentries)
 - A **meter**, like vanilla freezing in powder snow, not a status effect: milk clears all effects,
@@ -332,7 +343,7 @@ textures: amber resin glass in a weathered copper rim.
 **Build order** (proposed): (1) sturdier Sentry hearts and mob projectiles (a change to the
 Sentry), done; (2) Watcher's Lens, Lens Shard and the new Creaking Eye recipe, done; (3) petrification
 meter, its overlay and the mask's immunity, done; (4) summon pattern and the Watcher entity with its
-gaze; (5) body hearts, branch slam and the stuck-arm window; (6) burning resin and the reflect
+gaze, done; (5) body hearts, branch slam and the stuck-arm window; (6) burning resin and the reflect
 stun. Ruin Sentries' petrification and shard drops come with the Ruin.
 
 ## Parked for later (warrior content and extras)
