@@ -14,6 +14,8 @@ public class ElderwoodRenderState extends LivingEntityRenderState {
 	public Elderwood.SlamPhase slamPhase = Elderwood.SlamPhase.NONE;
 	public boolean slamRightBranch;
 	public float slamPhaseAge;
+	public float slamRight;
+	public float slamForward;
 	public boolean stunned;
 	public float growth = 1.0F;
 }

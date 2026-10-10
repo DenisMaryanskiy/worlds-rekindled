@@ -314,6 +314,49 @@ public class ElderwoodTest {
 				.thenSucceed();
 	}
 
+	// Facing south, its right is to the west, so a player to the east is on its left.
+	@GameTest(environment = MIDNIGHT, maxTicks = 60)
+	public void theSlamLandsWhereItsTargetStands(GameTestHelper helper) {
+		Elderwood elderwood = facingSouth(helper.spawn(ModEntities.ELDERWOOD, ELDERWOOD));
+		Player player = plainPlayer(helper, ELDERWOOD.add(2.5, 0.0, 3.5));
+		elderwood.setTarget(player);
+
+		helper.startSequence()
+				.thenWaitUntil(() -> helper.assertTrue(elderwood.getSlamPhase() == Elderwood.SlamPhase.STUCK, "branch planted"))
+				.thenExecute(() -> {
+					helper.assertTrue(player.getHealth() < player.getMaxHealth(), "The slam should hit a player off to the side");
+					helper.assertTrue(Math.abs(elderwood.getSlamRight() + 2.5F) < 0.5F, "It should aim to its left, was " + elderwood.getSlamRight());
+					ElderwoodHeart branch = elderwood.isSlammingRightBranch() ? ElderwoodHeart.RIGHT_BRANCH : ElderwoodHeart.LEFT_BRANCH;
+					Vec3 heart = branch.box(elderwood).getCenter();
+					helper.assertTrue(heart.y - elderwood.getY() < 2.0, "The planted branch's heart should be low");
+					helper.assertTrue(heart.z - elderwood.getZ() > 2.0, "The heart should be out where the branch landed");
+				})
+				.thenSucceed();
+	}
+
+	@GameTest(environment = MIDNIGHT, maxTicks = 60)
+	public void theSlamSmashesWoodButNotStone(GameTestHelper helper) {
+		Elderwood elderwood = facingSouth(helper.spawn(ModEntities.ELDERWOOD, ELDERWOOD));
+		// It lands at z 6.0, between these two rows.
+		BlockPos planks = new BlockPos(3, 1, 5);
+		BlockPos roof = new BlockPos(3, 3, 5);
+		BlockPos stone = new BlockPos(3, 1, 6);
+		helper.setBlock(planks, Blocks.OAK_PLANKS);
+		helper.setBlock(roof, Blocks.PALE_OAK_LEAVES);
+		helper.setBlock(stone, Blocks.STONE);
+		elderwood.startSlam();
+
+		helper.startSequence()
+				.thenWaitUntil(() -> helper.assertTrue(elderwood.getSlamPhase() == Elderwood.SlamPhase.STUCK, "branch planted"))
+				.thenExecute(() -> {
+					helper.assertBlockPresent(Blocks.AIR, planks);
+					helper.assertBlockPresent(Blocks.AIR, roof);
+					helper.assertBlockPresent(Blocks.STONE, stone);
+					helper.assertItemEntityPresent(Items.OAK_PLANKS);
+				})
+				.thenSucceed();
+	}
+
 	@GameTest(environment = MIDNIGHT, maxTicks = 60)
 	public void steppingOutOfTheSlamDodgesIt(GameTestHelper helper) {
 		Elderwood elderwood = facingSouth(helper.spawn(ModEntities.ELDERWOOD, ELDERWOOD));

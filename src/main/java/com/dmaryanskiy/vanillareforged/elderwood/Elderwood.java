@@ -3,12 +3,14 @@ package com.dmaryanskiy.vanillareforged.elderwood;
 import java.util.Arrays;
 import java.util.Optional;
 
+import com.dmaryanskiy.vanillareforged.VanillaReforged;
 import com.dmaryanskiy.vanillareforged.heart.HeartHit;
 import com.dmaryanskiy.vanillareforged.petrification.Petrification;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -19,6 +21,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.damagesource.DamageSource;
@@ -32,6 +35,7 @@ import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LevelEvent;
@@ -58,14 +62,19 @@ public class Elderwood extends Monster {
 	public static final float GAZE_ARC_DEGREES = 60.0F;
 	public static final int GAZE_RATE = 2;
 	public static final int CORE_GAZE_RATE = 3;
-	public static final double SLAM_REACH = 5.5;
+	public static final double SLAM_REACH = 6.0;
+	// Closer than this the branch would have to come down through its own trunk.
+	public static final double SLAM_MIN_DISTANCE = 2.5;
 	public static final float SLAM_DAMAGE = 10.0F;
 	public static final int SLAM_WINDUP_TICKS = 15;
 	public static final int SLAM_STUCK_TICKS = 30;
 	private static final int SLAM_COOLDOWN_TICKS = 40;
 	public static final double SLAM_DISTANCE = 3.5;
-	private static final float SLAM_ARC_DEGREES = 40.0F;
+	public static final float SLAM_ARC_DEGREES = 75.0F;
 	private static final double SLAM_RADIUS = 2.2;
+	private static final double SMASH_RADIUS = 1.5;
+	private static final int SMASH_HEIGHT = 4;
+	public static final TagKey<Block> BREAKABLE = TagKey.create(Registries.BLOCK, VanillaReforged.id("elderwood_breakable"));
 	private static final int CRACK_COOLDOWN_TICKS = 10;
 	public static final double RESIN_MIN_RANGE = 6.0;
 	public static final int RESIN_INTERVAL_TICKS = 60;
@@ -88,6 +97,11 @@ public class Elderwood extends Monster {
 			EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Boolean> SLAM_RIGHT_BRANCH = SynchedEntityData.defineId(Elderwood.class,
 			EntityDataSerializers.BOOLEAN);
+	// Where the slam lands, in blocks to its right and in front of the trunk's center.
+	private static final EntityDataAccessor<Float> SLAM_RIGHT = SynchedEntityData.defineId(Elderwood.class,
+			EntityDataSerializers.FLOAT);
+	private static final EntityDataAccessor<Float> SLAM_FORWARD = SynchedEntityData.defineId(Elderwood.class,
+			EntityDataSerializers.FLOAT);
 	private static final EntityDataAccessor<Boolean> STUNNED = SynchedEntityData.defineId(Elderwood.class,
 			EntityDataSerializers.BOOLEAN);
 	private static final EntityDataAccessor<Boolean> GROWING = SynchedEntityData.defineId(Elderwood.class,
@@ -100,6 +114,7 @@ public class Elderwood extends Monster {
 	private int slamTicks;
 	private int slamPhaseAge;
 	private int slamCooldown;
+	private double slamHeight;
 	private int crackCooldown;
 	private int resinCooldown = RESIN_FIRST_TICKS;
 	private int stunTicks;
@@ -133,6 +148,8 @@ public class Elderwood extends Monster {
 		builder.define(HEART_CRACKS, 0);
 		builder.define(SLAM_PHASE, SlamPhase.NONE.ordinal());
 		builder.define(SLAM_RIGHT_BRANCH, true);
+		builder.define(SLAM_RIGHT, 0.0F);
+		builder.define(SLAM_FORWARD, (float) SLAM_DISTANCE);
 		builder.define(STUNNED, false);
 		builder.define(GROWING, false);
 	}
@@ -241,11 +258,34 @@ public class Elderwood extends Monster {
 		return !this.isStunned() && !this.isGrowing() && this.getSlamPhase() == SlamPhase.NONE && this.slamCooldown == 0;
 	}
 
-	/** Raises a branch; after the wind-up it strikes the ground in front, where the Elderwood faces now. */
+	public float getSlamRight() {
+		return this.entityData.get(SLAM_RIGHT);
+	}
+
+	public float getSlamForward() {
+		return this.entityData.get(SLAM_FORWARD);
+	}
+
+	/** Slams straight ahead. */
 	public void startSlam() {
+		this.startSlam(this.position().add(Vec3.directionFromRotation(0.0F, this.yBodyRot).scale(SLAM_DISTANCE)));
+	}
+
+	/**
+	 * Raises a branch; after the wind-up it comes down on {@code point}, wherever its target has gone
+	 * by then, so stepping aside dodges it.
+	 */
+	public void startSlam(Vec3 point) {
 		if (!this.canStartSlam()) {
 			return;
 		}
+		Vec3 facing = Vec3.directionFromRotation(0.0F, this.yBodyRot);
+		Vec3 offset = point.subtract(this.position());
+		Vec3 flat = new Vec3(offset.x, 0.0, offset.z);
+		flat = flat.normalize().scale(Mth.clamp(flat.length(), SLAM_MIN_DISTANCE, SLAM_REACH));
+		this.entityData.set(SLAM_RIGHT, (float) (-facing.z * flat.x + facing.x * flat.z));
+		this.entityData.set(SLAM_FORWARD, (float) flat.dot(facing));
+		this.slamHeight = Mth.clamp(offset.y, -1.0, 3.0);
 		this.slamTicks = 0;
 		this.entityData.set(SLAM_PHASE, SlamPhase.WINDUP.ordinal());
 		this.playSound(SoundEvents.CREAKING_ATTACK, 1.5F, 0.6F);
@@ -281,7 +321,7 @@ public class Elderwood extends Monster {
 		} else {
 			this.tickSlam(level);
 			if (this.getTarget() != null && this.isInSlamArc(this.getTarget())) {
-				this.startSlam();
+				this.startSlam(this.getTarget().position());
 			}
 			// While a branch is planted it strains at it and does not gaze.
 			if (this.getSlamPhase() != SlamPhase.STUCK && this.getTarget() instanceof Player player && this.isWatching(player)) {
@@ -324,7 +364,7 @@ public class Elderwood extends Monster {
 		return (float) (Mth.atan2(target.getZ() - this.getZ(), target.getX() - this.getX()) * Mth.RAD_TO_DEG) - 90.0F;
 	}
 
-	// The strike lands straight ahead, so it only slams at a player it's roughly facing.
+	// Its main branches only swing forwards, so it can't slam at a player beside or behind it.
 	private boolean isInSlamArc(Entity target) {
 		return this.distanceToSqr(target) <= SLAM_REACH * SLAM_REACH
 				&& Math.abs(Mth.degreesDifference(this.yBodyRot, this.yawTo(target))) <= SLAM_ARC_DEGREES;
@@ -368,7 +408,10 @@ public class Elderwood extends Monster {
 	}
 
 	private void strike(ServerLevel level) {
-		Vec3 point = this.position().add(Vec3.directionFromRotation(0.0F, this.yBodyRot).scale(SLAM_DISTANCE));
+		Vec3 facing = Vec3.directionFromRotation(0.0F, this.yBodyRot);
+		Vec3 point = this.position().add(0.0, this.slamHeight, 0.0).add(facing.scale(this.getSlamForward()))
+				.add(new Vec3(-facing.z, 0.0, facing.x).scale(this.getSlamRight()));
+		this.smashSoftCover(level, point);
 		BlockPos ground = BlockPos.containing(point).below();
 		level.levelEvent(LevelEvent.PARTICLES_AND_SOUND_DESTROY_BLOCK, ground, Block.getId(level.getBlockState(ground)));
 		AABB area = AABB.ofSize(point.add(0.0, 1.0, 0.0), SLAM_RADIUS * 2.0, 3.0, SLAM_RADIUS * 2.0);
@@ -378,6 +421,22 @@ public class Elderwood extends Monster {
 			if (player.hurtServer(level, source, SLAM_DAMAGE)) {
 				Petrification.shatter(player);
 				player.knockback(1.5, this.getX() - player.getX(), this.getZ() - player.getZ(), source, SLAM_DAMAGE);
+			}
+		}
+	}
+
+	// Wood, leaves and dirt don't stop a branch that size; stone does. The ground it lands on stays.
+	private void smashSoftCover(ServerLevel level, Vec3 point) {
+		if (!level.getGameRules().get(GameRules.MOB_GRIEFING)) {
+			return;
+		}
+		BlockPos center = BlockPos.containing(point);
+		int reach = Mth.ceil(SMASH_RADIUS);
+		for (BlockPos pos : BlockPos.betweenClosed(center.offset(-reach, 0, -reach), center.offset(reach, SMASH_HEIGHT - 1, reach))) {
+			double dx = pos.getX() + 0.5 - point.x;
+			double dz = pos.getZ() + 0.5 - point.z;
+			if (dx * dx + dz * dz <= SMASH_RADIUS * SMASH_RADIUS && level.getBlockState(pos).is(BREAKABLE)) {
+				level.destroyBlock(pos, true, this);
 			}
 		}
 	}

@@ -18,9 +18,10 @@ public class ElderwoodModel extends EntityModel<ElderwoodRenderState> {
 	private static final float STUNNED_SPREAD = 1.222F;
 	private static final float RAISED_SPREAD = 0.15F;
 	private static final float RAISED_BACK = -0.5F;
-	// Swung this far, the branch's tip is in the ground in front of the trunk.
-	private static final float PLANTED_FORWARD = 2.498F;
-	private static final float PLANTED_SPREAD = 0.271F;
+	// A main branch's pivot and length in model pixels (ElderwoodGeometry), to aim its tip at the slam.
+	private static final float PIVOT_SIDE = 20.0F;
+	private static final float PIVOT_HEIGHT = 72.0F;
+	private static final float BRANCH_LENGTH = 92.0F;
 	private static final float SLAM_TICKS = 3.0F;
 	private static final float RECOVER_TICKS = 6.0F;
 
@@ -49,6 +50,7 @@ public class ElderwoodModel extends EntityModel<ElderwoodRenderState> {
 	private void pose(ModelPart branch, float side, ElderwoodRenderState state, boolean slamming, float sway) {
 		float forward = 0.0F;
 		float spread = REST_SPREAD;
+		float stretch = 1.0F;
 		if (state.stunned) {
 			spread = STUNNED_SPREAD;
 		} else if (slamming && state.slamPhase == Elderwood.SlamPhase.WINDUP) {
@@ -59,10 +61,19 @@ public class ElderwoodModel extends EntityModel<ElderwoodRenderState> {
 			// The branch comes down fast, stays planted, and lifts back just before it lets go.
 			float down = Mth.clamp(state.slamPhaseAge / SLAM_TICKS, 0.0F, 1.0F);
 			float held = Mth.clamp((Elderwood.SLAM_STUCK_TICKS - state.slamPhaseAge) / RECOVER_TICKS, 0.0F, 1.0F);
-			forward = Mth.lerp(held, 0.0F, Mth.lerp(down, RAISED_BACK, PLANTED_FORWARD));
-			spread = Mth.lerp(held, REST_SPREAD, Mth.lerp(down, RAISED_SPREAD, PLANTED_SPREAD));
+			// From the pivot to where the slam landed, in model space: x to its left, y down, z to its back.
+			float x = -state.slamRight * 16.0F - side * PIVOT_SIDE;
+			float z = -state.slamForward * 16.0F;
+			float length = Mth.sqrt(x * x + PIVOT_HEIGHT * PIVOT_HEIGHT + z * z);
+			float plantedForward = Mth.PI - (float) Math.asin(-z / length);
+			float plantedSpread = side * (float) Mth.atan2(-x, PIVOT_HEIGHT);
+			forward = Mth.lerp(held, 0.0F, Mth.lerp(down, RAISED_BACK, plantedForward));
+			spread = Mth.lerp(held, REST_SPREAD, Mth.lerp(down, RAISED_SPREAD, plantedSpread));
+			// The branch reaches for the spot: it's drawn longer or shorter so its tip is in the ground there.
+			stretch = Mth.lerp(held * down, 1.0F, length / BRANCH_LENGTH);
 		}
 		branch.xRot = forward;
 		branch.zRot = side * spread + sway;
+		branch.yScale = stretch;
 	}
 }
