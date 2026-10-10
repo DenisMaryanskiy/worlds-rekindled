@@ -25,7 +25,7 @@ public class VanillaReforged implements ModInitializer {
 
 		ModEntities.initialize();
 		ModItems.initialize();
-		WatcherGaze.initialize();
+		ElderwoodGaze.initialize();
 		Petrification.initialize();
 
 		LOGGER.info("Vanilla Reforged loaded");

@@ -16,21 +16,21 @@ import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.item.equipment.ArmorType;
 
 public final class ModItems {
-	public static final Item WATCHER_ARMOR_TRIM_SMITHING_TEMPLATE = register("watcher_armor_trim_smithing_template",
+	public static final Item ELDERWOOD_ARMOR_TRIM_SMITHING_TEMPLATE = register("elderwood_armor_trim_smithing_template",
 			SmithingTemplateItem::createArmorTrimTemplate, new Item.Properties().rarity(Rarity.RARE));
 	public static final Item GAZE_POTTERY_SHERD = register("gaze_pottery_sherd",
 			Item::new, new Item.Properties().rarity(Rarity.UNCOMMON).potPattern(ModPotPatterns.GAZE));
 	public static final Item CREAKING_POTTERY_SHERD = register("creaking_pottery_sherd",
 			Item::new, new Item.Properties().rarity(Rarity.UNCOMMON).potPattern(ModPotPatterns.CREAKING));
-	public static final Item WATCHERS_LENS_SHARD = register("watchers_lens_shard",
+	public static final Item ELDERWOOD_LENS_SHARD = register("elderwood_lens_shard",
 			Item::new, new Item.Properties().rarity(Rarity.UNCOMMON));
-	public static final Item WATCHERS_LENS = register("watchers_lens",
+	public static final Item ELDERWOOD_LENS = register("elderwood_lens",
 			Item::new, new Item.Properties().rarity(Rarity.RARE));
 	public static final Item CREAKING_EYE = register("creaking_eye",
 			Item::new, new Item.Properties().rarity(Rarity.RARE));
 	public static final Item PALE_MASK = register("pale_mask",
 			Item::new, new Item.Properties().rarity(Rarity.UNCOMMON).humanoidArmor(ModArmorMaterials.PALE_MASK, ArmorType.HELMET));
-	// Not in any creative tab: it only exists as the look of the Watcher's projectile, like the fire charge
+	// Not in any creative tab: it only exists as the look of the Elderwood's projectile, like the fire charge
 	// is for fireballs.
 	public static final Item BURNING_RESIN = register("burning_resin", Item::new, new Item.Properties());
 	public static final Item HEARTWOOD_SENTRY_SPAWN_EGG = register("heartwood_sentry_spawn_egg",
@@ -42,8 +42,8 @@ public final class ModItems {
 	public static void initialize() {
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.INGREDIENTS).register(output -> {
 			output.insertAfter(Items.SNORT_POTTERY_SHERD, GAZE_POTTERY_SHERD, CREAKING_POTTERY_SHERD);
-			output.insertAfter(Items.BOLT_ARMOR_TRIM_SMITHING_TEMPLATE, WATCHER_ARMOR_TRIM_SMITHING_TEMPLATE);
-			output.insertAfter(Items.RESIN_BRICK, WATCHERS_LENS_SHARD, WATCHERS_LENS, CREAKING_EYE);
+			output.insertAfter(Items.BOLT_ARMOR_TRIM_SMITHING_TEMPLATE, ELDERWOOD_ARMOR_TRIM_SMITHING_TEMPLATE);
+			output.insertAfter(Items.RESIN_BRICK, ELDERWOOD_LENS_SHARD, ELDERWOOD_LENS, CREAKING_EYE);
 		});
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.COMBAT).register(output ->
 				output.insertAfter(Items.TURTLE_HELMET, PALE_MASK));

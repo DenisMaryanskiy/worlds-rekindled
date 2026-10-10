@@ -1,11 +1,11 @@
 {
   "parent": "minecraft:recipes/root",
   "criteria": {
-    "has_watchers_lens": {
+    "has_elderwood_lens": {
       "conditions": {
         "items": [
           {
-            "items": "vanillareforged:watchers_lens"
+            "items": "vanillareforged:elderwood_lens"
           }
         ]
       },
@@ -21,7 +21,7 @@
   "requirements": [
     [
       "has_the_recipe",
-      "has_watchers_lens"
+      "has_elderwood_lens"
     ]
   ],
   "rewards": {

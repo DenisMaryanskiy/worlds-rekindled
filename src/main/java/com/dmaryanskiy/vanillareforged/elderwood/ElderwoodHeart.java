@@ -1,0 +1,82 @@
+package com.dmaryanskiy.vanillareforged.elderwood;
+
+import com.dmaryanskiy.vanillareforged.heart.HeartHit;
+
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
+
+/**
+ * The hearts on the Elderwood's body, its only weak points. Each is a box at a fixed spot relative to
+ * the body (blocks to its right, up from its feet, in front of its center):
+ * <ul>
+ * <li>the chest hearts can always be hit, from the front;</li>
+ * <li>an arm heart while that arm is stuck in the ground after a slam, from any side (the box then
+ * sits where the planted forearm is), or from the front on the hanging arm while it's stunned;</li>
+ * <li>the core only once every other heart is destroyed, from the front.</li>
+ * </ul>
+ */
+public enum ElderwoodHeart {
+	RIGHT_CHEST(3, 0.35, 3.06, 0.39, 0.5),
+	LEFT_CHEST(3, -0.35, 3.06, 0.39, 0.5),
+	RIGHT_ARM(3, 0.92, 2.1, 0.22, 0.6),
+	LEFT_ARM(3, -0.92, 2.1, 0.22, 0.6),
+	CORE(5, 0.0, 2.55, 0.39, 0.5);
+
+	public static final int TOTAL_CRACKS = 17;
+	private static final int BITS = 3;
+	private static final double PLANTED_UP = 0.85;
+	private static final double PLANTED_FORWARD = 1.64;
+	private static final double PLANTED_SIZE = 0.7;
+
+	private final int maxCracks;
+	private final double right;
+	private final double up;
+	private final double forward;
+	private final double size;
+
+	ElderwoodHeart(int maxCracks, double right, double up, double forward, double size) {
+		this.maxCracks = maxCracks;
+		this.right = right;
+		this.up = up;
+		this.forward = forward;
+		this.size = size;
+	}
+
+	public int maxCracks() {
+		return this.maxCracks;
+	}
+
+	public boolean isArm() {
+		return this == RIGHT_ARM || this == LEFT_ARM;
+	}
+
+	public AABB box(Elderwood elderwood) {
+		Vec3 facing = facing(elderwood);
+		Vec3 toRight = new Vec3(-facing.z, 0.0, facing.x);
+		boolean planted = elderwood.isStuckArm(this);
+		Vec3 center = elderwood.position()
+				.add(0.0, planted ? PLANTED_UP : this.up, 0.0)
+				.add(facing.scale(planted ? PLANTED_FORWARD : this.forward))
+				.add(toRight.scale(this.right));
+		double boxSize = planted ? PLANTED_SIZE : this.size;
+		return AABB.ofSize(center, boxSize, boxSize, boxSize);
+	}
+
+	public boolean isHitBy(Elderwood elderwood, HeartHit hit) {
+		return (elderwood.isStuckArm(this) || hit.comesFromTheFrontOf(facing(elderwood))) && hit.passesThrough(this.box(elderwood));
+	}
+
+	/** Cracks of every heart packed into one synced number, {@value #BITS} bits each. */
+	public int cracksIn(int packed) {
+		return packed >> this.ordinal() * BITS & (1 << BITS) - 1;
+	}
+
+	public int withCracks(int packed, int cracks) {
+		int shift = this.ordinal() * BITS;
+		return packed & ~((1 << BITS) - 1 << shift) | cracks << shift;
+	}
+
+	private static Vec3 facing(Elderwood elderwood) {
+		return Vec3.directionFromRotation(0.0F, elderwood.yBodyRot);
+	}
+}

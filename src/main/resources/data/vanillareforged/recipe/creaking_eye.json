@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "L": "vanillareforged:watchers_lens",
+    "L": "vanillareforged:elderwood_lens",
     "R": "minecraft:resin_clump"
   },
   "pattern": [

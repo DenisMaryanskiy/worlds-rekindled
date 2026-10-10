@@ -379,8 +379,8 @@ all around the trunk, so the player has to keep moving between the two.
    lens in living resin turns it back into an eye. Shaped recipe, 1 eye.
 3. **Pale Mask**: unchanged (`L E L` / `L _ L` with pale oak logs).
 
-The lens, shard and both recipes are implemented as the Watcher's Lens and Lens Shard (recipe book
-unlocks on picking up a lens or a shard). Placeholder textures: amber resin glass in a weathered
+The lens, shard and both recipes are implemented (recipe book unlocks on picking up a lens or a
+shard). Placeholder textures: amber resin glass in a weathered
 copper rim.
 
 **Build order**
@@ -393,7 +393,8 @@ pattern and the entity with its gaze; (5) body hearts, branch slam and the stuck
 The rework into the Elderwood:
 1. **Rename**: Watcher to Elderwood everywhere, items included (Elderwood Lens, Elderwood Lens
    Shard, Elderwood armor trim) with their ids, tags and translations. Nothing is released yet,
-   so old ids aren't migrated: Watcher items in existing test worlds disappear.
+   so old ids aren't migrated: Watcher items in existing test worlds disappear. Done: the code
+   now calls the old walking body the Elderwood until step 2 replaces it.
 2. **The tree**: the rooted, solid, slowly turning entity at its new size with the placeholder
    tree model, the stump pattern, growing, and the room and darkness messages.
 3. **Hearts and gaze**: the seven hearts around the trunk, the gaze cone, and resin and stun

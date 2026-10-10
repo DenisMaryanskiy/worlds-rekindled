@@ -5,7 +5,7 @@ import java.util.WeakHashMap;
 
 import com.dmaryanskiy.vanillareforged.ModItems;
 import com.dmaryanskiy.vanillareforged.VanillaReforged;
-import com.dmaryanskiy.vanillareforged.WatcherGaze;
+import com.dmaryanskiy.vanillareforged.ElderwoodGaze;
 
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
@@ -21,7 +21,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * The Watcher's reversed gaze: a meter, like freezing in powder snow, that fills while a petrifying
+ * The Elderwood's reversed gaze: a meter, like freezing in powder snow, that fills while a petrifying
  * gaze holds the player and drains once it's broken. As it fills the player slows down and turns
  * brittle; when it's full they're petrified (stuck) for a while, then crack free at half.
  * <p>
@@ -77,7 +77,7 @@ public final class Petrification {
 		LAST_EXPOSED.put(player, player.level().getGameTime());
 		ItemStack mask = player.getItemBySlot(EquipmentSlot.HEAD);
 		if (mask.is(ModItems.PALE_MASK)) {
-			if (MASK_TICKS.merge(player, 1, Integer::sum) >= WatcherGaze.TICKS_PER_DURABILITY) {
+			if (MASK_TICKS.merge(player, 1, Integer::sum) >= ElderwoodGaze.TICKS_PER_DURABILITY) {
 				MASK_TICKS.put(player, 0);
 				mask.hurtAndBreak(1, player, EquipmentSlot.HEAD);
 			}

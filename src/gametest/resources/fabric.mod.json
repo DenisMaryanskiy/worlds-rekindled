@@ -7,16 +7,16 @@
 	"entrypoints": {
 		"fabric-gametest": [
 			"com.dmaryanskiy.vanillareforged.test.StickyPistonRecipeTest",
-			"com.dmaryanskiy.vanillareforged.test.WatcherArmorTrimTest",
+			"com.dmaryanskiy.vanillareforged.test.ElderwoodArmorTrimTest",
 			"com.dmaryanskiy.vanillareforged.test.PotterySherdTest",
 			"com.dmaryanskiy.vanillareforged.test.PaleMaskTest",
-			"com.dmaryanskiy.vanillareforged.test.WatcherGazeTest",
+			"com.dmaryanskiy.vanillareforged.test.ElderwoodGazeTest",
 			"com.dmaryanskiy.vanillareforged.test.PaleMaskStealthTest",
 			"com.dmaryanskiy.vanillareforged.test.HeartwoodSentryTest",
 			"com.dmaryanskiy.vanillareforged.test.SentryHeartTest",
-			"com.dmaryanskiy.vanillareforged.test.WatchersLensTest",
+			"com.dmaryanskiy.vanillareforged.test.ElderwoodLensTest",
 			"com.dmaryanskiy.vanillareforged.test.PetrificationTest",
-			"com.dmaryanskiy.vanillareforged.test.WatcherTest"
+			"com.dmaryanskiy.vanillareforged.test.ElderwoodTest"
 		]
 	},
 	"depends": {
