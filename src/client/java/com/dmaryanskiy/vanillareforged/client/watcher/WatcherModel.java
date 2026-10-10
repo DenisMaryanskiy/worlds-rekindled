@@ -68,7 +68,18 @@ public class WatcherModel extends CreakingModel {
 	@Override
 	public void setupAnim(CreakingRenderState state) {
 		super.setupAnim(state);
-		if (!(state instanceof WatcherRenderState watcher) || watcher.slamPhase == Watcher.SlamPhase.NONE) {
+		if (!(state instanceof WatcherRenderState watcher)) {
+			return;
+		}
+		if (watcher.stunned) {
+			// Head down, arms hanging straight: the body stays upright so the hearts are where they're hit.
+			this.head.xRot = 0.6F;
+			this.head.yRot = 0.0F;
+			this.rightArm.xRot = 0.0F;
+			this.leftArm.xRot = 0.0F;
+			return;
+		}
+		if (watcher.slamPhase == Watcher.SlamPhase.NONE) {
 			return;
 		}
 		ModelPart arm = watcher.slamRightArm ? this.rightArm : this.leftArm;

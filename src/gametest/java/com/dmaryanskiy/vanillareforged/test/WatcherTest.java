@@ -5,6 +5,7 @@ import java.util.List;
 import com.dmaryanskiy.vanillareforged.ModEntities;
 import com.dmaryanskiy.vanillareforged.ModItems;
 import com.dmaryanskiy.vanillareforged.petrification.Petrification;
+import com.dmaryanskiy.vanillareforged.watcher.BurningResin;
 import com.dmaryanskiy.vanillareforged.watcher.Watcher;
 import com.dmaryanskiy.vanillareforged.watcher.WatcherHeart;
 
@@ -13,6 +14,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.gametest.framework.GameTestSequence;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -251,6 +253,133 @@ public class WatcherTest {
 
 		helper.assertItemEntityPresent(ModItems.WATCHERS_LENS);
 		helper.succeed();
+	}
+
+	@GameTest(environment = MIDNIGHT, maxTicks = 60)
+	public void burningResinSetsAPlayerOnFire(GameTestHelper helper) {
+		Watcher watcher = stillWatcher(helper);
+		Player player = plainPlayer(helper, WATCHER.add(0.0, 0.0, 4.5));
+		throwResin(helper, watcher, WATCHER.add(0.0, 1.0, 2.0), new Vec3(0.0, 0.0, 1.0));
+
+		helper.succeedWhen(() -> {
+			helper.assertTrue(player.getRemainingFireTicks() > 0, "Burning resin should set the player on fire");
+			helper.assertTrue(player.getHealth() < player.getMaxHealth(), "Burning resin should hurt");
+		});
+	}
+
+	@GameTest(environment = MIDNIGHT, maxTicks = 60)
+	public void burningResinDoesNotSetBlocksOnFire(GameTestHelper helper) {
+		Watcher watcher = stillWatcher(helper);
+		for (int x = 2; x <= 4; x++) {
+			for (int y = 1; y <= 3; y++) {
+				helper.setBlock(new BlockPos(x, y, 6), Blocks.OAK_PLANKS);
+			}
+		}
+		BurningResin resin = throwResin(helper, watcher, WATCHER.add(0.0, 1.0, 2.0), new Vec3(0.0, 0.0, 1.0));
+
+		helper.startSequence()
+				.thenWaitUntil(() -> helper.assertTrue(resin.isRemoved(), "The resin should burst on the planks"))
+				.thenExecute(() -> helper.assertBlockNotPresent(Blocks.FIRE, new BlockPos(3, 2, 5)))
+				.thenSucceed();
+	}
+
+	@GameTest(environment = MIDNIGHT, maxTicks = 60)
+	public void resinHitBackByAPlayerStunsIt(GameTestHelper helper) {
+		Watcher watcher = stillWatcher(helper);
+		Player player = helper.makeMockServerPlayer(GameType.SURVIVAL);
+		throwResin(helper, player, WATCHER.add(0.0, 2.0, 4.5), new Vec3(0.0, 0.0, -1.0));
+
+		helper.succeedWhen(() -> helper.assertTrue(watcher.isStunned(), "Its own resin, hit back, should stun it"));
+	}
+
+	@GameTest(environment = MIDNIGHT, maxTicks = 60)
+	public void resinFromAnotherWatcherDoesNotStunIt(GameTestHelper helper) {
+		Watcher watcher = stillWatcher(helper);
+		Watcher other = helper.spawn(ModEntities.WATCHER, WATCHER.add(0.0, 0.0, 5.0));
+		other.setNoAi(true);
+		BurningResin resin = throwResin(helper, other, WATCHER.add(0.0, 2.0, 3.0), new Vec3(0.0, 0.0, -1.0));
+
+		helper.startSequence()
+				.thenWaitUntil(() -> helper.assertTrue(resin.isRemoved(), "The resin should hit the Watcher"))
+				.thenExecute(() -> helper.assertFalse(watcher.isStunned(), "Only resin a player hit back stuns it"))
+				.thenSucceed();
+	}
+
+	@GameTest(environment = MIDNIGHT)
+	public void aPlayersHitSendsTheResinBack(GameTestHelper helper) {
+		Watcher watcher = stillWatcher(helper);
+		Player player = helper.makeMockServerPlayer(GameType.SURVIVAL);
+		player.snapTo(helper.absoluteVec(WATCHER.add(0.0, 0.0, 5.0)), 180.0F, 0.0F);
+		BurningResin resin = throwResin(helper, watcher, WATCHER.add(0.0, 1.5, 4.0), new Vec3(0.0, 0.0, 1.0));
+
+		player.attack(resin);
+
+		helper.assertTrue(resin.getOwner() == player, "Hitting the resin should make it the player's");
+		helper.assertTrue(resin.getDeltaMovement().z < 0.0, "It should fly back the way the player looks");
+		helper.succeed();
+	}
+
+	@GameTest(environment = MIDNIGHT, maxTicks = 60)
+	public void stunnedItStopsGazingAndItsArmHeartsOpen(GameTestHelper helper) {
+		Watcher watcher = facingSouth(helper.spawn(ModEntities.WATCHER, WATCHER));
+		// Close enough not to draw resin, far enough not to draw a slam.
+		Player player = helper.makeMockServerPlayer(GameType.SURVIVAL);
+		player.snapTo(helper.absoluteVec(WATCHER.add(0.0, 0.0, 4.9)), 0.0F, 0.0F);
+		watcher.setTarget(player);
+		watcher.stun();
+
+		helper.runAfterDelay(20, () -> {
+			helper.assertTrue(watcher.isStunned(), "still stunned");
+			helper.assertValueEqual(Petrification.getMeter(player), 0, "meter while it's stunned");
+			helper.assertTrue(hit(helper, watcher, WatcherHeart.LEFT_ARM, FRONT), "A stunned Watcher's arm hearts should be open");
+			helper.assertValueEqual(watcher.getCracks(WatcherHeart.LEFT_ARM), 1, "left arm cracks");
+			helper.succeed();
+		});
+	}
+
+	@GameTest(environment = MIDNIGHT, maxTicks = Watcher.STUN_TICKS + 40)
+	public void theStunWearsOffAndCannotBeRepeatedAtOnce(GameTestHelper helper) {
+		Watcher watcher = facingSouth(helper.spawn(ModEntities.WATCHER, WATCHER));
+		watcher.stun();
+
+		helper.startSequence()
+				.thenWaitUntil(() -> helper.assertFalse(watcher.isStunned(), "The stun should wear off"))
+				.thenExecute(() -> {
+					watcher.stun();
+					helper.assertFalse(watcher.isStunned(), "It shouldn't be stunned again right away");
+				})
+				.thenSucceed();
+	}
+
+	@GameTest(environment = MIDNIGHT, maxTicks = Watcher.RESIN_INTERVAL_TICKS + 60)
+	public void itThrowsBurningResinAtADistantPlayer(GameTestHelper helper) {
+		// The test structure floats, and this takes a few seconds: without a floor both would fall out of it.
+		for (int x = 0; x < 8; x++) {
+			for (int z = 0; z < 8; z++) {
+				helper.setBlock(new BlockPos(x, 0, z), Blocks.STONE);
+			}
+		}
+		Watcher watcher = helper.spawn(ModEntities.WATCHER, new Vec3(1.5, 1.0, 1.5));
+		// Rooted, so it can't close in and switch to its slam before it throws.
+		watcher.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(0.0);
+		watcher.setTarget(plainPlayer(helper, new Vec3(6.5, 1.0, 6.5)));
+
+		helper.succeedWhen(() -> helper.assertEntityPresent(ModEntities.BURNING_RESIN));
+	}
+
+	// A plain mock player in the level: unlike a mock ServerPlayer it can take damage (no connection needed).
+	private static Player plainPlayer(GameTestHelper helper, Vec3 pos) {
+		Player player = helper.makeMockPlayer(GameType.SURVIVAL);
+		player.snapTo(helper.absoluteVec(pos), 0.0F, 0.0F);
+		helper.getLevel().addFreshEntity(player);
+		return player;
+	}
+
+	private static BurningResin throwResin(GameTestHelper helper, LivingEntity owner, Vec3 from, Vec3 direction) {
+		BurningResin resin = new BurningResin(helper.getLevel(), owner, direction);
+		resin.setPos(helper.absoluteVec(from));
+		helper.getLevel().addFreshEntity(resin);
+		return resin;
 	}
 
 	private static Watcher stillWatcher(GameTestHelper helper) {

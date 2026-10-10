@@ -55,6 +55,7 @@ public class WatcherRenderer extends MobRenderer<Watcher, WatcherRenderState, Wa
 		state.slamPhase = entity.getSlamPhase();
 		state.slamRightArm = entity.isSlammingRightArm();
 		state.slamPhaseAge = entity.getSlamPhaseAge() + partialTicks;
+		state.stunned = entity.isStunned();
 		state.canMove = true;
 	}
 
