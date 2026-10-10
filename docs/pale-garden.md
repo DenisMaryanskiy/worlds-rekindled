@@ -355,8 +355,10 @@ roughly Elder Guardian tier) with a boss bar.
   - **Burning resin**: while it watches a player more than 6 blocks away it throws a glob of
     burning resin, the first after 1 s and then every 3 s. It walks about 2.4 blocks a second, so
     a player who keeps their distance gets shot at and one who stands still gets the slam. A hit
-    deals **5 damage and 5 s of fire**; blocks never catch fire. Placeholder look: a flying,
-    flaming resin clump.
+    deals **5 damage and 5 s of fire**; blocks never catch fire. It has its own look, a
+    molten amber glob with a white-hot core (placeholder texture, an unobtainable item like the
+    fire charge is for fireballs), without vanilla's fire overlay, which would make it look like
+    any fireball.
   - **Hitting it back**: the resin is in vanilla's `redirectable_projectile` tag, so a melee hit
     sends it where the player looks, like a ghast's fireball. Hit back into the Watcher it deals
     no damage but **stuns it for 3 s**; only resin a player hit back does.
