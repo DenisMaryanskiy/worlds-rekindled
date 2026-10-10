@@ -273,8 +273,28 @@ roughly Elder Guardian tier) with a boss bar.
   two-log Creaking Heart setup, and nothing in it resembles the Sentry (log + heart + pumpkin).
 
 **The woken Watcher**
-- A Creaking several blocks tall, with copper plates (in the collar's oxidation stage, so four
-  texture variants), resin joints and a glowing lens for an eye. Placeholder textures.
+- A bulky relative of the Creaking, about 4.6 blocks tall and 2 wide (an iron golem is 2.7): a
+  broad chest with room for its hearts, thick limbs, branches on the head, a copper collar and
+  pauldrons (in the collar block's oxidation stage, so four texture variants) and a large glowing
+  lens for an eye. Placeholder textures.
+- **Only weak points glow**: the lens now, the hearts from step 5, with the same full-bright glow
+  so they read in the dark. Nothing else on the body is resin-orange (no decorative resin joints:
+  they looked like dim hearts).
+- Implemented (step 4): its own model (the Creaking's part names, so its walk and attack
+  animations apply; the first version reused the Creaking's stick body and was too slim to carry
+  hearts); a boss bar; it hunts players only and never
+  despawns. Its **gaze fills the petrification meter by 2 per tick** (petrified in about 2.5 s)
+  while it has line of sight to its target within 24 blocks. Melee: 10 damage with strong
+  knockback, a placeholder until the branch slam. It counts as gaze-resistant for the Pale Mask
+  (boss-strength slowing). Drops its lens and 2–4 resin clumps.
+- Until its hearts exist (step 5) it can't be hurt, except by commands like `/kill`.
+- The summon is matched like vanilla's golems: a Mixin adds a placement hook to the Creaking Heart
+  (it has none), the body's blocks are cleared with break particles, and any pale oak log or wood
+  fills a log cell. Unlike the golems, the empty cells don't have to be pure air: anything that
+  isn't a full block (grass, flowers, snow, moss carpets, common in a Pale Garden) may stay and
+  is left alone. "Darkness" means not daytime with open sky above the head; placing the heart in
+  daylight shows "The Watcher only wakes in darkness" above the hotbar, like a bed in daytime, so
+  place it again at night.
 
 **Petrification** (new mechanic, shared with Ruin Sentries)
 - A **meter**, like vanilla freezing in powder snow, not a status effect: milk clears all effects,
@@ -332,7 +352,7 @@ textures: amber resin glass in a weathered copper rim.
 **Build order** (proposed): (1) sturdier Sentry hearts and mob projectiles (a change to the
 Sentry), done; (2) Watcher's Lens, Lens Shard and the new Creaking Eye recipe, done; (3) petrification
 meter, its overlay and the mask's immunity, done; (4) summon pattern and the Watcher entity with its
-gaze; (5) body hearts, branch slam and the stuck-arm window; (6) burning resin and the reflect
+gaze, done; (5) body hearts, branch slam and the stuck-arm window; (6) burning resin and the reflect
 stun. Ruin Sentries' petrification and shard drops come with the Ruin.
 
 ## Parked for later (warrior content and extras)
