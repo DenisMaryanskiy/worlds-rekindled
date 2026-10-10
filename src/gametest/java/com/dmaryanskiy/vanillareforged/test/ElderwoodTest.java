@@ -536,11 +536,13 @@ public class ElderwoodTest {
 					"branch heart parts open at rest");
 			elderwood.stun();
 		});
-		helper.runAfterDelay(5, () -> {
+		// The parts hang past this test's walls, where a neighbouring test's cleanup can remove one for a
+		// tick before the tree replaces it, so this waits for both instead of checking one moment.
+		helper.startSequence().thenIdle(3).thenWaitUntil(() -> helper.assertValueEqual(
+				branchHeartParts(helper, elderwood).stream().filter(Entity::isPickable).count(), 2L,
+				"branch heart parts open while stunned")).thenExecute(() -> {
 			Vec3 heart = ElderwoodHeart.RIGHT_BRANCH.box(elderwood).getCenter();
 			helper.assertTrue(elderwood.getBoundingBox().distanceToSqr(heart) > 4.0, "The drooping heart should hang well outside the trunk");
-			helper.assertValueEqual(branchHeartParts(helper, elderwood).stream().filter(Entity::isPickable).count(), 2L,
-					"branch heart parts open while stunned");
 			Arrow arrow = new Arrow(helper.getLevel(), heart.x, heart.y + 12.0, heart.z, new ItemStack(Items.ARROW), null);
 			arrow.setOwner(player);
 			arrow.setCritArrow(true);

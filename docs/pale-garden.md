@@ -311,8 +311,13 @@ iron/diamond gear: a huge, rooted tree fought by moving around it.
   frost overlay.
 - Implemented (players only; creative and spectators are immune):
   - the meter runs from 0 to 100; each source decides how fast it fills it per tick;
-  - movement slows by up to **60%** as it fills; when full the player is petrified for **3 s**
-    (no movement, no jumping) even if the gaze breaks, then cracks free at half;
+  - movement only slows once the meter is half full, then by up to **60%**; when full the player
+    is petrified for **3 s** (no movement, no jumping) even if the gaze breaks;
+  - cracking free (or being shattered by a slam) empties the meter and gives **3 s in which no
+    gaze takes hold**. Before, the player came out half full and still in the gaze, so in the
+    open one petrification led straight into the next;
+  - a **shield raised towards the gaze blocks it**: the meter drains behind it, at 1 shield
+    durability per second. The price is the shield's own: slow walking and no attacking;
   - without a gaze it drains **2 per tick** (a full meter clears in 2.5 s);
   - stored as a synced Fabric data attachment, not saved: relogging clears it. The brittleness
     needs a Mixin on `LivingEntity#hurtServer` (Fabric has no event that changes damage); it
@@ -325,8 +330,10 @@ petrifies and the branches slam; behind and to the sides the roots strike. Its h
 all around the trunk, so the player has to keep moving between the two.
 
 - **The gaze** covers a cone in front of the lens (about 60° to each side) out to 24 blocks and
-  fills the meter by 2 per tick (petrified in about 2.5 s), 3 once the core is open. Three ways
+  fills the meter by 2 per tick (petrified in about 2.5 s), 3 once the core is open. Four ways
   out of it:
+  - **a raised shield**, the one that needs nothing built and no mask: the first kill has to be
+    possible without the mask, on open ground;
   - **circle**: the trunk turns slower than a player runs;
   - **cover**: any block between the player and the lens stops it, including pillars the player
     builds before or during the fight;

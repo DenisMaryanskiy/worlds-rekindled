@@ -334,7 +334,7 @@ public class Elderwood extends Monster {
 			}
 			// While a branch is planted it strains at it and does not gaze.
 			if (this.getSlamPhase() != SlamPhase.STUCK && this.getTarget() instanceof Player player && this.isWatching(player)) {
-				Petrification.expose(player, this.isCoreOpen() ? CORE_GAZE_RATE : GAZE_RATE);
+				Petrification.expose(player, this.isCoreOpen() ? CORE_GAZE_RATE : GAZE_RATE, this.getEyePosition());
 				this.tickResin(level, player);
 			} else if (this.getTarget() instanceof Player player) {
 				this.tickRoots(level, player);
