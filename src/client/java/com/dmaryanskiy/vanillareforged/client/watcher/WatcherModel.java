@@ -1,5 +1,7 @@
 package com.dmaryanskiy.vanillareforged.client.watcher;
 
+import com.dmaryanskiy.vanillareforged.watcher.Watcher;
+
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.CubeListBuilder;
@@ -7,6 +9,8 @@ import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.client.model.monster.creaking.CreakingModel;
+import net.minecraft.client.renderer.entity.state.CreakingRenderState;
+import net.minecraft.util.Mth;
 
 /**
  * A bulky, symmetric relative of the Creaking: a broad chest with room for its hearts, thick limbs,
@@ -15,8 +19,23 @@ import net.minecraft.client.model.monster.creaking.CreakingModel;
  * (128x128) are our own, and the renderer scales it up.
  */
 public class WatcherModel extends CreakingModel {
+	private static final float RAISED_ARM = -2.8F;
+	// Bent this far forward, an arm hanging straight down reaches the ground in front of it.
+	private static final float BENT_OVER = 1.2F;
+	private static final float SLAM_TICKS = 3.0F;
+	private static final float RECOVER_TICKS = 6.0F;
+
+	private final ModelPart upperBody;
+	private final ModelPart head;
+	private final ModelPart rightArm;
+	private final ModelPart leftArm;
+
 	public WatcherModel(ModelPart root) {
 		super(root);
+		this.upperBody = root.getChild("root").getChild("upper_body");
+		this.head = this.upperBody.getChild("head");
+		this.rightArm = this.upperBody.getChild("right_arm");
+		this.leftArm = this.upperBody.getChild("left_arm");
 	}
 
 	public static LayerDefinition createBodyLayer() {
@@ -44,5 +63,26 @@ public class WatcherModel extends CreakingModel {
 		root.addOrReplaceChild("right_leg", CubeListBuilder.create()
 				.texOffs(40, 24).addBox(-2.5F, 0.0F, -2.5F, 5.0F, 18.0F, 5.0F), PartPose.offset(-3.5F, -18.0F, 0.0F));
 		return LayerDefinition.create(mesh, 128, 128);
+	}
+
+	@Override
+	public void setupAnim(CreakingRenderState state) {
+		super.setupAnim(state);
+		if (!(state instanceof WatcherRenderState watcher) || watcher.slamPhase == Watcher.SlamPhase.NONE) {
+			return;
+		}
+		ModelPart arm = watcher.slamRightArm ? this.rightArm : this.leftArm;
+		if (watcher.slamPhase == Watcher.SlamPhase.WINDUP) {
+			float raise = Mth.clamp(watcher.slamPhaseAge / Watcher.SLAM_WINDUP_TICKS, 0.0F, 1.0F);
+			arm.xRot += RAISED_ARM * raise;
+			this.upperBody.xRot -= 0.15F * raise;
+			return;
+		}
+		// The arm comes down fast, stays planted, and the body straightens up just before it lets go.
+		float down = Mth.clamp(watcher.slamPhaseAge / SLAM_TICKS, 0.0F, 1.0F);
+		float held = Mth.clamp((Watcher.SLAM_STUCK_TICKS - watcher.slamPhaseAge) / RECOVER_TICKS, 0.0F, 1.0F);
+		this.upperBody.xRot += Mth.lerp(down, -0.15F, BENT_OVER) * held;
+		arm.xRot += Mth.lerp(down, RAISED_ARM, -BENT_OVER) * held;
+		this.head.xRot += 0.3F * down * held;
 	}
 }

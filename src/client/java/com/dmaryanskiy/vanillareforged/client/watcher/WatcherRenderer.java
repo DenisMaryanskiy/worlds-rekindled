@@ -6,6 +6,7 @@ import java.util.Map;
 
 import com.dmaryanskiy.vanillareforged.VanillaReforged;
 import com.dmaryanskiy.vanillareforged.watcher.Watcher;
+import com.dmaryanskiy.vanillareforged.watcher.WatcherHeart;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.model.geom.ModelLayerLocation;
@@ -30,6 +31,7 @@ public class WatcherRenderer extends MobRenderer<Watcher, WatcherRenderState, Wa
 	public WatcherRenderer(EntityRendererProvider.Context context) {
 		super(context, new WatcherModel(context.bakeLayer(LAYER)), 0.9F * SCALE);
 		this.addLayer(new WatcherLensLayer(this, LENS));
+		this.addLayer(new WatcherHeartsLayer(this));
 	}
 
 	private static Identifier texture(String name) {
@@ -44,8 +46,15 @@ public class WatcherRenderer extends MobRenderer<Watcher, WatcherRenderState, Wa
 	@Override
 	public void extractRenderState(Watcher entity, WatcherRenderState state, float partialTicks) {
 		super.extractRenderState(entity, state, partialTicks);
-		state.attackAnimationState.copyFrom(entity.attackAnimationState);
 		state.copperStage = entity.getCopperStage();
+		for (WatcherHeart heart : WatcherHeart.values()) {
+			state.heartCracks[heart.ordinal()] = entity.getCracks(heart);
+			state.heartVulnerable[heart.ordinal()] = entity.isVulnerable(heart);
+		}
+		state.coreOpen = entity.isCoreOpen();
+		state.slamPhase = entity.getSlamPhase();
+		state.slamRightArm = entity.isSlammingRightArm();
+		state.slamPhaseAge = entity.getSlamPhaseAge() + partialTicks;
 		state.canMove = true;
 	}
 
