@@ -48,6 +48,32 @@ public class WatcherTest {
 		helper.succeed();
 	}
 
+	@GameTest(environment = MIDNIGHT, skyAccess = true)
+	public void plantsAndCarpetsInTheEmptyCellsDoNotBlockIt(GameTestHelper helper) {
+		for (int x = 0; x < 5; x++) {
+			helper.setBlock(new BlockPos(x, 0, 2), Blocks.STONE);
+		}
+		buildBody(helper, Blocks.COPPER_BLOCK.weathering().unaffected());
+		BlockPos carpet = new BlockPos(0, 1, 2);
+		helper.setBlock(carpet, Blocks.PALE_MOSS_CARPET);
+		helper.setBlock(new BlockPos(4, 1, 2), Blocks.SHORT_GRASS);
+		helper.setBlock(HEART, Blocks.CREAKING_HEART);
+
+		helper.assertValueEqual(findWatcher(helper).getCopperStage(), WeatheringCopper.WeatherState.UNAFFECTED, "copper stage");
+		helper.assertBlockPresent(Blocks.PALE_MOSS_CARPET, carpet);
+		helper.succeed();
+	}
+
+	@GameTest(environment = MIDNIGHT, skyAccess = true)
+	public void aFullBlockInAnEmptyCellBlocksIt(GameTestHelper helper) {
+		buildBody(helper, Blocks.COPPER_BLOCK.weathering().unaffected());
+		helper.setBlock(new BlockPos(0, TOP, 2), Blocks.STONE);
+		helper.setBlock(HEART, Blocks.CREAKING_HEART);
+
+		helper.assertEntityNotPresent(ModEntities.WATCHER);
+		helper.succeed();
+	}
+
 	@GameTest(environment = NOON, skyAccess = true)
 	public void itDoesNotWakeInDaylight(GameTestHelper helper) {
 		buildBody(helper, Blocks.COPPER_BLOCK.weathering().unaffected());

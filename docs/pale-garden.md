@@ -283,9 +283,12 @@ roughly Elder Guardian tier) with a boss bar.
   (boss-strength slowing). Drops its lens and 2–4 resin clumps.
 - Until its hearts exist (step 5) it can't be hurt, except by commands like `/kill`.
 - The summon is matched like vanilla's golems: a Mixin adds a placement hook to the Creaking Heart
-  (it has none), empty cells must be air, the body's blocks are cleared with break particles, and
-  any pale oak log or wood fills a log cell. "Darkness" means not daytime with open sky above the
-  head; placing the heart in daylight does nothing, so place it again at night.
+  (it has none), the body's blocks are cleared with break particles, and any pale oak log or wood
+  fills a log cell. Unlike the golems, the empty cells don't have to be pure air: anything that
+  isn't a full block (grass, flowers, snow, moss carpets, common in a Pale Garden) may stay and
+  is left alone. "Darkness" means not daytime with open sky above the head; placing the heart in
+  daylight shows "The Watcher only wakes in darkness" above the hotbar, like a bed in daytime, so
+  place it again at night.
 
 **Petrification** (new mechanic, shared with Ruin Sentries)
 - A **meter**, like vanilla freezing in powder snow, not a status effect: milk clears all effects,
