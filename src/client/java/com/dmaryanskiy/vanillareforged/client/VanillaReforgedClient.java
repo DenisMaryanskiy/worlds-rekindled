@@ -6,6 +6,7 @@ import com.dmaryanskiy.vanillareforged.client.sentry.HeartwoodSentryModel;
 import com.dmaryanskiy.vanillareforged.client.sentry.HeartwoodSentryRenderer;
 import com.dmaryanskiy.vanillareforged.client.elderwood.ElderwoodModel;
 import com.dmaryanskiy.vanillareforged.client.elderwood.ElderwoodRenderer;
+import com.dmaryanskiy.vanillareforged.client.elderwood.ElderwoodRootsRenderer;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.rendering.v1.ArmorRenderer;
@@ -24,6 +25,8 @@ public class VanillaReforgedClient implements ClientModInitializer {
 
 		ModelLayerRegistry.registerModelLayer(ElderwoodRenderer.LAYER, ElderwoodModel::createBodyLayer);
 		EntityRendererRegistry.register(ModEntities.ELDERWOOD, ElderwoodRenderer::new);
+		ModelLayerRegistry.registerModelLayer(ElderwoodRootsRenderer.LAYER, ElderwoodRootsRenderer::createLayer);
+		EntityRendererRegistry.register(ModEntities.ELDERWOOD_ROOTS, ElderwoodRootsRenderer::new);
 		EntityRendererRegistry.register(ModEntities.BURNING_RESIN, context -> new ThrownItemRenderer<>(context, 1.5F, true));
 
 		PetrificationOverlay.register();

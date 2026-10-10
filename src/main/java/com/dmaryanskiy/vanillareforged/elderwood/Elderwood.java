@@ -79,6 +79,12 @@ public class Elderwood extends Monster {
 	public static final double RESIN_MIN_RANGE = 6.0;
 	public static final int RESIN_INTERVAL_TICKS = 60;
 	private static final int RESIN_FIRST_TICKS = 20;
+	public static final double ROOT_RANGE = 12.0;
+	public static final int ROOT_INTERVAL_TICKS = 50;
+	private static final int ROOT_FIRST_TICKS = 20;
+	private static final int ROOT_GROUND_SEARCH = 4;
+	public static final int DORMANT_AFTER_TICKS = 600;
+	public static final int HEAL_INTERVAL_TICKS = 100;
 	public static final int STUN_TICKS = 60;
 	public static final int STUN_IMMUNITY_TICKS = 100;
 	public static final float TURN_DEGREES_PER_TICK = 1.5F;
@@ -117,6 +123,8 @@ public class Elderwood extends Monster {
 	private double slamHeight;
 	private int crackCooldown;
 	private int resinCooldown = RESIN_FIRST_TICKS;
+	private int rootCooldown = ROOT_FIRST_TICKS;
+	private int idleTicks;
 	private int stunTicks;
 	private int stunImmunity;
 	private int growAge;
@@ -138,7 +146,8 @@ public class Elderwood extends Monster {
 
 	@Override
 	protected void registerGoals() {
-		this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Player.class, true));
+		// It feels players through its roots, so cover doesn't hide them from it, only from its lens.
+		this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Player.class, false));
 	}
 
 	@Override
@@ -327,8 +336,11 @@ public class Elderwood extends Monster {
 			if (this.getSlamPhase() != SlamPhase.STUCK && this.getTarget() instanceof Player player && this.isWatching(player)) {
 				Petrification.expose(player, this.isCoreOpen() ? CORE_GAZE_RATE : GAZE_RATE);
 				this.tickResin(level, player);
+			} else if (this.getTarget() instanceof Player player) {
+				this.tickRoots(level, player);
 			}
 		}
+		this.tickDormancy();
 		int cracks = Arrays.stream(ElderwoodHeart.values()).mapToInt(this::getCracks).sum();
 		this.bossEvent.setProgress(1.0F - cracks / (float) ElderwoodHeart.TOTAL_CRACKS);
 	}
@@ -387,6 +399,48 @@ public class Elderwood extends Monster {
 			Vec3 push = (away.lengthSqr() < 1.0E-4 ? Vec3.directionFromRotation(0.0F, this.yBodyRot) : away.normalize()).scale(0.2);
 			entity.push(push.x, 0.0, push.z);
 		}
+	}
+
+	/** A player its lens can't see, beside it, behind it or behind cover, gets roots from below. */
+	private void tickRoots(ServerLevel level, Player target) {
+		if (this.isWatching(target) || this.distanceToSqr(target) > ROOT_RANGE * ROOT_RANGE) {
+			return;
+		}
+		if (--this.rootCooldown <= 0) {
+			this.rootCooldown = ROOT_INTERVAL_TICKS;
+			this.raiseRoots(level, target.position());
+		}
+	}
+
+	/** Roots crack the ground at {@code spot}, or just below it, and burst out a moment later. */
+	public void raiseRoots(ServerLevel level, Vec3 spot) {
+		BlockPos.MutableBlockPos pos = BlockPos.containing(spot).mutable();
+		for (int i = 0; i < ROOT_GROUND_SEARCH && level.getBlockState(pos.below()).getCollisionShape(level, pos.below()).isEmpty(); i++) {
+			pos.move(0, -1, 0);
+		}
+		level.addFreshEntity(new ElderwoodRoots(level, this, spot.x, pos.getY(), spot.z));
+	}
+
+	// With nobody near for a while it settles and mends, so walking away resets the fight.
+	private void tickDormancy() {
+		if (this.getTarget() != null) {
+			this.idleTicks = 0;
+			return;
+		}
+		this.idleTicks++;
+		if (this.isDormant() && (this.idleTicks - DORMANT_AFTER_TICKS) % HEAL_INTERVAL_TICKS == 0) {
+			for (ElderwoodHeart heart : ElderwoodHeart.values()) {
+				if (this.getCracks(heart) > 0) {
+					this.setCracks(heart, this.getCracks(heart) - 1);
+					this.playSound(SoundEvents.CREAKING_HEART_IDLE, 1.5F, 0.6F);
+					break;
+				}
+			}
+		}
+	}
+
+	public boolean isDormant() {
+		return this.idleTicks >= DORMANT_AFTER_TICKS;
 	}
 
 	/** At range, with the player in sight, it throws burning resin every few seconds. */

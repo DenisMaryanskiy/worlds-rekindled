@@ -231,10 +231,10 @@ slowing it, done.
 The source of the Creaking Eye, and so of the Pale Mask. A full boss with a boss bar, for
 iron/diamond gear: a huge, rooted tree fought by moving around it.
 
-> **Being reworked.** The first version, the Watcher, is implemented: a 4.6-block walking relative
-> of the Creaking with five hearts on its front. In play it read as a reskinned Warden (the names
-> are close too) and as a mini-boss. This section describes the Elderwood that replaces it. What
-> carries over unchanged is marked "kept"; the rework's steps are under Build order.
+> **Reworked.** The first version, the Watcher, was a 4.6-block walking relative of the Creaking
+> with five hearts on its front. In play it read as a reskinned Warden (the names are close too)
+> and as a mini-boss, so the Elderwood replaced it. What carried over unchanged is marked
+> "kept"; the rework's steps are under Build order. All of this section is implemented.
 
 **Story**
 - Creakings are natural creatures with a prey instinct: under a gaze, they freeze.
@@ -417,7 +417,14 @@ The rework into the Elderwood:
    - soft blocks break within 1.5 blocks of the landing spot, from its level to 3 blocks above
      it, so a wooden roof goes too but the ground it lands on stays. The tag holds logs, planks,
      leaves, dirt, sand, wool and wooden slabs, stairs, fences, gates, doors and trapdoors.
-5. **Roots and dormancy**: the root eruption and falling dormant.
+5. **Roots and dormancy**: the root eruption and falling dormant. Done. Notes:
+   - it no longer needs to see a player to target one: it senses anyone within 32 blocks, turns
+     towards them and raises roots, while the gaze and the resin still need the lens to see them;
+   - roots first come 1 s after the lens loses the player and then every 2.5 s, on the spot where
+     the player stands at that moment. They're their own short-lived entity with a placeholder
+     model of four spikes, and deal **6 damage** with a toss of about 2 blocks (low enough that
+     landing doesn't hurt);
+   - dormant after 30 s without a target; it then mends one crack every 5 s.
 
 Ruin Sentries' petrification and shard drops come with the Ruin.
 
