@@ -12,7 +12,7 @@ public class ElderwoodRenderState extends LivingEntityRenderState {
 	public final boolean[] heartVulnerable = new boolean[ElderwoodHeart.values().length];
 	public boolean coreOpen;
 	public Elderwood.SlamPhase slamPhase = Elderwood.SlamPhase.NONE;
-	public boolean slamRightArm;
+	public boolean slamRightBranch;
 	public float slamPhaseAge;
 	public boolean stunned;
 	public float growth = 1.0F;
