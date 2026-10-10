@@ -14,4 +14,5 @@ public class WatcherRenderState extends CreakingRenderState {
 	public Watcher.SlamPhase slamPhase = Watcher.SlamPhase.NONE;
 	public boolean slamRightArm;
 	public float slamPhaseAge;
+	public boolean stunned;
 }

@@ -351,6 +351,21 @@ roughly Elder Guardian tier) with a boss bar.
   its hearts are much easier to shoot; the petrification meter drains. A short stun immunity
   afterwards prevents chain-stunning. The risk is standing close enough to a burning projectile
   to hit it.
+- Implemented (step 6):
+  - **Burning resin**: while it watches a player more than 6 blocks away it throws a glob of
+    burning resin, the first after 1 s and then every 3 s. It walks about 2.4 blocks a second, so
+    a player who keeps their distance gets shot at and one who stands still gets the slam. A hit
+    deals **5 damage and 5 s of fire**; blocks never catch fire. It has its own look, a
+    molten amber glob with a white-hot core (placeholder texture, an unobtainable item like the
+    fire charge is for fireballs), without vanilla's fire overlay, which would make it look like
+    any fireball.
+  - **Hitting it back**: the resin is in vanilla's `redirectable_projectile` tag, so a melee hit
+    sends it where the player looks, like a ghast's fireball. Hit back into the Watcher it deals
+    no damage but **stuns it for 3 s**; only resin a player hit back does.
+  - **Stunned**: it stands still, doesn't gaze, slam or throw, its lens goes dark and its head
+    drops, and **both forearm hearts glow and can be hit from the front** along with the chest
+    hearts (or the core). This is how a ranged player opens the forearm hearts without baiting a
+    slam. For 5 s afterwards it can't be stunned again.
 - **Cover**: since it's summoned anywhere, the player picks the spot or builds cover beforehand.
 
 **Drops: the craft chain** (as deep as netherite; each step has a meaning)
@@ -368,7 +383,7 @@ textures: amber resin glass in a weathered copper rim.
 Sentry), done; (2) Watcher's Lens, Lens Shard and the new Creaking Eye recipe, done; (3) petrification
 meter, its overlay and the mask's immunity, done; (4) summon pattern and the Watcher entity with its
 gaze, done; (5) body hearts, branch slam and the stuck-arm window, done; (6) burning resin and the reflect
-stun. Ruin Sentries' petrification and shard drops come with the Ruin.
+stun, done. Ruin Sentries' petrification and shard drops come with the Ruin.
 
 ## Parked for later (warrior content and extras)
 

@@ -62,6 +62,11 @@ public class Watcher extends Monster {
 	private static final double SLAM_DISTANCE = 1.8;
 	private static final double SLAM_RADIUS = 2.2;
 	private static final int CRACK_COOLDOWN_TICKS = 10;
+	public static final double RESIN_MIN_RANGE = 6.0;
+	public static final int RESIN_INTERVAL_TICKS = 60;
+	private static final int RESIN_FIRST_TICKS = 20;
+	public static final int STUN_TICKS = 60;
+	public static final int STUN_IMMUNITY_TICKS = 100;
 
 	private static final EntityDataAccessor<Integer> COPPER_STAGE = SynchedEntityData.defineId(Watcher.class,
 			EntityDataSerializers.INT);
@@ -70,6 +75,8 @@ public class Watcher extends Monster {
 	private static final EntityDataAccessor<Integer> SLAM_PHASE = SynchedEntityData.defineId(Watcher.class,
 			EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Boolean> SLAM_RIGHT_ARM = SynchedEntityData.defineId(Watcher.class,
+			EntityDataSerializers.BOOLEAN);
+	private static final EntityDataAccessor<Boolean> STUNNED = SynchedEntityData.defineId(Watcher.class,
 			EntityDataSerializers.BOOLEAN);
 
 	public enum SlamPhase {
@@ -81,6 +88,9 @@ public class Watcher extends Monster {
 	private int slamCooldown;
 	private float slamYaw;
 	private int crackCooldown;
+	private int resinCooldown = RESIN_FIRST_TICKS;
+	private int stunTicks;
+	private int stunImmunity;
 	private final ServerBossEvent bossEvent = new ServerBossEvent(Mth.createInsecureUUID(this.random), this.getDisplayName(),
 			BossEvent.BossBarColor.YELLOW, BossEvent.BossBarOverlay.PROGRESS);
 
@@ -115,6 +125,7 @@ public class Watcher extends Monster {
 		builder.define(HEART_CRACKS, 0);
 		builder.define(SLAM_PHASE, SlamPhase.NONE.ordinal());
 		builder.define(SLAM_RIGHT_ARM, true);
+		builder.define(STUNNED, false);
 	}
 
 	/** The collar's oxidation stage, which its copper plates show. */
@@ -148,12 +159,41 @@ public class Watcher extends Monster {
 		if (this.isDestroyed(heart)) {
 			return false;
 		}
-		boolean stuck = this.getSlamPhase() == SlamPhase.STUCK;
-		if (heart.isArm()) {
-			return stuck && (heart == WatcherHeart.RIGHT_ARM) == this.isSlammingRightArm();
+		// While it's bent over its stuck arm, only that arm's heart is in reach.
+		if (this.getSlamPhase() == SlamPhase.STUCK) {
+			return this.isStuckArm(heart);
 		}
-		// While it's bent over its stuck arm, its chest faces the ground.
-		return !stuck && (heart != WatcherHeart.CORE || this.isCoreOpen());
+		// Its arms only hang still enough to hit while it's stunned.
+		if (heart.isArm()) {
+			return this.isStunned();
+		}
+		return heart != WatcherHeart.CORE || this.isCoreOpen();
+	}
+
+	/** Whether this is the heart of the arm that's planted in the ground right now. */
+	public boolean isStuckArm(WatcherHeart heart) {
+		return heart.isArm() && this.getSlamPhase() == SlamPhase.STUCK
+				&& (heart == WatcherHeart.RIGHT_ARM) == this.isSlammingRightArm();
+	}
+
+	public boolean isStunned() {
+		return this.entityData.get(STUNNED);
+	}
+
+	/**
+	 * Its own resin, hit back at it, stuns it: it stops gazing, turning and attacking, and its arms
+	 * hang with their hearts open. It can't be stunned again right away.
+	 */
+	public void stun() {
+		if (this.isStunned() || this.stunImmunity > 0) {
+			return;
+		}
+		this.entityData.set(STUNNED, true);
+		this.entityData.set(SLAM_PHASE, SlamPhase.NONE.ordinal());
+		this.stunTicks = STUN_TICKS;
+		this.slamYaw = this.yBodyRot;
+		this.getNavigation().stop();
+		this.playSound(SoundEvents.CREAKING_FREEZE, 1.5F, 0.6F);
 	}
 
 	public SlamPhase getSlamPhase() {
@@ -165,7 +205,7 @@ public class Watcher extends Monster {
 	}
 
 	public boolean canStartSlam() {
-		return this.getSlamPhase() == SlamPhase.NONE && this.slamCooldown == 0;
+		return !this.isStunned() && this.getSlamPhase() == SlamPhase.NONE && this.slamCooldown == 0;
 	}
 
 	/** Raises an arm; after the wind-up it strikes the ground in front, where the Watcher faces now. */
@@ -183,10 +223,22 @@ public class Watcher extends Monster {
 	@Override
 	protected void customServerAiStep(ServerLevel level) {
 		super.customServerAiStep(level);
-		this.tickSlam(level);
-		// Bent over its stuck arm, the lens faces the ground.
-		if (this.getSlamPhase() != SlamPhase.STUCK && this.getTarget() instanceof Player player && this.isWatching(player)) {
-			Petrification.expose(player, this.isCoreOpen() ? CORE_GAZE_RATE : GAZE_RATE);
+		if (this.stunImmunity > 0) {
+			this.stunImmunity--;
+		}
+		if (this.isStunned()) {
+			this.holdStill();
+			if (--this.stunTicks <= 0) {
+				this.entityData.set(STUNNED, false);
+				this.stunImmunity = STUN_IMMUNITY_TICKS;
+			}
+		} else {
+			this.tickSlam(level);
+			// Bent over its stuck arm, the lens faces the ground.
+			if (this.getSlamPhase() != SlamPhase.STUCK && this.getTarget() instanceof Player player && this.isWatching(player)) {
+				Petrification.expose(player, this.isCoreOpen() ? CORE_GAZE_RATE : GAZE_RATE);
+				this.tickResin(level, player);
+			}
 		}
 		int cracks = Arrays.stream(WatcherHeart.values()).mapToInt(this::getCracks).sum();
 		this.bossEvent.setProgress(1.0F - cracks / (float) WatcherHeart.TOTAL_CRACKS);
@@ -201,10 +253,7 @@ public class Watcher extends Monster {
 			return;
 		}
 		// The strike lands where it aimed when it raised the arm, so stepping aside dodges it.
-		this.getNavigation().stop();
-		this.setYRot(this.slamYaw);
-		this.yBodyRot = this.slamYaw;
-		this.yHeadRot = this.slamYaw;
+		this.holdStill();
 		this.slamTicks++;
 		if (phase == SlamPhase.WINDUP && this.slamTicks >= SLAM_WINDUP_TICKS) {
 			this.strike(level);
@@ -215,6 +264,31 @@ public class Watcher extends Monster {
 			this.entityData.set(SLAM_RIGHT_ARM, !this.isSlammingRightArm());
 			this.slamCooldown = SLAM_COOLDOWN_TICKS;
 		}
+	}
+
+	private void holdStill() {
+		this.getNavigation().stop();
+		this.setYRot(this.slamYaw);
+		this.yBodyRot = this.slamYaw;
+		this.yHeadRot = this.slamYaw;
+	}
+
+	/** At range, with the player in sight, it throws burning resin every few seconds. */
+	private void tickResin(ServerLevel level, Player target) {
+		if (this.resinCooldown > 0) {
+			this.resinCooldown--;
+		}
+		if (this.resinCooldown > 0 || this.getSlamPhase() != SlamPhase.NONE
+				|| this.distanceToSqr(target) < RESIN_MIN_RANGE * RESIN_MIN_RANGE) {
+			return;
+		}
+		this.resinCooldown = RESIN_INTERVAL_TICKS;
+		Vec3 from = this.getEyePosition();
+		Vec3 direction = target.getEyePosition().subtract(from).normalize();
+		BurningResin resin = new BurningResin(level, this, direction);
+		resin.setPos(from.add(direction.scale(1.5)));
+		level.addFreshEntity(resin);
+		this.playSound(SoundEvents.BLAZE_SHOOT, 1.5F, 0.6F);
 	}
 
 	private void strike(ServerLevel level) {

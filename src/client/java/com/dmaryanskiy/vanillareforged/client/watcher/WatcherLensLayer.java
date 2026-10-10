@@ -9,7 +9,7 @@ import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.Identifier;
 
-/** The lens glows like the Creaking's eyes. */
+/** The lens glows like the Creaking's eyes, and goes dark while the Watcher is stunned. */
 public class WatcherLensLayer extends RenderLayer<WatcherRenderState, WatcherModel> {
 	private final Identifier texture;
 
@@ -21,7 +21,7 @@ public class WatcherLensLayer extends RenderLayer<WatcherRenderState, WatcherMod
 	@Override
 	public void submit(PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int lightCoords,
 			WatcherRenderState state, float yRot, float xRot) {
-		if (!state.isInvisible) {
+		if (!state.isInvisible && !state.stunned) {
 			submitNodeCollector.order(1).submitModel(this.getParentModel(), state, poseStack, RenderTypes.eyes(this.texture),
 					lightCoords, OverlayTexture.NO_OVERLAY, state.outlineColor);
 		}

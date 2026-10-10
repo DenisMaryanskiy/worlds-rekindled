@@ -30,6 +30,9 @@ public final class ModItems {
 			Item::new, new Item.Properties().rarity(Rarity.RARE));
 	public static final Item PALE_MASK = register("pale_mask",
 			Item::new, new Item.Properties().rarity(Rarity.UNCOMMON).humanoidArmor(ModArmorMaterials.PALE_MASK, ArmorType.HELMET));
+	// Not in any creative tab: it only exists as the look of the Watcher's projectile, like the fire charge
+	// is for fireballs.
+	public static final Item BURNING_RESIN = register("burning_resin", Item::new, new Item.Properties());
 	public static final Item HEARTWOOD_SENTRY_SPAWN_EGG = register("heartwood_sentry_spawn_egg",
 			SpawnEggItem::new, new Item.Properties().spawnEgg(ModEntities.HEARTWOOD_SENTRY));
 
