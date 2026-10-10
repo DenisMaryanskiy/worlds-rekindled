@@ -3,6 +3,7 @@ package com.dmaryanskiy.vanillareforged;
 import com.dmaryanskiy.vanillareforged.sentry.HeartwoodSentry;
 import com.dmaryanskiy.vanillareforged.elderwood.BurningResin;
 import com.dmaryanskiy.vanillareforged.elderwood.Elderwood;
+import com.dmaryanskiy.vanillareforged.elderwood.ElderwoodBranchHeart;
 import com.dmaryanskiy.vanillareforged.elderwood.ElderwoodRoots;
 
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
@@ -26,6 +27,10 @@ public final class ModEntities {
 	public static final EntityType<ElderwoodRoots> ELDERWOOD_ROOTS = register("elderwood_roots",
 			EntityType.Builder.<ElderwoodRoots>of(ElderwoodRoots::new, MobCategory.MISC).noLootTable().sized(1.6F, 2.0F)
 					.clientTrackingRange(6).updateInterval(2));
+
+	public static final EntityType<ElderwoodBranchHeart> ELDERWOOD_BRANCH_HEART = register("elderwood_branch_heart",
+			EntityType.Builder.<ElderwoodBranchHeart>of(ElderwoodBranchHeart::new, MobCategory.MISC).noLootTable().noSave().noSummon()
+					.sized(0.9F, 0.9F).clientTrackingRange(10).updateInterval(1));
 
 	private ModEntities() {
 	}

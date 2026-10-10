@@ -9,6 +9,7 @@ import com.dmaryanskiy.vanillareforged.ModItems;
 import com.dmaryanskiy.vanillareforged.petrification.Petrification;
 import com.dmaryanskiy.vanillareforged.elderwood.BurningResin;
 import com.dmaryanskiy.vanillareforged.elderwood.Elderwood;
+import com.dmaryanskiy.vanillareforged.elderwood.ElderwoodBranchHeart;
 import com.dmaryanskiy.vanillareforged.elderwood.ElderwoodHeart;
 import com.dmaryanskiy.vanillareforged.elderwood.ElderwoodRoots;
 import com.dmaryanskiy.vanillareforged.elderwood.ElderwoodSummon;
@@ -20,10 +21,12 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.gametest.framework.GameTestSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.arrow.Arrow;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
@@ -521,6 +524,38 @@ public class ElderwoodTest {
 			helper.assertValueEqual(elderwood.getCracks(ElderwoodHeart.LEFT_BRANCH), 1, "left branch cracks");
 			helper.succeed();
 		});
+	}
+
+	// A stunned tree's branch hearts droop far outside its own box, where an arrow would fly past it.
+	@GameTest(environment = MIDNIGHT, skyAccess = true, maxTicks = 60)
+	public void anArrowCracksAStunnedBranchHeartWhereItHangs(GameTestHelper helper) {
+		Elderwood elderwood = facingSouth(helper.spawn(ModEntities.ELDERWOOD, ELDERWOOD));
+		Player player = helper.makeMockServerPlayer(GameType.SURVIVAL);
+		helper.runAfterDelay(2, () -> {
+			helper.assertValueEqual(branchHeartParts(helper, elderwood).stream().filter(Entity::isPickable).count(), 0L,
+					"branch heart parts open at rest");
+			elderwood.stun();
+		});
+		helper.runAfterDelay(5, () -> {
+			Vec3 heart = ElderwoodHeart.RIGHT_BRANCH.box(elderwood).getCenter();
+			helper.assertTrue(elderwood.getBoundingBox().distanceToSqr(heart) > 4.0, "The drooping heart should hang well outside the trunk");
+			helper.assertValueEqual(branchHeartParts(helper, elderwood).stream().filter(Entity::isPickable).count(), 2L,
+					"branch heart parts open while stunned");
+			Arrow arrow = new Arrow(helper.getLevel(), heart.x, heart.y + 12.0, heart.z, new ItemStack(Items.ARROW), null);
+			arrow.setOwner(player);
+			arrow.setCritArrow(true);
+			arrow.setDeltaMovement(0.0, -3.0, 0.0);
+			helper.getLevel().addFreshEntity(arrow);
+		});
+		helper.succeedWhen(() -> helper.assertValueEqual(elderwood.getCracks(ElderwoodHeart.RIGHT_BRANCH), 1, "right branch cracks"));
+	}
+
+	private static List<ElderwoodBranchHeart> branchHeartParts(GameTestHelper helper, Elderwood elderwood) {
+		// Only where this tree's own branch hearts are: other tests' trees stand close by.
+		AABB right = ElderwoodHeart.RIGHT_BRANCH.box(elderwood);
+		AABB left = ElderwoodHeart.LEFT_BRANCH.box(elderwood);
+		return helper.getLevel().getEntities(ModEntities.ELDERWOOD_BRANCH_HEART, right.minmax(left),
+				part -> part.getBoundingBox().intersects(right) || part.getBoundingBox().intersects(left));
 	}
 
 	@GameTest(environment = MIDNIGHT, maxTicks = Elderwood.STUN_TICKS + 40)

@@ -12,6 +12,7 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.rendering.v1.ArmorRenderer;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.ModelLayerRegistry;
+import net.minecraft.client.renderer.entity.NoopRenderer;
 import net.minecraft.client.renderer.entity.ThrownItemRenderer;
 
 public class VanillaReforgedClient implements ClientModInitializer {
@@ -27,6 +28,7 @@ public class VanillaReforgedClient implements ClientModInitializer {
 		EntityRendererRegistry.register(ModEntities.ELDERWOOD, ElderwoodRenderer::new);
 		ModelLayerRegistry.registerModelLayer(ElderwoodRootsRenderer.LAYER, ElderwoodRootsRenderer::createLayer);
 		EntityRendererRegistry.register(ModEntities.ELDERWOOD_ROOTS, ElderwoodRootsRenderer::new);
+		EntityRendererRegistry.register(ModEntities.ELDERWOOD_BRANCH_HEART, NoopRenderer::new);
 		EntityRendererRegistry.register(ModEntities.BURNING_RESIN, context -> new ThrownItemRenderer<>(context, 1.5F, true));
 
 		PetrificationOverlay.register();

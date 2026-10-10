@@ -400,10 +400,11 @@ The rework into the Elderwood:
 2. **The tree**: the rooted, solid, slowly turning entity at its new size with the placeholder
    tree model, the stump pattern, growing, and the room and darkness messages. Done. Notes:
    - its collision box is the trunk (3 × 3 × 10); the crown and branches are only drawn;
-   - branch hearts hang outside the collision box, so while they're open (planted branch or
-     stun) attacks aimed within 4 blocks of the box count as aimed at the tree. An arrow that
-     misses the heart in that zone bounces off thin air; a part entity per branch heart would
-     fix that if it bothers in play.
+   - branch hearts hang outside the collision box, where neither a crosshair nor an arrow finds
+     the tree, so each has an invisible entity of its own (`elderwood_branch_heart`) that follows
+     it, can only be targeted while its heart is open and passes hits on to the tree. It isn't
+     saved; the tree makes its own again. (The first attempt widened the tree's pick radius,
+     which arrows ignore: a stunned tree's branch hearts couldn't be hit at all.)
 3. **Hearts and gaze**: the seven hearts around the trunk, the gaze cone, and resin and stun
    adjusted to the new body. Done. A trunk heart only opens to a hit that lands on its own side
    of the trunk. The resin leaves from the lens, not the crown: it's only thrown at a player the

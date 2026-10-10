@@ -92,8 +92,7 @@ public class Elderwood extends Monster {
 	public static final int GROW_STAGE_TICKS = 20;
 	public static final int GROW_TICKS = GROW_STAGES * GROW_STAGE_TICKS;
 	private static final float GROW_SNAP_TICKS = 3.0F;
-	// Branch hearts hang well outside the trunk's box; while they're open, attacks aimed there count.
-	private static final float OPEN_BRANCH_PICK_RADIUS = 4.0F;
+	private static final ElderwoodHeart[] BRANCH_HEARTS = {ElderwoodHeart.RIGHT_BRANCH, ElderwoodHeart.LEFT_BRANCH};
 
 	private static final EntityDataAccessor<Integer> COPPER_STAGE = SynchedEntityData.defineId(Elderwood.class,
 			EntityDataSerializers.INT);
@@ -125,6 +124,7 @@ public class Elderwood extends Monster {
 	private int resinCooldown = RESIN_FIRST_TICKS;
 	private int rootCooldown = ROOT_FIRST_TICKS;
 	private int idleTicks;
+	private final ElderwoodBranchHeart[] branchHearts = new ElderwoodBranchHeart[BRANCH_HEARTS.length];
 	private int stunTicks;
 	private int stunImmunity;
 	private int growAge;
@@ -513,6 +513,44 @@ public class Elderwood extends Monster {
 		if (this.crackCooldown > 0) {
 			this.crackCooldown--;
 		}
+		if (this.level() instanceof ServerLevel level) {
+			this.carryBranchHearts(level);
+		}
+	}
+
+	// The branch hearts hang outside its own box, so each has an entity of its own to be hit through.
+	private void carryBranchHearts(ServerLevel level) {
+		for (int i = 0; i < BRANCH_HEARTS.length; i++) {
+			ElderwoodBranchHeart part = this.branchHearts[i];
+			boolean missing = part == null || part.isRemoved();
+			if (missing) {
+				part = new ElderwoodBranchHeart(level, this, BRANCH_HEARTS[i]);
+				this.branchHearts[i] = part;
+			}
+			Vec3 spot = BRANCH_HEARTS[i].box(this).getCenter();
+			part.setPos(spot.x, spot.y - part.getBbHeight() / 2.0, spot.z);
+			if (missing) {
+				level.addFreshEntity(part);
+			}
+		}
+	}
+
+	@Override
+	public void remove(RemovalReason reason) {
+		super.remove(reason);
+		for (ElderwoodBranchHeart part : this.branchHearts) {
+			if (part != null) {
+				part.discard();
+			}
+		}
+	}
+
+	/** A hit that landed on one heart for certain, passed on by a branch heart's own entity. */
+	public boolean hurtHeart(ServerLevel level, ElderwoodHeart heart, DamageSource source, float damage) {
+		if (HeartHit.of(source, damage, false).isEmpty() || this.crackCooldown > 0 || !this.isVulnerable(heart)) {
+			return false;
+		}
+		return this.crack(level, source, heart);
 	}
 
 	/** Ticks since the slam phase last changed, for the client's pose. */
@@ -596,11 +634,6 @@ public class Elderwood extends Monster {
 	@Override
 	protected boolean canRide(Entity vehicle) {
 		return false;
-	}
-
-	@Override
-	public float getPickRadius() {
-		return this.isStunned() || this.getSlamPhase() == SlamPhase.STUCK ? OPEN_BRANCH_PICK_RADIUS : 0.0F;
 	}
 
 	@Override
