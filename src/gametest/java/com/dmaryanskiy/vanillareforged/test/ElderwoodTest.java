@@ -211,11 +211,12 @@ public class ElderwoodTest {
 	}
 
 	@GameTest(environment = MIDNIGHT)
-	public void aWeakSwingDoesNotCrackAHeart(GameTestHelper helper) {
+	public void aQuickSwingCracksAHeartButNotTwiceAtOnce(GameTestHelper helper) {
 		Elderwood elderwood = stillElderwood(helper);
 
-		helper.assertFalse(hit(helper, elderwood, ElderwoodHeart.TRUNK_FRONT, FRONT, 2.0, 0.6F), "A half-charged swing shouldn't crack a heart");
-		helper.assertValueEqual(elderwood.getCracks(ElderwoodHeart.TRUNK_FRONT), 0, "front heart cracks");
+		helper.assertTrue(hit(helper, elderwood, ElderwoodHeart.TRUNK_FRONT, FRONT, 2.0, 0.3F), "A barely charged swing should crack a heart");
+		helper.assertFalse(hit(helper, elderwood, ElderwoodHeart.TRUNK_FRONT, FRONT, 2.0, 0.3F), "A heart cracks at most once per half second");
+		helper.assertValueEqual(elderwood.getCracks(ElderwoodHeart.TRUNK_FRONT), 1, "front heart cracks");
 		helper.succeed();
 	}
 
@@ -642,7 +643,7 @@ public class ElderwoodTest {
 		return elderwood;
 	}
 
-	/** A full-strength sword swing aimed at the heart by a player standing two blocks from it on the given side. */
+	/** A sword swing aimed at the heart by a player standing two blocks from it on the given side. */
 	private static boolean hit(GameTestHelper helper, Elderwood elderwood, ElderwoodHeart heart, Vec3 side) {
 		return hit(helper, elderwood, heart, side, 2.0, 1.0F);
 	}

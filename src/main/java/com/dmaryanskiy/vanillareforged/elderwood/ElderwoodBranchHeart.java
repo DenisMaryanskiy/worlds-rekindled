@@ -67,7 +67,7 @@ public class ElderwoodBranchHeart extends Entity {
 
 	@Override
 	public boolean hurtServer(ServerLevel level, DamageSource source, float damage) {
-		return this.tree != null && this.tree.hurtHeart(level, this.heart, source, damage);
+		return this.tree != null && this.tree.hurtHeart(level, this.heart, source);
 	}
 
 	@Override

@@ -547,17 +547,9 @@ public class Elderwood extends Monster {
 	}
 
 	/** A hit that landed on one heart for certain, passed on by a branch heart's own entity. */
-	public boolean hurtHeart(ServerLevel level, ElderwoodHeart heart, DamageSource source, float damage) {
-		if (!this.isVulnerable(heart)) {
-			return false;
-		}
-		if (HeartHit.of(source, damage, false).isEmpty()) {
-			if (HeartHit.ofWeakSwing(source, damage).isPresent()) {
-				HeartHit.warnWeakSwing(this, source);
-			}
-			return false;
-		}
-		return this.crackCooldown == 0 && this.crack(level, source, heart);
+	public boolean hurtHeart(ServerLevel level, ElderwoodHeart heart, DamageSource source) {
+		return this.isVulnerable(heart) && HeartHit.of(source, false).isPresent() && this.crackCooldown == 0
+				&& this.crack(level, source, heart);
 	}
 
 	/** Ticks since the slam phase last changed, for the client's pose. */
@@ -580,14 +572,7 @@ public class Elderwood extends Monster {
 			return false;
 		}
 		// Only players can hurt it, and only through a heart that's open to them.
-		Optional<HeartHit> hit = HeartHit.of(source, damage, false).map(this::intoTheTrunk);
-		if (hit.isEmpty()) {
-			if (HeartHit.ofWeakSwing(source, damage).map(this::intoTheTrunk).map(this::openHeartOn).isPresent()) {
-				HeartHit.warnWeakSwing(this, source);
-			}
-			return false;
-		}
-		ElderwoodHeart heart = this.openHeartOn(hit.get());
+		ElderwoodHeart heart = HeartHit.of(source, false).map(this::intoTheTrunk).map(this::openHeartOn).orElse(null);
 		return heart != null && this.crackCooldown == 0 && this.crack(level, source, heart);
 	}
 
