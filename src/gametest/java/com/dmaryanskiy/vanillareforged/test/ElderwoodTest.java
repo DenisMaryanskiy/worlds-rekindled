@@ -195,6 +195,30 @@ public class ElderwoodTest {
 		helper.succeed();
 	}
 
+	// Its box doesn't turn with it. Turned 45 degrees, the front heart sits inside the box's corner: the
+	// corner is within the player's reach here, the heart itself just beyond it.
+	@GameTest(environment = MIDNIGHT)
+	public void aSwingAtFullReachCracksAHeartOnATurnedTrunk(GameTestHelper helper) {
+		Elderwood elderwood = stillElderwood(helper);
+		elderwood.setYRot(45.0F);
+		elderwood.setYHeadRot(45.0F);
+		elderwood.setYBodyRot(45.0F);
+		Vec3 outwards = Vec3.directionFromRotation(0.0F, 45.0F);
+
+		helper.assertTrue(hit(helper, elderwood, ElderwoodHeart.TRUNK_FRONT, outwards, 3.6, 1.0F),
+				"A swing that reaches the trunk's box should reach the heart in it");
+		helper.succeed();
+	}
+
+	@GameTest(environment = MIDNIGHT)
+	public void aWeakSwingDoesNotCrackAHeart(GameTestHelper helper) {
+		Elderwood elderwood = stillElderwood(helper);
+
+		helper.assertFalse(hit(helper, elderwood, ElderwoodHeart.TRUNK_FRONT, FRONT, 2.0, 0.6F), "A half-charged swing shouldn't crack a heart");
+		helper.assertValueEqual(elderwood.getCracks(ElderwoodHeart.TRUNK_FRONT), 0, "front heart cracks");
+		helper.succeed();
+	}
+
 	// Facing south, its right is to the west.
 	@GameTest(environment = MIDNIGHT, maxTicks = 80)
 	public void eachTrunkHeartOpensOnlyFromItsOwnSide(GameTestHelper helper) {
@@ -620,14 +644,18 @@ public class ElderwoodTest {
 
 	/** A full-strength sword swing aimed at the heart by a player standing two blocks from it on the given side. */
 	private static boolean hit(GameTestHelper helper, Elderwood elderwood, ElderwoodHeart heart, Vec3 side) {
+		return hit(helper, elderwood, heart, side, 2.0, 1.0F);
+	}
+
+	private static boolean hit(GameTestHelper helper, Elderwood elderwood, ElderwoodHeart heart, Vec3 side, double distance, float strength) {
 		Vec3 target = heart.box(elderwood).getCenter();
-		Vec3 eyes = target.add(side.normalize().scale(2.0));
+		Vec3 eyes = target.add(side.normalize().scale(distance));
 		Player player = helper.makeMockServerPlayer(GameType.SURVIVAL);
 		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.IRON_SWORD));
 		float yaw = (float) Math.toDegrees(Math.atan2(target.z - eyes.z, target.x - eyes.x)) - 90.0F;
 		player.snapTo(eyes.subtract(0.0, player.getEyeHeight(), 0.0), yaw, 0.0F);
 		player.setYHeadRot(yaw);
-		float damage = (float) player.getAttributeValue(Attributes.ATTACK_DAMAGE);
+		float damage = strength * (float) player.getAttributeValue(Attributes.ATTACK_DAMAGE);
 		return elderwood.hurtServer(helper.getLevel(), helper.getLevel().damageSources().playerAttack(player), damage);
 	}
 

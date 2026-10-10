@@ -341,7 +341,10 @@ all around the trunk, so the player has to keep moving between the two.
 - **Hearts**: it can only be hurt through its hearts, each with crack stages like the Sentry's and
   traced the same way (kept: a full-strength sword, a charged arrow or a trident, at most one
   crack per 0.5 s, players only). A glowing heart is one that can be hit right now; a destroyed
-  heart is a dark husk. **Seven hearts, 23 cracks**; the boss bar shows how many are left:
+  heart is a dark husk. A swing that lands on an open heart before the sword has recharged (it
+  needs about 90%, 0.55 s for a sword) used to look like a miss; it now gives a dull knock and
+  "A heart only cracks under a full-strength swing" above the hotbar, on the Sentry too.
+  **Seven hearts, 23 cracks**; the boss bar shows how many are left:
   - **4 trunk hearts** (3 cracks each) at sword height: front, back, left and right. **Always
     open**, each from its own side. The danger is where you have to stand: the front one is in
     the gaze, the others are where the roots strike;

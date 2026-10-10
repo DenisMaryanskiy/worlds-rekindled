@@ -5,6 +5,9 @@ import java.util.Optional;
 import com.dmaryanskiy.vanillareforged.VanillaReforged;
 
 import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
@@ -28,6 +31,7 @@ public record HeartHit(Vec3 from, Vec3 to) {
 	// Player.attack resets the attack strength before the hit lands, so a full-strength swing is told
 	// apart by its damage: below 90% charge it deals at most ~85% of the attack damage attribute.
 	private static final double FULL_STRENGTH_DAMAGE = 0.84;
+	public static final String WEAK_SWING_MESSAGE = "entity.vanillareforged.heart.weak_swing";
 
 	/**
 	 * A player's full-strength sword swing, or their charged arrow or thrown trident. Mobs can't charge
@@ -37,12 +41,9 @@ public record HeartHit(Vec3 from, Vec3 to) {
 		Entity direct = source.getDirectEntity();
 		Entity attacker = source.getEntity();
 		if (direct instanceof Player player && attacker == player) {
-			if (!player.getMainHandItem().is(CRACKING_WEAPONS)
-					|| damage < FULL_STRENGTH_DAMAGE * player.getAttributeValue(Attributes.ATTACK_DAMAGE)) {
-				return Optional.empty();
-			}
-			Vec3 eyes = player.getEyePosition();
-			return Optional.of(new HeartHit(eyes, eyes.add(player.getViewVector(1.0F).scale(player.entityInteractionRange()))));
+			return player.getMainHandItem().is(CRACKING_WEAPONS) && isFullStrength(player, damage)
+					? Optional.of(swingOf(player))
+					: Optional.empty();
 		}
 		if (direct instanceof AbstractArrow arrow) {
 			boolean cracks = attacker instanceof Player
@@ -55,6 +56,39 @@ public record HeartHit(Vec3 from, Vec3 to) {
 			}
 		}
 		return Optional.empty();
+	}
+
+	/**
+	 * A player's swing of a cracking weapon that was too weak to crack anything: the mob can then tell
+	 * them so (see {@link #warnWeakSwing}), since otherwise it looks like a miss.
+	 */
+	public static Optional<HeartHit> ofWeakSwing(DamageSource source, float damage) {
+		return source.getDirectEntity() instanceof Player player && source.getEntity() == player
+				&& player.getMainHandItem().is(CRACKING_WEAPONS) && !isFullStrength(player, damage)
+						? Optional.of(swingOf(player))
+						: Optional.empty();
+	}
+
+	/** A dull knock and a line above the hotbar for a swing that landed on a heart but too weakly. */
+	public static void warnWeakSwing(Entity heartOwner, DamageSource source) {
+		heartOwner.playSound(SoundEvents.WOOD_HIT, 1.0F, 0.5F);
+		if (source.getEntity() instanceof ServerPlayer player && player.connection != null) {
+			player.sendOverlayMessage(Component.translatable(WEAK_SWING_MESSAGE));
+		}
+	}
+
+	private static boolean isFullStrength(Player player, float damage) {
+		return damage >= FULL_STRENGTH_DAMAGE * player.getAttributeValue(Attributes.ATTACK_DAMAGE);
+	}
+
+	private static HeartHit swingOf(Player player) {
+		Vec3 eyes = player.getEyePosition();
+		return new HeartHit(eyes, eyes.add(player.getViewVector(1.0F).scale(player.entityInteractionRange())));
+	}
+
+	/** The same hit carried on for {@code blocks} more, for a heart that sits inside its mob's box. */
+	public HeartHit carriedOn(double blocks) {
+		return new HeartHit(this.from, this.to.add(this.to.subtract(this.from).normalize().scale(blocks)));
 	}
 
 	public boolean passesThrough(AABB box) {
