@@ -8,13 +8,17 @@ import com.dmaryanskiy.vanillareforged.petrification.Petrification;
 import com.dmaryanskiy.vanillareforged.elderwood.BurningResin;
 import com.dmaryanskiy.vanillareforged.elderwood.Elderwood;
 import com.dmaryanskiy.vanillareforged.elderwood.ElderwoodHeart;
+import com.dmaryanskiy.vanillareforged.elderwood.ElderwoodSummon;
 
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.gametest.framework.GameTestSequence;
+import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -30,29 +34,39 @@ public class ElderwoodTest {
 	private static final String NOON = "vanillareforged-test:noon";
 	private static final String MIDNIGHT = "vanillareforged-test:midnight";
 	// The wide tree, top row first, in the x/y plane at z = 2; the heart is placed last.
-	private static final String[] PATTERN = {"~~W~~", "LLCLL", "R~H~R", "~LLL~"};
-	private static final int TOP = 4;
-	private static final BlockPos HEART = new BlockPos(2, TOP - 2, 2);
+	private static final BlockPos LOG = new BlockPos(3, 1, 3);
+	private static final BlockPos HEART = LOG.above(2);
 	private static final Vec3 ELDERWOOD = new Vec3(3.5, 1.0, 2.5);
 	// It faces south (+z), so its front is on its +z side.
 	private static final Vec3 FRONT = new Vec3(0.0, 0.0, 1.0);
 
-	// Sky access removes the test's barrier ceiling, which would cut through the pattern.
-	@GameTest(environment = MIDNIGHT, skyAccess = true)
-	public void placingTheHeartLastAtNightWakesTheElderwood(GameTestHelper helper) {
-		buildBody(helper, Blocks.COPPER_BLOCK.weathering().weathered());
+	// Sky access removes the test's barrier ceiling: the tree needs more room than the test is tall.
+	@GameTest(environment = MIDNIGHT, skyAccess = true, maxTicks = Elderwood.GROW_TICKS + 40)
+	public void placingTheHeartLastAtNightGrowsTheElderwood(GameTestHelper helper) {
+		buildStump(helper, Blocks.COPPER_BLOCK.weathering().weathered());
 		helper.setBlock(HEART, Blocks.CREAKING_HEART);
 
 		Elderwood elderwood = findElderwood(helper);
 		helper.assertValueEqual(elderwood.getCopperStage(), WeatheringCopper.WeatherState.WEATHERED, "copper stage");
-		helper.assertBlockPresent(Blocks.AIR, HEART);
-		helper.assertBlockPresent(Blocks.AIR, new BlockPos(2, TOP, 2));
-		helper.succeed();
+		for (BlockPos pos : new BlockPos[] {HEART, HEART.below(), LOG, LOG.north(), LOG.south(), LOG.east(), LOG.west()}) {
+			helper.assertBlockPresent(Blocks.AIR, pos);
+		}
+		helper.assertTrue(elderwood.isGrowing(), "It should start as a sprout");
+		helper.assertFalse(hit(helper, elderwood, ElderwoodHeart.RIGHT_CHEST, elderwood.getLookAngle()), "It can't be hurt while growing");
+		helper.assertFalse(elderwood.canBeCollidedWith(null), "It isn't solid until it's grown");
+		helper.assertValueEqual(elderwood.getGrowStage(), 1, "size right after waking");
+		helper.runAfterDelay(Elderwood.GROW_STAGE_TICKS + 2, () -> helper.assertValueEqual(elderwood.getGrowStage(), 2, "size after one burst"));
+		helper.runAfterDelay(2 * Elderwood.GROW_STAGE_TICKS + 2,
+				() -> helper.assertValueEqual(elderwood.getGrowStage(), 3, "size after two bursts"));
+		helper.succeedWhen(() -> {
+			helper.assertFalse(elderwood.isGrowing(), "It should finish growing");
+			helper.assertTrue(elderwood.canBeCollidedWith(null), "The grown trunk should be solid");
+		});
 	}
 
 	@GameTest(environment = MIDNIGHT, skyAccess = true)
 	public void waxedCopperKeepsItsStage(GameTestHelper helper) {
-		buildBody(helper, Blocks.COPPER_BLOCK.waxed().oxidized());
+		buildStump(helper, Blocks.COPPER_BLOCK.waxed().oxidized());
 		helper.setBlock(HEART, Blocks.CREAKING_HEART);
 
 		helper.assertValueEqual(findElderwood(helper).getCopperStage(), WeatheringCopper.WeatherState.OXIDIZED, "copper stage");
@@ -60,14 +74,11 @@ public class ElderwoodTest {
 	}
 
 	@GameTest(environment = MIDNIGHT, skyAccess = true)
-	public void plantsAndCarpetsInTheEmptyCellsDoNotBlockIt(GameTestHelper helper) {
-		for (int x = 0; x < 5; x++) {
-			helper.setBlock(new BlockPos(x, 0, 2), Blocks.STONE);
-		}
-		buildBody(helper, Blocks.COPPER_BLOCK.weathering().unaffected());
-		BlockPos carpet = new BlockPos(0, 1, 2);
+	public void plantsAndCarpetsAroundTheStumpDoNotBlockIt(GameTestHelper helper) {
+		buildStump(helper, Blocks.COPPER_BLOCK.weathering().unaffected());
+		BlockPos carpet = LOG.offset(2, 0, 2);
 		helper.setBlock(carpet, Blocks.PALE_MOSS_CARPET);
-		helper.setBlock(new BlockPos(4, 1, 2), Blocks.SHORT_GRASS);
+		helper.setBlock(LOG.offset(-1, 0, -1), Blocks.SHORT_GRASS);
 		helper.setBlock(HEART, Blocks.CREAKING_HEART);
 
 		helper.assertValueEqual(findElderwood(helper).getCopperStage(), WeatheringCopper.WeatherState.UNAFFECTED, "copper stage");
@@ -76,18 +87,20 @@ public class ElderwoodTest {
 	}
 
 	@GameTest(environment = MIDNIGHT, skyAccess = true)
-	public void aFullBlockInAnEmptyCellBlocksIt(GameTestHelper helper) {
-		buildBody(helper, Blocks.COPPER_BLOCK.weathering().unaffected());
-		helper.setBlock(new BlockPos(0, TOP, 2), Blocks.STONE);
+	public void aFullBlockInItsWayLeavesTheStumpAsItIs(GameTestHelper helper) {
+		buildStump(helper, Blocks.COPPER_BLOCK.weathering().unaffected());
+		helper.setBlock(LOG.offset(2, ElderwoodSummon.ROOM_HEIGHT - 1, -2), Blocks.STONE);
 		helper.setBlock(HEART, Blocks.CREAKING_HEART);
 
 		helper.assertEntityNotPresent(ModEntities.ELDERWOOD);
+		helper.assertBlockPresent(Blocks.CREAKING_HEART, HEART);
+		helper.assertBlockPresent(Blocks.RESIN_BLOCK, LOG.north());
 		helper.succeed();
 	}
 
 	@GameTest(environment = NOON, skyAccess = true)
 	public void itDoesNotWakeInDaylight(GameTestHelper helper) {
-		buildBody(helper, Blocks.COPPER_BLOCK.weathering().unaffected());
+		buildStump(helper, Blocks.COPPER_BLOCK.weathering().unaffected());
 		helper.setBlock(HEART, Blocks.CREAKING_HEART);
 
 		helper.assertEntityNotPresent(ModEntities.ELDERWOOD);
@@ -96,13 +109,43 @@ public class ElderwoodTest {
 	}
 
 	@GameTest(environment = MIDNIGHT, skyAccess = true)
-	public void anIncompleteBodyStaysAsleep(GameTestHelper helper) {
-		buildBody(helper, Blocks.COPPER_BLOCK.weathering().unaffected());
-		helper.setBlock(new BlockPos(0, TOP - 2, 2), Blocks.AIR);
+	public void aStumpMissingARootStaysAsleep(GameTestHelper helper) {
+		buildStump(helper, Blocks.COPPER_BLOCK.weathering().unaffected());
+		helper.setBlock(LOG.east(), Blocks.AIR);
 		helper.setBlock(HEART, Blocks.CREAKING_HEART);
 
 		helper.assertEntityNotPresent(ModEntities.ELDERWOOD);
 		helper.succeed();
+	}
+
+	@GameTest(environment = MIDNIGHT)
+	public void nothingMovesItFromItsSpot(GameTestHelper helper) {
+		Elderwood elderwood = stillElderwood(helper);
+		Vec3 spot = elderwood.position();
+
+		elderwood.move(MoverType.SELF, new Vec3(1.0, 0.0, 1.0));
+		elderwood.move(MoverType.PISTON, new Vec3(1.0, 0.0, 0.0));
+
+		helper.assertValueEqual(elderwood.getX(), spot.x, "x after being moved");
+		helper.assertValueEqual(elderwood.getZ(), spot.z, "z after being moved");
+		helper.assertFalse(elderwood.isPushable(), "It shouldn't be pushable");
+		helper.succeed();
+	}
+
+	@GameTest(environment = MIDNIGHT, maxTicks = 40)
+	public void itTurnsSlowlyTowardsItsTarget(GameTestHelper helper) {
+		Elderwood elderwood = facingSouth(helper.spawn(ModEntities.ELDERWOOD, ELDERWOOD));
+		// Straight behind it, out of slam reach.
+		Player player = helper.makeMockServerPlayer(GameType.SURVIVAL);
+		player.snapTo(helper.absoluteVec(ELDERWOOD.add(0.5, 0.0, -7.0)), 0.0F, 0.0F);
+		elderwood.setTarget(player);
+
+		helper.runAfterDelay(20, () -> {
+			float turned = Math.abs(Mth.degreesDifference(0.0F, elderwood.yBodyRot));
+			helper.assertTrue(turned > 10.0F, "It should be turning towards the player, turned " + turned);
+			helper.assertTrue(turned <= 20 * Elderwood.TURN_DEGREES_PER_TICK + 0.5F, "It should turn slowly, turned " + turned);
+			helper.succeed();
+		});
 	}
 
 	@GameTest(environment = MIDNIGHT, maxTicks = 40)
@@ -173,7 +216,7 @@ public class ElderwoodTest {
 
 	// The Elderwood needs its AI for the slam to run, so these start it right after turning it south.
 	@GameTest(environment = MIDNIGHT, maxTicks = 60)
-	public void theStuckArmExposesItsHeartAndHidesTheChest(GameTestHelper helper) {
+	public void thePlantedBranchBringsItsHeartWithinReach(GameTestHelper helper) {
 		Elderwood elderwood = facingSouth(helper.spawn(ModEntities.ELDERWOOD, ELDERWOOD));
 		boolean rightArm = elderwood.isSlammingRightArm();
 		ElderwoodHeart arm = rightArm ? ElderwoodHeart.RIGHT_ARM : ElderwoodHeart.LEFT_ARM;
@@ -182,7 +225,7 @@ public class ElderwoodTest {
 		helper.startSequence()
 				.thenWaitUntil(() -> helper.assertTrue(elderwood.getSlamPhase() == Elderwood.SlamPhase.STUCK, "arm stuck"))
 				.thenExecute(() -> {
-					helper.assertFalse(hit(helper, elderwood, ElderwoodHeart.RIGHT_CHEST, FRONT), "Bent over, the chest can't be hit");
+					helper.assertTrue(arm.box(elderwood).getCenter().y - elderwood.getY() < 2.0, "The planted branch's heart should be low");
 					helper.assertTrue(hit(helper, elderwood, arm, new Vec3(rightArm ? -1.0 : 1.0, 0.0, 0.0)),
 							"The stuck arm's heart should be open, from the side too");
 					helper.assertValueEqual(elderwood.getCracks(arm), 1, "arm cracks");
@@ -216,7 +259,7 @@ public class ElderwoodTest {
 		Elderwood elderwood = facingSouth(helper.spawn(ModEntities.ELDERWOOD, ELDERWOOD));
 		// A plain mock player: a mock ServerPlayer has no connection, which taking damage needs.
 		Player player = helper.makeMockPlayer(GameType.SURVIVAL);
-		player.snapTo(helper.absoluteVec(ELDERWOOD.add(0.0, 0.0, 1.8)), 0.0F, 0.0F);
+		player.snapTo(helper.absoluteVec(ELDERWOOD.add(0.0, 0.0, Elderwood.SLAM_DISTANCE)), 0.0F, 0.0F);
 		helper.getLevel().addFreshEntity(player);
 		Petrification.expose(player, Petrification.FULL);
 		elderwood.startSlam();
@@ -235,7 +278,7 @@ public class ElderwoodTest {
 	public void steppingOutOfTheSlamDodgesIt(GameTestHelper helper) {
 		Elderwood elderwood = facingSouth(helper.spawn(ModEntities.ELDERWOOD, ELDERWOOD));
 		Player player = helper.makeMockPlayer(GameType.SURVIVAL);
-		player.snapTo(helper.absoluteVec(ELDERWOOD.add(-3.0, 0.0, 1.8)), 0.0F, 0.0F);
+		player.snapTo(helper.absoluteVec(ELDERWOOD.add(-3.0, 0.0, Elderwood.SLAM_DISTANCE)), 0.0F, 0.0F);
 		helper.getLevel().addFreshEntity(player);
 		elderwood.startSlam();
 
@@ -408,20 +451,18 @@ public class ElderwoodTest {
 		return elderwood.hurtServer(helper.getLevel(), helper.getLevel().damageSources().playerAttack(player), damage);
 	}
 
-	private static void buildBody(GameTestHelper helper, Block copper) {
-		for (int row = 0; row < PATTERN.length; row++) {
-			for (int x = 0; x < 5; x++) {
-				Block block = switch (PATTERN[row].charAt(x)) {
-					case 'W', 'L' -> Blocks.PALE_OAK_LOG;
-					case 'C' -> copper;
-					case 'R' -> Blocks.RESIN_BLOCK;
-					default -> null;
-				};
-				if (block != null) {
-					helper.setBlock(new BlockPos(x, TOP - row, 2), block);
-				}
+	/** The stump without its heart, on a stone floor for the tree to stand on. */
+	private static void buildStump(GameTestHelper helper, Block copper) {
+		for (int x = -2; x <= 2; x++) {
+			for (int z = -2; z <= 2; z++) {
+				helper.setBlock(LOG.offset(x, -1, z), Blocks.STONE);
 			}
 		}
+		helper.setBlock(LOG, Blocks.PALE_OAK_LOG);
+		for (Direction side : Direction.Plane.HORIZONTAL) {
+			helper.setBlock(LOG.relative(side), Blocks.RESIN_BLOCK);
+		}
+		helper.setBlock(LOG.above(), copper);
 	}
 
 	private static Elderwood findElderwood(GameTestHelper helper) {

@@ -269,9 +269,10 @@ iron/diamond gear: a huge, rooted tree fought by moving around it.
 - **Any copper block works, and it shows on the Elderwood** (kept): copper, exposed, weathered or
   oxidized, waxed or not. The woken tree's bands and plates take the collar's oxidation stage and
   keep it for the whole fight.
-- **It grows** over about 3 s, like a Warden digging out: the stump's blocks break and the trunk
-  rises. While growing it can't be hurt and doesn't attack. It faces the player who placed the
-  heart.
+- **It grows in three bursts** over 3 s, not smoothly: the stump's blocks break and a sprout a
+  third of its size stands in their place, then twice a second later it snaps to the next size
+  in a burst of wood splinters with a crack and a creak, reaching full size on the third. While
+  growing it can't be hurt and doesn't attack. It faces the player who placed the heart.
 - **Room to grow**: about 5 × 5 blocks around the stump and 10 up. Anything that isn't a full
   block (grass, flowers, snow, moss carpets) may stay and is left alone, as in the Watcher's
   pattern. If full blocks are in the way nothing is destroyed; the heart stays a block and the
@@ -283,9 +284,10 @@ iron/diamond gear: a huge, rooted tree fought by moving around it.
 
 **The woken Elderwood**
 - **An old pale oak about 10 blocks tall**: a thick trunk about 3 blocks across, spreading roots,
-  and a crown of bare branches and twigs with hanging moss, about 5 blocks wide in all. Placeholder
-  model and textures built from boxes in code; the part names are a contract so an artist can
-  replace the look later without touching the fight.
+  and a crown of bare branches and twigs with hanging moss, about 7 blocks wide at the top.
+  Placeholder model and textures built from boxes (generated from one spec, so the geometry and
+  the UVs agree); the part names are a contract so an artist can replace the look later without
+  touching the fight.
 - **Metal everywhere**, so it reads as the builders' work: copper bands around the trunk, riveted
   plates over old wounds, a collar holding the lens in a hollow about 4 blocks up, braces on the
   two main branches and a plate over the core. Four texture variants, one per oxidation stage.
@@ -396,7 +398,15 @@ The rework into the Elderwood:
    so old ids aren't migrated: Watcher items in existing test worlds disappear. Done: the code
    now calls the old walking body the Elderwood until step 2 replaces it.
 2. **The tree**: the rooted, solid, slowly turning entity at its new size with the placeholder
-   tree model, the stump pattern, growing, and the room and darkness messages.
+   tree model, the stump pattern, growing, and the room and darkness messages. Done. Notes:
+   - its collision box is the trunk (3 × 3 × 10); the crown and branches are only drawn;
+   - until steps 3 and 4 it keeps the Watcher's five hearts on the new body (two low on the
+     trunk's front, one on each main branch, the core under the lens), its all-round gaze and
+     its slam, which for now only starts at a player within 40° of straight ahead;
+   - branch hearts hang outside the collision box, so while they're open (planted branch or
+     stun) attacks aimed within 4 blocks of the box count as aimed at the tree. An arrow that
+     misses the heart in that zone bounces off thin air; a part entity per branch heart would
+     fix that if it bothers in play.
 3. **Hearts and gaze**: the seven hearts around the trunk, the gaze cone, and resin and stun
    adjusted to the new body.
 4. **Branch slam**: the longer slam, the planted branch bringing its heart down, and smashing

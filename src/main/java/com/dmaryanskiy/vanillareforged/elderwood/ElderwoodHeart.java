@@ -6,27 +6,32 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * The hearts on the Elderwood's body, its only weak points. Each is a box at a fixed spot relative to
- * the body (blocks to its right, up from its feet, in front of its center):
+ * The hearts on the Elderwood, its only weak points. Each is a box at a fixed spot relative to the
+ * tree (blocks to its right, up from the ground, in front of the trunk's center):
  * <ul>
- * <li>the chest hearts can always be hit, from the front;</li>
- * <li>an arm heart while that arm is stuck in the ground after a slam, from any side (the box then
- * sits where the planted forearm is), or from the front on the hanging arm while it's stunned;</li>
+ * <li>the chest hearts, low on the trunk, can always be hit, from the front;</li>
+ * <li>a branch ("arm") heart is a band around its main branch, so it moves with the branch: far
+ * overhead at rest, lower while the stunned tree droops, and near the ground while the branch is
+ * planted after a slam. It can be hit from any side whenever it's open;</li>
  * <li>the core only once every other heart is destroyed, from the front.</li>
  * </ul>
  */
 public enum ElderwoodHeart {
-	RIGHT_CHEST(3, 0.35, 3.06, 0.39, 0.5),
-	LEFT_CHEST(3, -0.35, 3.06, 0.39, 0.5),
-	RIGHT_ARM(3, 0.92, 2.1, 0.22, 0.6),
-	LEFT_ARM(3, -0.92, 2.1, 0.22, 0.6),
-	CORE(5, 0.0, 2.55, 0.39, 0.5);
+	RIGHT_CHEST(3, 0.625, 1.56, 1.5, 0.7),
+	LEFT_CHEST(3, -0.625, 1.56, 1.5, 0.7),
+	RIGHT_ARM(3, 1.25, 4.5, 0.0, 0.9),
+	LEFT_ARM(3, -1.25, 4.5, 0.0, 0.9),
+	CORE(5, 0.0, 2.94, 1.28, 0.9);
 
 	public static final int TOTAL_CRACKS = 17;
 	private static final int BITS = 3;
-	private static final double PLANTED_UP = 0.85;
-	private static final double PLANTED_FORWARD = 1.64;
-	private static final double PLANTED_SIZE = 0.7;
+	// A branch heart sits this far along its branch from the pivot (the arm hearts' spot above), in
+	// the direction (right, up, forward) the right branch points; the left one mirrors it. These
+	// follow the poses in the client's ElderwoodModel.
+	private static final double ALONG_BRANCH = 4.03;
+	private static final Vec3 BRANCH_AT_REST = new Vec3(0.423, 0.906, 0.0);
+	private static final Vec3 BRANCH_STUNNED = new Vec3(0.940, 0.342, 0.0);
+	private static final Vec3 BRANCH_PLANTED = new Vec3(-0.214, -0.771, 0.600);
 
 	private final int maxCracks;
 	private final double right;
@@ -53,17 +58,17 @@ public enum ElderwoodHeart {
 	public AABB box(Elderwood elderwood) {
 		Vec3 facing = facing(elderwood);
 		Vec3 toRight = new Vec3(-facing.z, 0.0, facing.x);
-		boolean planted = elderwood.isStuckArm(this);
-		Vec3 center = elderwood.position()
-				.add(0.0, planted ? PLANTED_UP : this.up, 0.0)
-				.add(facing.scale(planted ? PLANTED_FORWARD : this.forward))
-				.add(toRight.scale(this.right));
-		double boxSize = planted ? PLANTED_SIZE : this.size;
-		return AABB.ofSize(center, boxSize, boxSize, boxSize);
+		Vec3 spot = new Vec3(this.right, this.up, this.forward);
+		if (this.isArm()) {
+			Vec3 branch = elderwood.isStuckArm(this) ? BRANCH_PLANTED : elderwood.isStunned() ? BRANCH_STUNNED : BRANCH_AT_REST;
+			spot = spot.add(branch.multiply(Math.signum(this.right), 1.0, 1.0).scale(ALONG_BRANCH));
+		}
+		Vec3 center = elderwood.position().add(0.0, spot.y, 0.0).add(facing.scale(spot.z)).add(toRight.scale(spot.x));
+		return AABB.ofSize(center, this.size, this.size, this.size);
 	}
 
 	public boolean isHitBy(Elderwood elderwood, HeartHit hit) {
-		return (elderwood.isStuckArm(this) || hit.comesFromTheFrontOf(facing(elderwood))) && hit.passesThrough(this.box(elderwood));
+		return (this.isArm() || hit.comesFromTheFrontOf(facing(elderwood))) && hit.passesThrough(this.box(elderwood));
 	}
 
 	/** Cracks of every heart packed into one synced number, {@value #BITS} bits each. */
