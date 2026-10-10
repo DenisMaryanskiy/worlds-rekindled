@@ -3,6 +3,7 @@ package com.dmaryanskiy.vanillareforged;
 import com.dmaryanskiy.vanillareforged.sentry.HeartwoodSentry;
 import com.dmaryanskiy.vanillareforged.elderwood.BurningResin;
 import com.dmaryanskiy.vanillareforged.elderwood.Elderwood;
+import com.dmaryanskiy.vanillareforged.elderwood.ElderwoodRoots;
 
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.minecraft.core.Registry;
@@ -21,6 +22,10 @@ public final class ModEntities {
 	public static final EntityType<BurningResin> BURNING_RESIN = register("burning_resin",
 			EntityType.Builder.<BurningResin>of(BurningResin::new, MobCategory.MISC).noLootTable().sized(0.5F, 0.5F)
 					.clientTrackingRange(4).updateInterval(10));
+
+	public static final EntityType<ElderwoodRoots> ELDERWOOD_ROOTS = register("elderwood_roots",
+			EntityType.Builder.<ElderwoodRoots>of(ElderwoodRoots::new, MobCategory.MISC).noLootTable().sized(1.6F, 2.0F)
+					.clientTrackingRange(6).updateInterval(2));
 
 	private ModEntities() {
 	}

@@ -10,6 +10,7 @@ import com.dmaryanskiy.vanillareforged.petrification.Petrification;
 import com.dmaryanskiy.vanillareforged.elderwood.BurningResin;
 import com.dmaryanskiy.vanillareforged.elderwood.Elderwood;
 import com.dmaryanskiy.vanillareforged.elderwood.ElderwoodHeart;
+import com.dmaryanskiy.vanillareforged.elderwood.ElderwoodRoots;
 import com.dmaryanskiy.vanillareforged.elderwood.ElderwoodSummon;
 
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
@@ -355,6 +356,65 @@ public class ElderwoodTest {
 					helper.assertItemEntityPresent(Items.OAK_PLANKS);
 				})
 				.thenSucceed();
+	}
+
+	@GameTest(environment = MIDNIGHT, maxTicks = ElderwoodRoots.LIFE_TICKS + 20)
+	public void rootsHurtWhoeverStillStandsOnTheCrackedGround(GameTestHelper helper) {
+		Elderwood elderwood = stillElderwood(helper);
+		Player caught = plainPlayer(helper, ELDERWOOD.add(-2.5, 0.0, 1.0));
+		Player away = plainPlayer(helper, ELDERWOOD.add(-2.5, 0.0, 4.5));
+		elderwood.raiseRoots(helper.getLevel(), caught.position());
+
+		helper.runAfterDelay(ElderwoodRoots.WARNING_TICKS - 2,
+				() -> helper.assertValueEqual(caught.getHealth(), caught.getMaxHealth(), "health while the ground only cracks"));
+		helper.startSequence()
+				.thenWaitUntil(() -> helper.assertEntityNotPresent(ModEntities.ELDERWOOD_ROOTS))
+				.thenExecute(() -> {
+					helper.assertValueEqual(caught.getHealth(), caught.getMaxHealth() - ElderwoodRoots.DAMAGE, "health after the roots");
+					helper.assertValueEqual(away.getHealth(), away.getMaxHealth(), "health away from the roots");
+				})
+				.thenSucceed();
+	}
+
+	// Facing south, a player to its north-west is well outside what the lens sees.
+	@GameTest(environment = MIDNIGHT, maxTicks = 40)
+	public void itRaisesRootsUnderAPlayerItsLensCannotSee(GameTestHelper helper) {
+		Elderwood elderwood = facingSouth(helper.spawn(ModEntities.ELDERWOOD, ELDERWOOD));
+		Player player = helper.makeMockServerPlayer(GameType.SURVIVAL);
+		player.snapTo(helper.absoluteVec(ELDERWOOD.add(-3.0, 0.0, -1.5)), 0.0F, 0.0F);
+		elderwood.setTarget(player);
+
+		helper.succeedWhen(() -> helper.assertEntityPresent(ModEntities.ELDERWOOD_ROOTS));
+	}
+
+	@GameTest(environment = MIDNIGHT, maxTicks = 60)
+	public void itRaisesNoRootsUnderAPlayerItWatches(GameTestHelper helper) {
+		Elderwood elderwood = facingSouth(helper.spawn(ModEntities.ELDERWOOD, ELDERWOOD));
+		Player player = helper.makeMockServerPlayer(GameType.SURVIVAL);
+		player.snapTo(helper.absoluteVec(ELDERWOOD.add(0.0, 0.0, 5.0)), 0.0F, 0.0F);
+		elderwood.setTarget(player);
+
+		helper.runAfterDelay(50, () -> {
+			helper.assertEntityNotPresent(ModEntities.ELDERWOOD_ROOTS);
+			helper.succeed();
+		});
+	}
+
+	@GameTest(environment = MIDNIGHT, maxTicks = Elderwood.DORMANT_AFTER_TICKS + 2 * Elderwood.HEAL_INTERVAL_TICKS + 40)
+	public void leftAloneItFallsDormantAndItsHeartsMend(GameTestHelper helper) {
+		Elderwood elderwood = facingSouth(helper.spawn(ModEntities.ELDERWOOD, ELDERWOOD));
+		elderwood.setCracks(ElderwoodHeart.TRUNK_BACK, ElderwoodHeart.TRUNK_BACK.maxCracks());
+
+		helper.runAfterDelay(Elderwood.DORMANT_AFTER_TICKS - 20, () -> {
+			helper.assertFalse(elderwood.isDormant(), "It shouldn't fall dormant so soon");
+			helper.assertTrue(elderwood.isDestroyed(ElderwoodHeart.TRUNK_BACK), "Its hearts shouldn't mend before it's dormant");
+		});
+		helper.runAfterDelay(Elderwood.DORMANT_AFTER_TICKS + Elderwood.HEAL_INTERVAL_TICKS + 20, () -> {
+			helper.assertTrue(elderwood.isDormant(), "It should be dormant by now");
+			helper.assertValueEqual(elderwood.getCracks(ElderwoodHeart.TRUNK_BACK), ElderwoodHeart.TRUNK_BACK.maxCracks() - 2,
+					"cracks after two mends");
+			helper.succeed();
+		});
 	}
 
 	@GameTest(environment = MIDNIGHT, maxTicks = 60)
