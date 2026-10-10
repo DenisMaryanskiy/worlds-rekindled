@@ -150,10 +150,10 @@ slowing it, done.
   L   L
   ```
 
-- **Creaking Eye** (rare ingredient): crafted from a **Watcher's Lens** set in resin, see
-  [The Watcher](#5-the-watcher-boss). The mask's durability and resin repair stay as they are: the
-  mask is strong, so each one costs a boss fight.
-- **Watcher's Gaze**: the **hostile** mob in the crosshair within ~16 blocks gets Slowness while the
+- **Creaking Eye** (rare ingredient): crafted from an **Elderwood Lens** set in resin, see
+  [The Elderwood](#5-the-elderwood-boss). The mask's durability and resin repair stay as they are:
+  the mask is strong, so each one costs a boss fight.
+- **Elderwood's Gaze**: the **hostile** mob in the crosshair within ~16 blocks gets Slowness while the
   gaze is held. Costs **1 durability per second** of slowing.
 - Bosses (`#vanillareforged:gaze_resistant`: Wither, Warden, Elder Guardian) get a weaker effect:
   Slowness I plus a drag on their horizontal velocity (x0.85 per tick). Main target: Wither phase 2
@@ -166,7 +166,7 @@ slowing it, done.
   the wearer; looking at your own guard costs no durability. Ruin Sentries still see and attack
   the wearer; the gaze only slows them.
 - **Immune to petrification**: the wearer looks through the same lens,
-  so the Watcher's and Ruin Sentries' petrifying gaze doesn't take hold. Blocking it costs
+  so the Elderwood's and Ruin Sentries' petrifying gaze doesn't take hold. Blocking it costs
   **1 durability per second** of being watched, like the mask's own gaze, so the mask makes boss
   farming easier without making it free.
 - **Passive: hidden from Creakings.** Vanilla Creakings don't target the wearer (the mask makes
@@ -174,7 +174,7 @@ slowing it, done.
   Implemented with a Mixin on `Creaking#canAttack` (no Fabric hook exists). Side effects: the
   wearer's own gaze no longer freezes Creakings that ignore them (vanilla's freeze check uses the
   same `canAttack`), and a reveal is per Creaking and isn't saved, so a reloaded Creaking forgets.
-- **Build order**: (1) Creaking Eye + wearable mask with recipe, done; (2) Watcher's Gaze, done;
+- **Build order**: (1) Creaking Eye + wearable mask with recipe, done; (2) Elderwood's Gaze, done;
   (3) hidden from Creakings, done.
 
 ### 4. Pale Ruin (structure)
@@ -202,20 +202,20 @@ slowing it, done.
     during the day, since at night the Sentries are active again. Number per structure: TODO, decided when the structure is built.
 - **Look**: a plain Creaking body (no pumpkin) with its heart visible in the chest. The pumpkin
   marks a player's own, peaceful Sentry; a bare Creaking with a glowing heart is a Ruin guard.
-- **Story**: the ancient builders' simpler work on the same idea as the Watcher: Creakings with an
-  isolated heart and a **shard of the Watcher's lens** in the eye, bound to guard. The Watcher's
+- **Story**: the ancient builders' simpler work on the same idea as the Elderwood: Creakings with an
+  isolated heart and a **shard of the Elderwood's lens** in the eye, bound to guard. The Elderwood's
   gaze doesn't affect them (they share its heart); the Pale Mask still slows them.
-- **A weaker petrifying gaze** (see [Petrification](#5-the-watcher-boss)): it fills the meter more
-  slowly than the Watcher's.
-- **Drops**: resin and **1–2 Watcher's Lens Shards**. **9 shards craft a Watcher's Lens**, so one
+- **A weaker petrifying gaze** (see [Petrification](#5-the-elderwood-boss)): it fills the meter more
+  slowly than the Elderwood's.
+- **Drops**: resin and **1–2 Elderwood Lens Shards**. **9 shards craft an Elderwood Lens**, so one
   Ruin gives roughly one lens. Ruin Sentries don't respawn: the Ruin is a one-time source found by
-  exploring, the Watcher is the repeatable farm.
+  exploring, the Elderwood is the repeatable farm.
 - Ruin Sentries are hostile to players and ignore other mobs, same as the vanilla Creaking (which
   only targets players). Two ways to beat them:
   - aim: bow or trident at the heart;
   - melee: Pale Mask to slow them, then a sword on the heart.
 - **Archaeology**: suspicious gravel or mud holds:
-  - **Watcher armor trim** smithing template (rare; duplicated with 7 diamonds + a block of resin).
+  - **Elderwood armor trim** smithing template (rare; duplicated with 7 diamonds + a block of resin).
     Implemented, but only obtainable in creative until the Ruin's loot exists. Its textures are
     placeholders to be replaced with final art;
   - pottery sherds: **Gaze** (eye) and **Creaking** (tree figure with a heart). Implemented with
@@ -226,87 +226,89 @@ slowing it, done.
   hostiles. That's intended; Ruin Sentries ignore other mobs, so they coexist.
 - Mostly data-driven: structure NBT, loot tables, worldgen JSON.
 
-### 5. The Watcher (boss)
+### 5. The Elderwood (boss)
 
-The source of the Creaking Eye, and so of the Pale Mask. A mid-game boss (iron/diamond gear,
-roughly Elder Guardian tier) with a boss bar.
+The source of the Creaking Eye, and so of the Pale Mask. A full boss with a boss bar, for
+iron/diamond gear: a huge, rooted tree fought by moving around it.
+
+> **Being reworked.** The first version, the Watcher, is implemented: a 4.6-block walking relative
+> of the Creaking with five hearts on its front. In play it read as a reskinned Warden (the names
+> are close too) and as a mini-boss. This section describes the Elderwood that replaces it. What
+> carries over unchanged is marked "kept"; the rework's steps are under Build order.
 
 **Story**
 - Creakings are natural creatures with a prey instinct: under a gaze, they freeze.
-- **The Watcher** is the oldest of them, a natural Creaking grown huge over ages. An ancient
-  civilization couldn't destroy it, so they **improved it to control it**: they fitted it with
-  copper braces and resin joints and set a **lens** in its eye socket that turns the freeze
-  outward. Its gaze now freezes others.
-- To keep it under control they **cut out its heart**. Without one it sleeps, and over the ages it
-  has come to look like a dead pale oak held together by old copper.
-- The player wakes it by **putting a Creaking Heart back in**: the same craft as the Heartwood
+- **The Elderwood** is the oldest pale oak, the tree the first Creaking Heart grew in. Over ages
+  the heart woke the whole tree. An ancient civilization couldn't destroy it, so they **improved
+  it to control it**: they banded its trunk with copper, riveted plates over its wounds and set a
+  **lens** in a hollow, which turns the Creakings' freeze outward. Its gaze now freezes others.
+- To keep it under control they **cut out its hearts and felled it** to a stump. A stump with its
+  copper collar still on it is all that's left, and the builders' method still works on any pale
+  oak: the player wakes one by **putting a Creaking Heart back**, the same craft as the Heartwood
   Sentry, done long ago and on a much larger scale.
 - The Ruin Sentries are the builders' simpler copies (see Pale Ruin). The names connect: the
-  **Watcher** armor trim, **Watcher's Gaze** on the mask (the reversed gaze, inherited through its
-  lens) and Creakings ignoring the mask's wearer (you look like one of them).
+  **Elderwood** armor trim, **Elderwood's Gaze** on the mask (the reversed gaze, inherited through
+  its lens) and Creakings ignoring the mask's wearer (you look like one of them).
 
 **Summoning** (farmable anywhere, since Pale Gardens are hard to find)
-- Like the Wither and the golems, the dormant body is a **block pattern** the player builds, and
-  the **Creaking Heart is placed last** to wake it. It wakes only at night or in darkness, like
-  any Creaking. The heart is consumed.
-- **Pattern: the "wide tree"**, 12 blocks in one flat plane (5 wide, 4 tall), chosen from in-game
-  mockups over a larger 18-block tree (too much to build) and 9-block versions (too small for a
-  big entity). It reads as a dead pale oak with long, drooping branches: the Creaking's long-armed
-  silhouette.
+- The player builds a **stump**, and the **Creaking Heart is placed last**, on top. It wakes only
+  at night or in darkness, like any Creaking. The heart is consumed.
+- **Pattern**: 7 blocks. A humanoid frame that turns into a 10-block tree made no sense, so the
+  build is only the stump and the tree **grows out of it**:
 
   ```
-  .  .  W  .  .     W  pale oak wood: the head
-  L  L  C  L  L     L  pale oak logs lying sideways: the branches; C  copper block: the collar
-  R  .  ♥  .  R     R  resin blocks hanging from the branch tips; ♥  Creaking Heart, placed last
-  .  L  L  L  .     roots: an upright pale oak log between two lying sideways
+  top view, ground level     side view
+  .  R  .                    .  ♥  .     ♥  Creaking Heart, placed last
+  R  L  R                    .  C  .     C  any copper block: the collar
+  .  R  .                    R  L  R     L  pale oak log or wood; R  resin blocks: the roots
   ```
 
-- Materials per summon: 8 pale oak logs/wood (saplings grow anywhere), 1 copper block, 2 resin
-  blocks and the Creaking Heart (itself a resin block and pale oak logs). With the 4 resin clumps
-  for the eye that's about 31 resin per Creaking Eye: a real goal, renewable once a Pale Garden is
-  known.
-- **Any copper block works, and it shows on the Watcher**: copper, exposed, weathered or oxidized
-  (waxed or not). The woken Watcher's copper plates take the same oxidation stage as the collar,
-  so a bright new collar wakes a shiny Watcher and an oxidized one a green, ancient one. The
-  stage doesn't change during the fight.
-- The heart sits between a log below and copper above, so the pattern never matches vanilla's
-  two-log Creaking Heart setup, and nothing in it resembles the Sentry (log + heart + pumpkin).
+- Materials per summon: 1 pale oak log, 1 copper block, 4 resin blocks and the Creaking Heart.
+  With the 4 resin clumps for the eye that's about 49 resin per Creaking Eye (the Watcher's
+  pattern took about 31): a real goal, renewable once a Pale Garden is known.
+- **Any copper block works, and it shows on the Elderwood** (kept): copper, exposed, weathered or
+  oxidized, waxed or not. The woken tree's bands and plates take the collar's oxidation stage and
+  keep it for the whole fight.
+- **It grows** over about 3 s, like a Warden digging out: the stump's blocks break and the trunk
+  rises. While growing it can't be hurt and doesn't attack. It faces the player who placed the
+  heart.
+- **Room to grow**: about 5 × 5 blocks around the stump and 10 up. Anything that isn't a full
+  block (grass, flowers, snow, moss carpets) may stay and is left alone, as in the Watcher's
+  pattern. If full blocks are in the way nothing is destroyed; the heart stays a block and the
+  player sees "The Elderwood needs room to grow" above the hotbar.
+- Placing the heart in daylight shows "The Elderwood only wakes in darkness" (kept). "Darkness"
+  means not daytime with open sky above.
+- The heart sits on copper, so the pattern never matches vanilla's Creaking Heart setup (a heart
+  between two logs) or the Sentry (log + heart + pumpkin).
 
-**The woken Watcher**
-- A bulky relative of the Creaking, about 4.6 blocks tall and 2 wide (an iron golem is 2.7): a
-  broad chest with room for its hearts, thick limbs, branches on the head, a copper collar and
-  pauldrons (in the collar block's oxidation stage, so four texture variants) and a large glowing
-  lens for an eye. Placeholder textures.
-- **Only weak points glow**: the lens now, the hearts from step 5, with the same full-bright glow
-  so they read in the dark. Nothing else on the body is resin-orange (no decorative resin joints:
-  they looked like dim hearts).
-- Implemented (step 4): its own model (the Creaking's part names, so its walk and attack
-  animations apply; the first version reused the Creaking's stick body and was too slim to carry
-  hearts); a boss bar; it hunts players only and never
-  despawns. Its **gaze fills the petrification meter by 2 per tick** (petrified in about 2.5 s)
-  while it has line of sight to its target within 24 blocks. It counts as gaze-resistant for the
-  Pale Mask (boss-strength slowing). Drops its lens and 2–4 resin clumps.
-- The summon is matched like vanilla's golems: a Mixin adds a placement hook to the Creaking Heart
-  (it has none), the body's blocks are cleared with break particles, and any pale oak log or wood
-  fills a log cell. Unlike the golems, the empty cells don't have to be pure air: anything that
-  isn't a full block (grass, flowers, snow, moss carpets, common in a Pale Garden) may stay and
-  is left alone. "Darkness" means not daytime with open sky above the head; placing the heart in
-  daylight shows "The Watcher only wakes in darkness" above the hotbar, like a bed in daytime, so
-  place it again at night.
+**The woken Elderwood**
+- **An old pale oak about 10 blocks tall**: a thick trunk about 3 blocks across, spreading roots,
+  and a crown of bare branches and twigs with hanging moss, about 5 blocks wide in all. Placeholder
+  model and textures built from boxes in code; the part names are a contract so an artist can
+  replace the look later without touching the fight.
+- **Metal everywhere**, so it reads as the builders' work: copper bands around the trunk, riveted
+  plates over old wounds, a collar holding the lens in a hollow about 4 blocks up, braces on the
+  two main branches and a plate over the core. Four texture variants, one per oxidation stage.
+- **Only weak points glow** (kept): the lens and the hearts that can be hit right now, full-bright
+  so they read in the dark.
+- **Rooted**: it never leaves the spot it grew on. It can't be pushed, knocked back or moved by
+  pistons, and its trunk is solid, so players walk around it, not through it.
+- **It turns slowly in place** to face its target, slower than a player can circle it (about 30°
+  a second; a sprinting player 4 blocks away circles at about 80°).
+- It hunts players only and never despawns. It counts as gaze-resistant for the Pale Mask. Drops
+  its lens and 2–4 resin clumps (kept).
 
-**Petrification** (new mechanic, shared with Ruin Sentries)
+**Petrification** (kept; shared with Ruin Sentries)
 - A **meter**, like vanilla freezing in powder snow, not a status effect: milk clears all effects,
   which would turn every fight into "drink milk".
-- It **fills while the Watcher has line of sight** to the player and drains once sight is broken.
+- It **fills while the lens has line of sight** to the player and drains once sight is broken.
   The player slows down more and more, and when it's full they're **petrified**: stuck in place.
 - **Brittle**: damage taken rises with the meter, up to about **+50%** when petrified (you're
   slowly turning into a statue).
 - A grey, cracked stone overlay creeps in from the screen edges as it fills, like powder snow's
   frost overlay.
-- Countered by breaking line of sight (cover) or wearing the Pale Mask (see Pale Mask).
-- Implemented (players only; creative and spectators are immune), waiting for a source:
-  - the meter runs from 0 to 100; each source decides how fast it fills it per tick (the Watcher
-    in step 4, Ruin Sentries more slowly);
+- Implemented (players only; creative and spectators are immune):
+  - the meter runs from 0 to 100; each source decides how fast it fills it per tick;
   - movement slows by up to **60%** as it fills; when full the player is petrified for **3 s**
     (no movement, no jumping) even if the gaze breaks, then cracks free at half;
   - without a gaze it drains **2 per tick** (a full meter clears in 2.5 s);
@@ -315,85 +317,102 @@ roughly Elder Guardian tier) with a boss bar.
     applies after difficulty scaling.
 
 **The fight** (single player first; numbers to be tuned)
-- **Hearts**: the Watcher can only be hurt through **hearts on its body**, each with crack stages
-  like the Sentry's and traced the same way. Every heart must be reachable by one player, so none
-  is on the back (it always turns to face you):
-  - **chest and shoulder** hearts, open to arrows from the front;
-  - **arm** hearts: after a branch slam the arm stays **stuck in the ground for 1–2 s**, exposing its
-    heart. Dodging the slam is rewarded with an opening;
-  - a **core heart** that only opens once all the others are destroyed: the final phase, in which
-    its gaze fills faster.
-- **Up close**: its gaze petrifies, and its **branch slam shatters the stone shell**: the
-  petrification ends, the player takes the brittle bonus damage and is knocked away. The loop is
-  gaze, petrify, slam, back to cover.
-- Implemented (step 5):
-  - **Five hearts**: two on the chest (3 cracks each), one on each forearm (3 each) and the core
-    in the middle of the chest (5), behind a copper shutter until the other four are destroyed.
-    17 cracks in all; the boss bar shows how many are left. Cracking rules are the Sentry's
-    (full-strength sword, charged arrow or trident, at most one crack per 0.5 s), players only.
-  - **A glowing heart is one you can hit right now**, with the lens's full-bright glow. Chest
-    hearts and the open core can be hit from the front; a destroyed heart is a dark husk.
-  - **Branch slam**: within 3.5 blocks it raises an arm for 0.75 s, then strikes the ground 1.8
-    blocks in front of where it faced when it started, so stepping aside dodges it. Players
-    within about 2 blocks of the strike take **10 damage** (15 when petrified, before armor),
-    their petrification shatters and they're thrown back.
-  - **Stuck arm**: the arm stays planted for 1.5 s. Its forearm heart glows and can be hit from
-    any side; bent over, the Watcher can't be hit in the chest and **doesn't gaze**. Arms
-    alternate, with 2 s between slams.
-  - With the core open its gaze fills the meter by 3 per tick.
-  - The hit tracing is shared with the Sentry (`HeartHit`); each heart is a box at a fixed spot
-    on the body, and the stuck arm's box sits where the planted forearm is.
-- **At range**: it throws **burning resin** with the Wither skull's mechanics. A hit sets the player
-  on fire but never blocks, so nothing burns in a dungeon (Fire Resistance is a fair preparation).
-- **Reflecting the resin** (risky): hitting a resin ball back, like a Ghast fireball, does no
-  damage (only hearts take damage), but if it hits the Watcher it's **stunned for a few seconds**,
-  like a Ravager whose attack is blocked. While stunned it can't gaze or turn, its arms hang and
-  its hearts are much easier to shoot; the petrification meter drains. A short stun immunity
-  afterwards prevents chain-stunning. The risk is standing close enough to a burning projectile
-  to hit it.
-- Implemented (step 6):
-  - **Burning resin**: while it watches a player more than 6 blocks away it throws a glob of
-    burning resin, the first after 1 s and then every 3 s. It walks about 2.4 blocks a second, so
-    a player who keeps their distance gets shot at and one who stands still gets the slam. A hit
-    deals **5 damage and 5 s of fire**; blocks never catch fire. It has its own look, a
-    molten amber glob with a white-hot core (placeholder texture, an unobtainable item like the
-    fire charge is for fireballs), without vanilla's fire overlay, which would make it look like
-    any fireball.
-  - **Hitting it back**: the resin is in vanilla's `redirectable_projectile` tag, so a melee hit
-    sends it where the player looks, like a ghast's fireball. Hit back into the Watcher it deals
-    no damage but **stuns it for 3 s**; only resin a player hit back does.
-  - **Stunned**: it stands still, doesn't gaze, slam or throw, its lens goes dark and its head
-    drops, and **both forearm hearts glow and can be hit from the front** along with the chest
-    hearts (or the core). This is how a ranged player opens the forearm hearts without baiting a
-    slam. For 5 s afterwards it can't be stunned again.
-- **Cover**: since it's summoned anywhere, the player picks the spot or builds cover beforehand.
+
+The Elderwood has a front and a back, and each is dangerous in its own way. In front the lens
+petrifies and the branches slam; behind and to the sides the roots strike. Its hearts are spread
+all around the trunk, so the player has to keep moving between the two.
+
+- **The gaze** covers a cone in front of the lens (about 60° to each side) out to 24 blocks and
+  fills the meter by 2 per tick (petrified in about 2.5 s), 3 once the core is open. Three ways
+  out of it:
+  - **circle**: the trunk turns slower than a player runs;
+  - **cover**: any block between the player and the lens stops it, including pillars the player
+    builds before or during the fight;
+  - **the Pale Mask** (see Pale Mask).
+- **Hearts**: it can only be hurt through its hearts, each with crack stages like the Sentry's and
+  traced the same way (kept: a full-strength sword, a charged arrow or a trident, at most one
+  crack per 0.5 s, players only). A glowing heart is one that can be hit right now; a destroyed
+  heart is a dark husk. **Seven hearts, 23 cracks**; the boss bar shows how many are left:
+  - **4 trunk hearts** (3 cracks each) at sword height: front, back, left and right. **Always
+    open**, each from its own side. The danger is where you have to stand: the front one is in
+    the gaze, the others are where the roots strike;
+  - **2 branch hearts** (3 each), one on each main branch, about 6 blocks up: out of a sword's
+    reach and closed until that branch is stuck after a slam, or the tree is stunned;
+  - the **core** (5), under the lens behind a copper plate that opens once the other six are
+    destroyed. Destroying it kills the Elderwood.
+- **Branch slam** (reworked from the Watcher's): against a player in front within about 6 blocks
+  it raises a main branch for 0.75 s, then brings it down where the player stood when it started,
+  so stepping aside dodges it. Players near the strike take **10 damage** (15 when petrified,
+  before armor), their petrification **shatters** and they're thrown back. The loop is gaze,
+  petrify, slam, back to cover.
+  - **Stuck branch**: the branch stays planted for 1.5 s, which brings its heart down to sword
+    height, glowing and open from any side. While a branch is planted the tree doesn't gaze or
+    turn. Branches alternate, with 2 s between slams.
+  - **It smashes soft cover**: blocks under the strike that are in the
+    `#vanillareforged:elderwood_breakable` tag (logs, planks, leaves, dirt and the like) break
+    and drop. Stone and harder cover holds, so a quick wooden hut doesn't trivialize the fight.
+    Follows the `mobGriefing` game rule.
+- **Root eruption** (new): against a player it can't see in front of it (behind, to the side or
+  behind cover) within about 12 blocks. The ground under the player cracks for 1 s, then roots
+  burst out: about 6 damage (the brittle bonus applies) and a toss into the air. Moving out of the
+  cracked patch dodges it, like evoker fangs. It keeps circling and camping from being free.
+- **Burning resin** (kept): at a player in the gaze cone beyond the slam's reach it throws a glob
+  of burning resin from the crown, the first after 1 s and then every 3 s. A hit deals **5 damage
+  and 5 s of fire**; blocks never catch fire. Its own look: a molten amber glob with a white-hot
+  core, without vanilla's fire overlay.
+- **Hitting the resin back** (kept): a melee hit sends it where the player looks, like a ghast's
+  fireball. Hit back into the Elderwood it does no damage but **stuns it for 3 s**; only resin a
+  player hit back does. For 5 s afterwards it can't be stunned again.
+- **Stunned**: it doesn't turn, gaze, slam, throw or raise roots, its lens goes dark and its
+  branches droop, so **both branch hearts open** to arrows and tridents (still too high for a
+  sword). This is how a ranged player opens them without baiting a slam.
+- **Falling dormant**: with no player within 32 blocks for 30 s it stops, and its hearts heal one
+  crack every few seconds, destroyed ones included. Walking away resets the fight; it doesn't let
+  the player whittle it down from safety.
+- The hit tracing is shared with the Sentry (`HeartHit`, kept); each heart is a box at a fixed
+  spot on the tree, and a planted branch's box sits where its heart ends up.
 
 **Drops: the craft chain** (as deep as netherite; each step has a meaning)
-1. **Watcher's Lens**: one per kill. A copper-rimmed disc of resin glass, clearly made by the
-   builders. Also crafted from **9 Watcher's Lens Shards** (Ruin Sentry drops).
+1. **Elderwood Lens**: one per kill. A copper-rimmed disc of resin glass, clearly made by the
+   builders. Also crafted from **9 Elderwood Lens Shards** (Ruin Sentry drops).
 2. **Creaking Eye**: the lens in the middle, 4 resin clumps around it (plus shape). Setting the
    lens in living resin turns it back into an eye. Shaped recipe, 1 eye.
 3. **Pale Mask**: unchanged (`L E L` / `L _ L` with pale oak logs).
 
-The lens, shard and both recipes are implemented (recipe book unlocks on picking up a lens or a
-shard). Until the Watcher and the Ruin exist, the lens and shard are creative-only. Placeholder
-textures: amber resin glass in a weathered copper rim.
+The lens, shard and both recipes are implemented as the Watcher's Lens and Lens Shard (recipe book
+unlocks on picking up a lens or a shard). Placeholder textures: amber resin glass in a weathered
+copper rim.
 
-**Build order** (proposed): (1) sturdier Sentry hearts and mob projectiles (a change to the
-Sentry), done; (2) Watcher's Lens, Lens Shard and the new Creaking Eye recipe, done; (3) petrification
-meter, its overlay and the mask's immunity, done; (4) summon pattern and the Watcher entity with its
-gaze, done; (5) body hearts, branch slam and the stuck-arm window, done; (6) burning resin and the reflect
-stun, done. Ruin Sentries' petrification and shard drops come with the Ruin.
+**Build order**
+
+The Watcher, done: (1) sturdier Sentry hearts and mob projectiles; (2) the lens, lens shard and
+the Creaking Eye recipe; (3) petrification meter, its overlay and the mask's immunity; (4) summon
+pattern and the entity with its gaze; (5) body hearts, branch slam and the stuck-arm window;
+(6) burning resin and the reflect stun.
+
+The rework into the Elderwood:
+1. **Rename**: Watcher to Elderwood everywhere, items included (Elderwood Lens, Elderwood Lens
+   Shard, Elderwood armor trim) with their ids, tags and translations. Nothing is released yet,
+   so old ids aren't migrated: Watcher items in existing test worlds disappear.
+2. **The tree**: the rooted, solid, slowly turning entity at its new size with the placeholder
+   tree model, the stump pattern, growing, and the room and darkness messages.
+3. **Hearts and gaze**: the seven hearts around the trunk, the gaze cone, and resin and stun
+   adjusted to the new body.
+4. **Branch slam**: the longer slam, the planted branch bringing its heart down, and smashing
+   soft cover.
+5. **Roots and dormancy**: the root eruption and falling dormant.
+
+Ruin Sentries' petrification and shard drops come with the Ruin.
 
 ## Parked for later (warrior content and extras)
 
 - **Resin Tappers**: illager-type faction that farms resin from captive hearts, uses resin traps.
 - Ambient threat: moths drawn to open eyeblossoms at night.
-- Watcher block for redstoners: outputs a signal while a player looks at it.
+- Gaze block for redstoners: outputs a signal while a player looks at it.
 - Other resin uses: slowing resin-coated blocks, amber preservation displays, tool handle upgrade.
 
 ## Open questions / TODO
 
-1. **Watcher numbers**: health per heart, stun length, gaze fill rate, resin damage: tuned when
-   implemented.
+1. **Elderwood numbers**: cracks per heart, turn speed, root damage, stun length, gaze fill rate,
+   resin damage and the summon's resin cost: tuned when implemented.
 2. **Ruin Sentry count** per structure: TODO, decided when the structure is built.
