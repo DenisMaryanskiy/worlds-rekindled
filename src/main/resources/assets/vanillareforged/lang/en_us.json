@@ -1,17 +1,17 @@
 {
-  "block.vanillareforged.creaking_heart.watcher_asleep": "The Watcher only wakes in darkness",
+  "block.vanillareforged.creaking_heart.elderwood_asleep": "The Elderwood only wakes in darkness",
   "entity.vanillareforged.burning_resin": "Burning Resin",
   "entity.vanillareforged.heartwood_sentry": "Heartwood Sentry",
-  "entity.vanillareforged.watcher": "Watcher",
+  "entity.vanillareforged.elderwood": "Elderwood",
   "item.vanillareforged.burning_resin": "Burning Resin",
   "item.vanillareforged.creaking_eye": "Creaking Eye",
   "item.vanillareforged.creaking_pottery_sherd": "Creaking Pottery Sherd",
   "item.vanillareforged.gaze_pottery_sherd": "Gaze Pottery Sherd",
   "item.vanillareforged.heartwood_sentry_spawn_egg": "Heartwood Sentry Spawn Egg",
   "item.vanillareforged.pale_mask": "Pale Mask",
-  "item.vanillareforged.watcher_armor_trim_smithing_template": "Smithing Template",
-  "item.vanillareforged.watcher_armor_trim_smithing_template.new": "Watcher Armor Trim",
-  "item.vanillareforged.watchers_lens": "Watcher's Lens",
-  "item.vanillareforged.watchers_lens_shard": "Watcher's Lens Shard",
-  "trim_pattern.vanillareforged.watcher": "Watcher Armor Trim"
+  "item.vanillareforged.elderwood_armor_trim_smithing_template": "Smithing Template",
+  "item.vanillareforged.elderwood_armor_trim_smithing_template.new": "Elderwood Armor Trim",
+  "item.vanillareforged.elderwood_lens": "Elderwood Lens",
+  "item.vanillareforged.elderwood_lens_shard": "Elderwood Lens Shard",
+  "trim_pattern.vanillareforged.elderwood": "Elderwood Armor Trim"
 }

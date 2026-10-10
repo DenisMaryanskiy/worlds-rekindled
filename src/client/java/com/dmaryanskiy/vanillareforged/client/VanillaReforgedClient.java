@@ -4,8 +4,8 @@ import com.dmaryanskiy.vanillareforged.ModEntities;
 import com.dmaryanskiy.vanillareforged.ModItems;
 import com.dmaryanskiy.vanillareforged.client.sentry.HeartwoodSentryModel;
 import com.dmaryanskiy.vanillareforged.client.sentry.HeartwoodSentryRenderer;
-import com.dmaryanskiy.vanillareforged.client.watcher.WatcherModel;
-import com.dmaryanskiy.vanillareforged.client.watcher.WatcherRenderer;
+import com.dmaryanskiy.vanillareforged.client.elderwood.ElderwoodModel;
+import com.dmaryanskiy.vanillareforged.client.elderwood.ElderwoodRenderer;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.rendering.v1.ArmorRenderer;
@@ -22,8 +22,8 @@ public class VanillaReforgedClient implements ClientModInitializer {
 		ModelLayerRegistry.registerModelLayer(HeartwoodSentryRenderer.LAYER, HeartwoodSentryModel::createBodyLayer);
 		EntityRendererRegistry.register(ModEntities.HEARTWOOD_SENTRY, HeartwoodSentryRenderer::new);
 
-		ModelLayerRegistry.registerModelLayer(WatcherRenderer.LAYER, WatcherModel::createBodyLayer);
-		EntityRendererRegistry.register(ModEntities.WATCHER, WatcherRenderer::new);
+		ModelLayerRegistry.registerModelLayer(ElderwoodRenderer.LAYER, ElderwoodModel::createBodyLayer);
+		EntityRendererRegistry.register(ModEntities.ELDERWOOD, ElderwoodRenderer::new);
 		EntityRendererRegistry.register(ModEntities.BURNING_RESIN, context -> new ThrownItemRenderer<>(context, 1.5F, true));
 
 		PetrificationOverlay.register();

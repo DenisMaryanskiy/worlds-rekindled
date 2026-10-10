@@ -1,7 +1,7 @@
 package com.dmaryanskiy.vanillareforged.test;
 
 import com.dmaryanskiy.vanillareforged.ModItems;
-import com.dmaryanskiy.vanillareforged.WatcherGaze;
+import com.dmaryanskiy.vanillareforged.ElderwoodGaze;
 import com.dmaryanskiy.vanillareforged.petrification.Petrification;
 
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
@@ -56,7 +56,7 @@ public class PetrificationTest {
 		ItemStack mask = new ItemStack(ModItems.PALE_MASK);
 		player.setItemSlot(EquipmentSlot.HEAD, mask);
 
-		for (int i = 0; i < WatcherGaze.TICKS_PER_DURABILITY; i++) {
+		for (int i = 0; i < ElderwoodGaze.TICKS_PER_DURABILITY; i++) {
 			Petrification.expose(player, Petrification.FULL / 4);
 		}
 
