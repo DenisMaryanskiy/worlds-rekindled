@@ -9,9 +9,10 @@ import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.client.model.monster.creaking.CreakingModel;
 
 /**
- * The Creaking's body fitted with the builders' copper: pauldrons, a chest plate and a single lens
- * for an eye. Part names match {@link CreakingModel} so its animations apply; the UV layout is our
- * own (128x64), and the renderer scales it up.
+ * A bulky, symmetric relative of the Creaking: a broad chest with room for its hearts, thick limbs,
+ * branches on the head and the builders' copper (a collar, pauldrons, the rim of its single lens).
+ * Part names match {@link CreakingModel} so its animations apply; the geometry and the UV layout
+ * (128x128) are our own, and the renderer scales it up.
  */
 public class WatcherModel extends CreakingModel {
 	public WatcherModel(ModelPart root) {
@@ -21,33 +22,27 @@ public class WatcherModel extends CreakingModel {
 	public static LayerDefinition createBodyLayer() {
 		MeshDefinition mesh = new MeshDefinition();
 		PartDefinition root = mesh.getRoot().addOrReplaceChild("root", CubeListBuilder.create(), PartPose.offset(0.0F, 24.0F, 0.0F));
-		PartDefinition upperBody = root.addOrReplaceChild("upper_body", CubeListBuilder.create(), PartPose.offset(-1.0F, -19.0F, 0.0F));
+		PartDefinition upperBody = root.addOrReplaceChild("upper_body", CubeListBuilder.create(), PartPose.offset(0.0F, -18.0F, 0.0F));
 		upperBody.addOrReplaceChild("head", CubeListBuilder.create()
-				.texOffs(0, 0).addBox(-3.0F, -10.0F, -3.0F, 6.0F, 10.0F, 6.0F)
-				.texOffs(0, 34).addBox(-3.0F, -13.0F, -3.0F, 6.0F, 3.0F, 6.0F)
-				.texOffs(24, 34).addBox(3.0F, -13.0F, 0.0F, 9.0F, 14.0F, 0.0F)
-				.texOffs(44, 34).addBox(-12.0F, -14.0F, 0.0F, 9.0F, 14.0F, 0.0F)
-				.texOffs(0, 48).addBox(-2.0F, -8.0F, -4.0F, 4.0F, 4.0F, 1.0F), PartPose.offset(-3.0F, -11.0F, 0.0F));
+				.texOffs(0, 0).addBox(-4.0F, -10.0F, -4.0F, 8.0F, 10.0F, 8.0F)
+				.texOffs(80, 24).addBox(-4.0F, -13.0F, -4.0F, 8.0F, 3.0F, 8.0F)
+				.texOffs(0, 68).addBox(4.0F, -14.0F, 0.0F, 10.0F, 15.0F, 0.0F)
+				.texOffs(20, 68).addBox(-14.0F, -15.0F, 0.0F, 10.0F, 15.0F, 0.0F)
+				.texOffs(114, 0).addBox(-3.0F, -9.0F, -5.0F, 6.0F, 6.0F, 1.0F), PartPose.offset(0.0F, -22.0F, 0.0F));
 		upperBody.addOrReplaceChild("body", CubeListBuilder.create()
-				.texOffs(32, 0).addBox(0.0F, -3.0F, -3.0F, 6.0F, 13.0F, 5.0F)
-				.texOffs(54, 0).addBox(-6.0F, -4.0F, -3.0F, 6.0F, 7.0F, 5.0F)
-				.texOffs(104, 34).addBox(0.0F, -2.0F, -4.0F, 6.0F, 5.0F, 1.0F), PartPose.offset(0.0F, -7.0F, 1.0F));
+				.texOffs(32, 0).addBox(-8.0F, -22.0F, -4.5F, 16.0F, 14.0F, 9.0F)
+				.texOffs(82, 0).addBox(-5.0F, -8.0F, -3.0F, 10.0F, 8.0F, 6.0F)
+				.texOffs(0, 54).addBox(-8.5F, -23.0F, -5.0F, 17.0F, 3.0F, 10.0F), PartPose.ZERO);
 		upperBody.addOrReplaceChild("right_arm", CubeListBuilder.create()
-				.texOffs(76, 0).addBox(-2.0F, -1.5F, -1.5F, 3.0F, 21.0F, 3.0F)
-				.texOffs(0, 24).addBox(-2.0F, 19.5F, -1.5F, 3.0F, 4.0F, 3.0F)
-				.texOffs(64, 34).addBox(-3.0F, -2.5F, -2.5F, 5.0F, 2.0F, 5.0F), PartPose.offset(-7.0F, -9.5F, 1.5F));
+				.texOffs(0, 24).addBox(-2.5F, -2.0F, -2.5F, 5.0F, 24.0F, 5.0F)
+				.texOffs(54, 54).addBox(-3.5F, -3.5F, -3.5F, 7.0F, 3.0F, 7.0F), PartPose.offset(-10.5F, -20.0F, 0.0F));
 		upperBody.addOrReplaceChild("left_arm", CubeListBuilder.create()
-				.texOffs(88, 0).addBox(0.0F, -1.0F, -1.5F, 3.0F, 16.0F, 3.0F)
-				.texOffs(12, 24).addBox(0.0F, -5.0F, -1.5F, 3.0F, 4.0F, 3.0F)
-				.texOffs(24, 24).addBox(0.0F, 15.0F, -1.5F, 3.0F, 4.0F, 3.0F)
-				.texOffs(84, 34).addBox(-1.0F, -1.5F, -2.5F, 5.0F, 2.0F, 5.0F), PartPose.offset(6.0F, -9.0F, 0.5F));
+				.texOffs(20, 24).addBox(-2.5F, -2.0F, -2.5F, 5.0F, 24.0F, 5.0F)
+				.texOffs(82, 54).addBox(-3.5F, -3.5F, -3.5F, 7.0F, 3.0F, 7.0F), PartPose.offset(10.5F, -20.0F, 0.0F));
 		root.addOrReplaceChild("left_leg", CubeListBuilder.create()
-				.texOffs(112, 0).addBox(-1.5F, 0.0F, -1.5F, 3.0F, 16.0F, 3.0F)
-				.texOffs(48, 24).addBox(-1.5F, 15.7F, -4.5F, 5.0F, 0.0F, 9.0F), PartPose.offset(1.5F, -16.0F, 0.5F));
+				.texOffs(60, 24).addBox(-2.5F, 0.0F, -2.5F, 5.0F, 18.0F, 5.0F), PartPose.offset(3.5F, -18.0F, 0.0F));
 		root.addOrReplaceChild("right_leg", CubeListBuilder.create()
-				.texOffs(100, 0).addBox(-3.0F, -1.5F, -1.5F, 3.0F, 19.0F, 3.0F)
-				.texOffs(76, 24).addBox(-5.0F, 17.2F, -4.5F, 5.0F, 0.0F, 9.0F)
-				.texOffs(36, 24).addBox(-3.0F, -4.5F, -1.5F, 3.0F, 3.0F, 3.0F), PartPose.offset(-1.0F, -17.5F, 0.5F));
-		return LayerDefinition.create(mesh, 128, 64);
+				.texOffs(40, 24).addBox(-2.5F, 0.0F, -2.5F, 5.0F, 18.0F, 5.0F), PartPose.offset(-3.5F, -18.0F, 0.0F));
+		return LayerDefinition.create(mesh, 128, 128);
 	}
 }

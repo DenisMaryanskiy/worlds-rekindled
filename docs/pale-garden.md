@@ -273,10 +273,16 @@ roughly Elder Guardian tier) with a boss bar.
   two-log Creaking Heart setup, and nothing in it resembles the Sentry (log + heart + pumpkin).
 
 **The woken Watcher**
-- A Creaking several blocks tall, with copper plates (in the collar's oxidation stage, so four
-  texture variants), resin joints and a glowing lens for an eye. Placeholder textures.
-- Implemented (step 4): the Creaking model scaled 1.6x (about 4.3 blocks tall) with copper
-  pauldrons, a chest plate and a single lens; a boss bar; it hunts players only and never
+- A bulky relative of the Creaking, about 4.6 blocks tall and 2 wide (an iron golem is 2.7): a
+  broad chest with room for its hearts, thick limbs, branches on the head, a copper collar and
+  pauldrons (in the collar block's oxidation stage, so four texture variants) and a large glowing
+  lens for an eye. Placeholder textures.
+- **Only weak points glow**: the lens now, the hearts from step 5, with the same full-bright glow
+  so they read in the dark. Nothing else on the body is resin-orange (no decorative resin joints:
+  they looked like dim hearts).
+- Implemented (step 4): its own model (the Creaking's part names, so its walk and attack
+  animations apply; the first version reused the Creaking's stick body and was too slim to carry
+  hearts); a boss bar; it hunts players only and never
   despawns. Its **gaze fills the petrification meter by 2 per tick** (petrified in about 2.5 s)
   while it has line of sight to its target within 24 blocks. Melee: 10 damage with strong
   knockback, a placeholder until the branch slam. It counts as gaze-resistant for the Pale Mask

@@ -16,7 +16,7 @@ public final class ModEntities {
 	public static final EntityType<HeartwoodSentry> HEARTWOOD_SENTRY = register("heartwood_sentry",
 			EntityType.Builder.of(HeartwoodSentry::new, MobCategory.MISC).sized(0.9F, 2.7F).eyeHeight(2.3F).clientTrackingRange(10));
 	public static final EntityType<Watcher> WATCHER = register("watcher",
-			EntityType.Builder.of(Watcher::new, MobCategory.MONSTER).sized(1.4F, 4.3F).eyeHeight(3.7F).clientTrackingRange(10));
+			EntityType.Builder.of(Watcher::new, MobCategory.MONSTER).sized(2.0F, 4.6F).eyeHeight(4.0F).clientTrackingRange(10));
 
 	private ModEntities() {
 	}

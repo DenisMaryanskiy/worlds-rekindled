@@ -16,7 +16,7 @@ import net.minecraft.world.level.block.WeatheringCopper;
 
 public class WatcherRenderer extends MobRenderer<Watcher, WatcherRenderState, WatcherModel> {
 	public static final ModelLayerLocation LAYER = new ModelLayerLocation(VanillaReforged.id("watcher"), "main");
-	public static final float SCALE = 1.6F;
+	public static final float SCALE = 1.4F;
 	private static final Map<WeatheringCopper.WeatherState, Identifier> TEXTURES = new EnumMap<>(WeatheringCopper.WeatherState.class);
 	// Only the lens is opaque in this texture.
 	private static final Identifier LENS = texture("watcher_lens");
@@ -28,7 +28,7 @@ public class WatcherRenderer extends MobRenderer<Watcher, WatcherRenderState, Wa
 	}
 
 	public WatcherRenderer(EntityRendererProvider.Context context) {
-		super(context, new WatcherModel(context.bakeLayer(LAYER)), 0.6F * SCALE);
+		super(context, new WatcherModel(context.bakeLayer(LAYER)), 0.9F * SCALE);
 		this.addLayer(new WatcherLensLayer(this, LENS));
 	}
 
