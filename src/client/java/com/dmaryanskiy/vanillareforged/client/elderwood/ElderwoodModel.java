@@ -2,98 +2,67 @@ package com.dmaryanskiy.vanillareforged.client.elderwood;
 
 import com.dmaryanskiy.vanillareforged.elderwood.Elderwood;
 
+import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.client.model.geom.PartPose;
-import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
-import net.minecraft.client.model.geom.builders.MeshDefinition;
-import net.minecraft.client.model.geom.builders.PartDefinition;
-import net.minecraft.client.model.monster.creaking.CreakingModel;
-import net.minecraft.client.renderer.entity.state.CreakingRenderState;
 import net.minecraft.util.Mth;
 
 /**
- * A bulky, symmetric relative of the Creaking: a broad chest with room for its hearts, thick limbs,
- * branches on the head and the builders' copper (a collar, pauldrons, the rim of its single lens).
- * Part names match {@link CreakingModel} so its animations apply; the geometry and the UV layout
- * (128x128) are our own, and the renderer scales it up.
+ * An old pale oak: a thick trunk on spreading roots, a crown of bare branches, and the builders'
+ * copper. Only its two main branches move. Their poses are mirrored on the server by the branch
+ * hearts' spots in {@code ElderwoodHeart}, so the two must change together.
  */
-public class ElderwoodModel extends CreakingModel {
-	private static final float RAISED_ARM = -2.8F;
-	// Bent this far forward, an arm hanging straight down reaches the ground in front of it.
-	private static final float BENT_OVER = 1.2F;
+public class ElderwoodModel extends EntityModel<ElderwoodRenderState> {
+	// Angles from straight up: out to the side (z) and over the top towards the front (x).
+	private static final float REST_SPREAD = 0.436F;
+	private static final float STUNNED_SPREAD = 1.222F;
+	private static final float RAISED_SPREAD = 0.15F;
+	private static final float RAISED_BACK = -0.5F;
+	// Swung this far, the branch's tip is in the ground in front of the trunk.
+	private static final float PLANTED_FORWARD = 2.498F;
+	private static final float PLANTED_SPREAD = 0.271F;
 	private static final float SLAM_TICKS = 3.0F;
 	private static final float RECOVER_TICKS = 6.0F;
 
-	private final ModelPart upperBody;
-	private final ModelPart head;
-	private final ModelPart rightArm;
-	private final ModelPart leftArm;
+	private final ModelPart rightBranch;
+	private final ModelPart leftBranch;
 
 	public ElderwoodModel(ModelPart root) {
 		super(root);
-		this.upperBody = root.getChild("root").getChild("upper_body");
-		this.head = this.upperBody.getChild("head");
-		this.rightArm = this.upperBody.getChild("right_arm");
-		this.leftArm = this.upperBody.getChild("left_arm");
+		ModelPart tree = root.getChild("tree");
+		this.rightBranch = tree.getChild("right_branch");
+		this.leftBranch = tree.getChild("left_branch");
 	}
 
 	public static LayerDefinition createBodyLayer() {
-		MeshDefinition mesh = new MeshDefinition();
-		PartDefinition root = mesh.getRoot().addOrReplaceChild("root", CubeListBuilder.create(), PartPose.offset(0.0F, 24.0F, 0.0F));
-		PartDefinition upperBody = root.addOrReplaceChild("upper_body", CubeListBuilder.create(), PartPose.offset(0.0F, -18.0F, 0.0F));
-		upperBody.addOrReplaceChild("head", CubeListBuilder.create()
-				.texOffs(0, 0).addBox(-4.0F, -10.0F, -4.0F, 8.0F, 10.0F, 8.0F)
-				.texOffs(80, 24).addBox(-4.0F, -13.0F, -4.0F, 8.0F, 3.0F, 8.0F)
-				.texOffs(0, 68).addBox(4.0F, -14.0F, 0.0F, 10.0F, 15.0F, 0.0F)
-				.texOffs(20, 68).addBox(-14.0F, -15.0F, 0.0F, 10.0F, 15.0F, 0.0F)
-				.texOffs(114, 0).addBox(-3.0F, -9.0F, -5.0F, 6.0F, 6.0F, 1.0F), PartPose.offset(0.0F, -22.0F, 0.0F));
-		upperBody.addOrReplaceChild("body", CubeListBuilder.create()
-				.texOffs(32, 0).addBox(-8.0F, -22.0F, -4.5F, 16.0F, 14.0F, 9.0F)
-				.texOffs(82, 0).addBox(-5.0F, -8.0F, -3.0F, 10.0F, 8.0F, 6.0F)
-				.texOffs(0, 54).addBox(-8.5F, -23.0F, -5.0F, 17.0F, 3.0F, 10.0F), PartPose.ZERO);
-		upperBody.addOrReplaceChild("right_arm", CubeListBuilder.create()
-				.texOffs(0, 24).addBox(-2.5F, -2.0F, -2.5F, 5.0F, 24.0F, 5.0F)
-				.texOffs(54, 54).addBox(-3.5F, -3.5F, -3.5F, 7.0F, 3.0F, 7.0F), PartPose.offset(-10.5F, -20.0F, 0.0F));
-		upperBody.addOrReplaceChild("left_arm", CubeListBuilder.create()
-				.texOffs(20, 24).addBox(-2.5F, -2.0F, -2.5F, 5.0F, 24.0F, 5.0F)
-				.texOffs(82, 54).addBox(-3.5F, -3.5F, -3.5F, 7.0F, 3.0F, 7.0F), PartPose.offset(10.5F, -20.0F, 0.0F));
-		root.addOrReplaceChild("left_leg", CubeListBuilder.create()
-				.texOffs(60, 24).addBox(-2.5F, 0.0F, -2.5F, 5.0F, 18.0F, 5.0F), PartPose.offset(3.5F, -18.0F, 0.0F));
-		root.addOrReplaceChild("right_leg", CubeListBuilder.create()
-				.texOffs(40, 24).addBox(-2.5F, 0.0F, -2.5F, 5.0F, 18.0F, 5.0F), PartPose.offset(-3.5F, -18.0F, 0.0F));
-		return LayerDefinition.create(mesh, 128, 128);
+		return ElderwoodGeometry.create();
 	}
 
 	@Override
-	public void setupAnim(CreakingRenderState state) {
+	public void setupAnim(ElderwoodRenderState state) {
 		super.setupAnim(state);
-		if (!(state instanceof ElderwoodRenderState elderwood)) {
-			return;
+		float sway = Mth.sin(state.ageInTicks * 0.04F) * 0.02F;
+		this.pose(this.rightBranch, -1.0F, state, state.slamRightArm, sway);
+		this.pose(this.leftBranch, 1.0F, state, !state.slamRightArm, sway);
+	}
+
+	private void pose(ModelPart branch, float side, ElderwoodRenderState state, boolean slamming, float sway) {
+		float forward = 0.0F;
+		float spread = REST_SPREAD;
+		if (state.stunned) {
+			spread = STUNNED_SPREAD;
+		} else if (slamming && state.slamPhase == Elderwood.SlamPhase.WINDUP) {
+			float raise = Mth.clamp(state.slamPhaseAge / Elderwood.SLAM_WINDUP_TICKS, 0.0F, 1.0F);
+			forward = RAISED_BACK * raise;
+			spread = Mth.lerp(raise, REST_SPREAD, RAISED_SPREAD);
+		} else if (slamming && state.slamPhase == Elderwood.SlamPhase.STUCK) {
+			// The branch comes down fast, stays planted, and lifts back just before it lets go.
+			float down = Mth.clamp(state.slamPhaseAge / SLAM_TICKS, 0.0F, 1.0F);
+			float held = Mth.clamp((Elderwood.SLAM_STUCK_TICKS - state.slamPhaseAge) / RECOVER_TICKS, 0.0F, 1.0F);
+			forward = Mth.lerp(held, 0.0F, Mth.lerp(down, RAISED_BACK, PLANTED_FORWARD));
+			spread = Mth.lerp(held, REST_SPREAD, Mth.lerp(down, RAISED_SPREAD, PLANTED_SPREAD));
 		}
-		if (elderwood.stunned) {
-			// Head down, arms hanging straight: the body stays upright so the hearts are where they're hit.
-			this.head.xRot = 0.6F;
-			this.head.yRot = 0.0F;
-			this.rightArm.xRot = 0.0F;
-			this.leftArm.xRot = 0.0F;
-			return;
-		}
-		if (elderwood.slamPhase == Elderwood.SlamPhase.NONE) {
-			return;
-		}
-		ModelPart arm = elderwood.slamRightArm ? this.rightArm : this.leftArm;
-		if (elderwood.slamPhase == Elderwood.SlamPhase.WINDUP) {
-			float raise = Mth.clamp(elderwood.slamPhaseAge / Elderwood.SLAM_WINDUP_TICKS, 0.0F, 1.0F);
-			arm.xRot += RAISED_ARM * raise;
-			this.upperBody.xRot -= 0.15F * raise;
-			return;
-		}
-		// The arm comes down fast, stays planted, and the body straightens up just before it lets go.
-		float down = Mth.clamp(elderwood.slamPhaseAge / SLAM_TICKS, 0.0F, 1.0F);
-		float held = Mth.clamp((Elderwood.SLAM_STUCK_TICKS - elderwood.slamPhaseAge) / RECOVER_TICKS, 0.0F, 1.0F);
-		this.upperBody.xRot += Mth.lerp(down, -0.15F, BENT_OVER) * held;
-		arm.xRot += Mth.lerp(down, RAISED_ARM, -BENT_OVER) * held;
-		this.head.xRot += 0.3F * down * held;
+		branch.xRot = forward;
+		branch.zRot = side * spread + sway;
 	}
 }

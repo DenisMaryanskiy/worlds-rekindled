@@ -1,17 +1,18 @@
 {
   "block.vanillareforged.creaking_heart.elderwood_asleep": "The Elderwood only wakes in darkness",
+  "block.vanillareforged.creaking_heart.elderwood_no_room": "The Elderwood needs room to grow",
   "entity.vanillareforged.burning_resin": "Burning Resin",
-  "entity.vanillareforged.heartwood_sentry": "Heartwood Sentry",
   "entity.vanillareforged.elderwood": "Elderwood",
+  "entity.vanillareforged.heartwood_sentry": "Heartwood Sentry",
   "item.vanillareforged.burning_resin": "Burning Resin",
   "item.vanillareforged.creaking_eye": "Creaking Eye",
   "item.vanillareforged.creaking_pottery_sherd": "Creaking Pottery Sherd",
-  "item.vanillareforged.gaze_pottery_sherd": "Gaze Pottery Sherd",
-  "item.vanillareforged.heartwood_sentry_spawn_egg": "Heartwood Sentry Spawn Egg",
-  "item.vanillareforged.pale_mask": "Pale Mask",
   "item.vanillareforged.elderwood_armor_trim_smithing_template": "Smithing Template",
   "item.vanillareforged.elderwood_armor_trim_smithing_template.new": "Elderwood Armor Trim",
   "item.vanillareforged.elderwood_lens": "Elderwood Lens",
   "item.vanillareforged.elderwood_lens_shard": "Elderwood Lens Shard",
+  "item.vanillareforged.gaze_pottery_sherd": "Gaze Pottery Sherd",
+  "item.vanillareforged.heartwood_sentry_spawn_egg": "Heartwood Sentry Spawn Egg",
+  "item.vanillareforged.pale_mask": "Pale Mask",
   "trim_pattern.vanillareforged.elderwood": "Elderwood Armor Trim"
 }

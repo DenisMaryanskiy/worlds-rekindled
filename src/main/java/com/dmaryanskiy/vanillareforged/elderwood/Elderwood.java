@@ -20,14 +20,12 @@ import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.ai.goal.FloatGoal;
-import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
-import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
-import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
@@ -36,30 +34,33 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LevelEvent;
 import net.minecraft.world.level.block.WeatheringCopper;
+import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * The oldest Creaking, fitted by an ancient civilization with copper braces and a lens that turns
- * its freeze outward: whoever it watches is petrified. Woken by placing a Creaking Heart into its
- * summon pattern (see {@link ElderwoodSummon}).
+ * The oldest pale oak, woken whole by its Creaking Heart and fitted by an ancient civilization with
+ * copper bands and a lens that turns the Creakings' freeze outward: whoever it watches is petrified.
+ * Grown by placing a Creaking Heart on its stump (see {@link ElderwoodSummon}).
  * <p>
- * It can only be hurt through the hearts on its body (see {@link ElderwoodHeart}). Up close it slams
- * a branch arm down: the hit shatters a petrified player's stone shell, and the arm then stays stuck
- * in the ground for a moment, exposing its heart.
+ * It's rooted: it never leaves its spot and only turns, slower than a player can circle it. It can
+ * only be hurt through its hearts (see {@link ElderwoodHeart}). Up close it slams a branch down: the
+ * hit shatters a petrified player's stone shell, and the branch then stays stuck in the ground for a
+ * moment, bringing its heart within reach.
  */
 public class Elderwood extends Monster {
 	public static final double GAZE_RANGE = 24.0;
 	public static final int GAZE_RATE = 2;
 	public static final int CORE_GAZE_RATE = 3;
-	public static final double SLAM_REACH = 3.5;
+	public static final double SLAM_REACH = 5.5;
 	public static final float SLAM_DAMAGE = 10.0F;
 	public static final int SLAM_WINDUP_TICKS = 15;
 	public static final int SLAM_STUCK_TICKS = 30;
 	private static final int SLAM_COOLDOWN_TICKS = 40;
-	private static final double SLAM_DISTANCE = 1.8;
+	public static final double SLAM_DISTANCE = 3.5;
+	private static final float SLAM_ARC_DEGREES = 40.0F;
 	private static final double SLAM_RADIUS = 2.2;
 	private static final int CRACK_COOLDOWN_TICKS = 10;
 	public static final double RESIN_MIN_RANGE = 6.0;
@@ -67,6 +68,10 @@ public class Elderwood extends Monster {
 	private static final int RESIN_FIRST_TICKS = 20;
 	public static final int STUN_TICKS = 60;
 	public static final int STUN_IMMUNITY_TICKS = 100;
+	public static final float TURN_DEGREES_PER_TICK = 1.5F;
+	public static final int GROW_TICKS = 60;
+	// Branch hearts hang well outside the trunk's box; while they're open, attacks aimed there count.
+	private static final float OPEN_BRANCH_PICK_RADIUS = 4.0F;
 
 	private static final EntityDataAccessor<Integer> COPPER_STAGE = SynchedEntityData.defineId(Elderwood.class,
 			EntityDataSerializers.INT);
@@ -78,6 +83,8 @@ public class Elderwood extends Monster {
 			EntityDataSerializers.BOOLEAN);
 	private static final EntityDataAccessor<Boolean> STUNNED = SynchedEntityData.defineId(Elderwood.class,
 			EntityDataSerializers.BOOLEAN);
+	private static final EntityDataAccessor<Boolean> GROWING = SynchedEntityData.defineId(Elderwood.class,
+			EntityDataSerializers.BOOLEAN);
 
 	public enum SlamPhase {
 		NONE, WINDUP, STUCK
@@ -86,11 +93,11 @@ public class Elderwood extends Monster {
 	private int slamTicks;
 	private int slamPhaseAge;
 	private int slamCooldown;
-	private float slamYaw;
 	private int crackCooldown;
 	private int resinCooldown = RESIN_FIRST_TICKS;
 	private int stunTicks;
 	private int stunImmunity;
+	private int growAge;
 	private final ServerBossEvent bossEvent = new ServerBossEvent(Mth.createInsecureUUID(this.random), this.getDisplayName(),
 			BossEvent.BossBarColor.YELLOW, BossEvent.BossBarOverlay.PROGRESS);
 
@@ -102,19 +109,13 @@ public class Elderwood extends Monster {
 	public static AttributeSupplier.Builder createAttributes() {
 		return Monster.createMonsterAttributes()
 				.add(Attributes.MAX_HEALTH, 100.0)
-				.add(Attributes.MOVEMENT_SPEED, 0.25)
+				.add(Attributes.MOVEMENT_SPEED, 0.0)
 				.add(Attributes.KNOCKBACK_RESISTANCE, 1.0)
-				.add(Attributes.FOLLOW_RANGE, 32.0)
-				.add(Attributes.STEP_HEIGHT, 1.5);
+				.add(Attributes.FOLLOW_RANGE, 32.0);
 	}
 
 	@Override
 	protected void registerGoals() {
-		this.goalSelector.addGoal(0, new FloatGoal(this));
-		this.goalSelector.addGoal(2, new ElderwoodSlamGoal(this));
-		this.goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(this, 0.6));
-		this.goalSelector.addGoal(7, new LookAtPlayerGoal(this, Player.class, 16.0F));
-		this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
 		this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Player.class, true));
 	}
 
@@ -126,6 +127,7 @@ public class Elderwood extends Monster {
 		builder.define(SLAM_PHASE, SlamPhase.NONE.ordinal());
 		builder.define(SLAM_RIGHT_ARM, true);
 		builder.define(STUNNED, false);
+		builder.define(GROWING, false);
 	}
 
 	/** The collar's oxidation stage, which its copper plates show. */
@@ -159,13 +161,12 @@ public class Elderwood extends Monster {
 		if (this.isDestroyed(heart)) {
 			return false;
 		}
-		// While it's bent over its stuck arm, only that arm's heart is in reach.
-		if (this.getSlamPhase() == SlamPhase.STUCK) {
-			return this.isStuckArm(heart);
+		if (this.isGrowing()) {
+			return false;
 		}
-		// Its arms only hang still enough to hit while it's stunned.
+		// A branch heart is out of reach until its branch is planted, or the stun makes both droop.
 		if (heart.isArm()) {
-			return this.isStunned();
+			return this.isStunned() || this.isStuckArm(heart);
 		}
 		return heart != ElderwoodHeart.CORE || this.isCoreOpen();
 	}
@@ -180,19 +181,32 @@ public class Elderwood extends Monster {
 		return this.entityData.get(STUNNED);
 	}
 
+	public boolean isGrowing() {
+		return this.entityData.get(GROWING);
+	}
+
+	/** Makes it rise out of its stump: until it's grown it can't be hurt and does nothing. */
+	public void startGrowing() {
+		this.entityData.set(GROWING, true);
+		this.playSound(SoundEvents.CREAKING_SPAWN, 2.0F, 0.5F);
+	}
+
+	/** How much of its full size it has reached, for the client. */
+	public float getGrowth(float partialTicks) {
+		return this.isGrowing() ? Mth.clamp((this.growAge + partialTicks) / GROW_TICKS, 0.0F, 1.0F) : 1.0F;
+	}
+
 	/**
-	 * Its own resin, hit back at it, stuns it: it stops gazing, turning and attacking, and its arms
-	 * hang with their hearts open. It can't be stunned again right away.
+	 * Its own resin, hit back at it, stuns it: it stops gazing, turning and attacking, and its
+	 * branches droop with their hearts open. It can't be stunned again right away.
 	 */
 	public void stun() {
-		if (this.isStunned() || this.stunImmunity > 0) {
+		if (this.isStunned() || this.isGrowing() || this.stunImmunity > 0) {
 			return;
 		}
 		this.entityData.set(STUNNED, true);
 		this.entityData.set(SLAM_PHASE, SlamPhase.NONE.ordinal());
 		this.stunTicks = STUN_TICKS;
-		this.slamYaw = this.yBodyRot;
-		this.getNavigation().stop();
 		this.playSound(SoundEvents.CREAKING_FREEZE, 1.5F, 0.6F);
 	}
 
@@ -205,16 +219,14 @@ public class Elderwood extends Monster {
 	}
 
 	public boolean canStartSlam() {
-		return !this.isStunned() && this.getSlamPhase() == SlamPhase.NONE && this.slamCooldown == 0;
+		return !this.isStunned() && !this.isGrowing() && this.getSlamPhase() == SlamPhase.NONE && this.slamCooldown == 0;
 	}
 
-	/** Raises an arm; after the wind-up it strikes the ground in front, where the Elderwood faces now. */
+	/** Raises a branch; after the wind-up it strikes the ground in front, where the Elderwood faces now. */
 	public void startSlam() {
 		if (!this.canStartSlam()) {
 			return;
 		}
-		this.getNavigation().stop();
-		this.slamYaw = this.yBodyRot;
 		this.slamTicks = 0;
 		this.entityData.set(SLAM_PHASE, SlamPhase.WINDUP.ordinal());
 		this.playSound(SoundEvents.CREAKING_ATTACK, 1.5F, 0.6F);
@@ -223,18 +235,34 @@ public class Elderwood extends Monster {
 	@Override
 	protected void customServerAiStep(ServerLevel level) {
 		super.customServerAiStep(level);
+		float yaw = this.yBodyRot;
+		if (this.isGrowing()) {
+			this.pushOutOfTheTrunk(level);
+			if (this.growAge >= GROW_TICKS) {
+				this.entityData.set(GROWING, false);
+			}
+			this.face(yaw);
+			return;
+		}
 		if (this.stunImmunity > 0) {
 			this.stunImmunity--;
 		}
+		// It turns only while it's free: a planted branch or a stun holds it where it faced.
+		if (!this.isStunned() && this.getSlamPhase() == SlamPhase.NONE && this.getTarget() != null) {
+			yaw = Mth.approachDegrees(yaw, this.yawTo(this.getTarget()), TURN_DEGREES_PER_TICK);
+		}
+		this.face(yaw);
 		if (this.isStunned()) {
-			this.holdStill();
 			if (--this.stunTicks <= 0) {
 				this.entityData.set(STUNNED, false);
 				this.stunImmunity = STUN_IMMUNITY_TICKS;
 			}
 		} else {
 			this.tickSlam(level);
-			// Bent over its stuck arm, the lens faces the ground.
+			if (this.getTarget() != null && this.isInSlamArc(this.getTarget())) {
+				this.startSlam();
+			}
+			// While a branch is planted it strains at it and does not gaze.
 			if (this.getSlamPhase() != SlamPhase.STUCK && this.getTarget() instanceof Player player && this.isWatching(player)) {
 				Petrification.expose(player, this.isCoreOpen() ? CORE_GAZE_RATE : GAZE_RATE);
 				this.tickResin(level, player);
@@ -252,8 +280,6 @@ public class Elderwood extends Monster {
 		if (phase == SlamPhase.NONE) {
 			return;
 		}
-		// The strike lands where it aimed when it raised the arm, so stepping aside dodges it.
-		this.holdStill();
 		this.slamTicks++;
 		if (phase == SlamPhase.WINDUP && this.slamTicks >= SLAM_WINDUP_TICKS) {
 			this.strike(level);
@@ -266,11 +292,30 @@ public class Elderwood extends Monster {
 		}
 	}
 
-	private void holdStill() {
-		this.getNavigation().stop();
-		this.setYRot(this.slamYaw);
-		this.yBodyRot = this.slamYaw;
-		this.yHeadRot = this.slamYaw;
+	// The whole trunk turns as one: there's no head to look around with.
+	private void face(float yaw) {
+		this.setYRot(yaw);
+		this.yBodyRot = yaw;
+		this.yHeadRot = yaw;
+	}
+
+	private float yawTo(Entity target) {
+		return (float) (Mth.atan2(target.getZ() - this.getZ(), target.getX() - this.getX()) * Mth.RAD_TO_DEG) - 90.0F;
+	}
+
+	// The strike lands straight ahead, so it only slams at a player it's roughly facing.
+	private boolean isInSlamArc(Entity target) {
+		return this.distanceToSqr(target) <= SLAM_REACH * SLAM_REACH
+				&& Math.abs(Mth.degreesDifference(this.yBodyRot, this.yawTo(target))) <= SLAM_ARC_DEGREES;
+	}
+
+	// The trunk becomes solid once it's grown; nobody should end up inside it.
+	private void pushOutOfTheTrunk(ServerLevel level) {
+		for (Entity entity : level.getEntities(this, this.getBoundingBox(), e -> !e.isSpectator() && e.isPushable())) {
+			Vec3 away = new Vec3(entity.getX() - this.getX(), 0.0, entity.getZ() - this.getZ());
+			Vec3 push = (away.lengthSqr() < 1.0E-4 ? Vec3.directionFromRotation(0.0F, this.yBodyRot) : away.normalize()).scale(0.2);
+			entity.push(push.x, 0.0, push.z);
+		}
 	}
 
 	/** At range, with the player in sight, it throws burning resin every few seconds. */
@@ -286,13 +331,13 @@ public class Elderwood extends Monster {
 		Vec3 from = this.getEyePosition();
 		Vec3 direction = target.getEyePosition().subtract(from).normalize();
 		BurningResin resin = new BurningResin(level, this, direction);
-		resin.setPos(from.add(direction.scale(1.5)));
+		resin.setPos(from.add(direction.scale(2.0)));
 		level.addFreshEntity(resin);
 		this.playSound(SoundEvents.BLAZE_SHOOT, 1.5F, 0.6F);
 	}
 
 	private void strike(ServerLevel level) {
-		Vec3 point = this.position().add(Vec3.directionFromRotation(0.0F, this.slamYaw).scale(SLAM_DISTANCE));
+		Vec3 point = this.position().add(Vec3.directionFromRotation(0.0F, this.yBodyRot).scale(SLAM_DISTANCE));
 		BlockPos ground = BlockPos.containing(point).below();
 		level.levelEvent(LevelEvent.PARTICLES_AND_SOUND_DESTROY_BLOCK, ground, Block.getId(level.getBlockState(ground)));
 		AABB area = AABB.ofSize(point.add(0.0, 1.0, 0.0), SLAM_RADIUS * 2.0, 3.0, SLAM_RADIUS * 2.0);
@@ -318,6 +363,9 @@ public class Elderwood extends Monster {
 	public void tick() {
 		super.tick();
 		this.slamPhaseAge++;
+		if (this.isGrowing()) {
+			this.growAge++;
+		}
 		if (this.crackCooldown > 0) {
 			this.crackCooldown--;
 		}
@@ -336,6 +384,9 @@ public class Elderwood extends Monster {
 	public boolean hurtServer(ServerLevel level, DamageSource source, float damage) {
 		if (source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
 			return super.hurtServer(level, source, damage);
+		}
+		if (this.isGrowing()) {
+			return false;
 		}
 		// Only players can hurt it, and only through a heart that's open to them.
 		Optional<HeartHit> hit = HeartHit.of(source, damage, false);
@@ -362,6 +413,48 @@ public class Elderwood extends Monster {
 		}
 		level.broadcastDamageEvent(this, source);
 		return true;
+	}
+
+	// Rooted: nothing moves it sideways, not even a piston. It still settles onto the ground.
+	@Override
+	public void move(MoverType moverType, Vec3 delta) {
+		if (moverType != MoverType.PISTON) {
+			super.move(moverType, new Vec3(0.0, delta.y, 0.0));
+		}
+	}
+
+	@Override
+	public boolean canBeCollidedWith(Entity other) {
+		return this.isAlive() && !this.isGrowing();
+	}
+
+	@Override
+	public boolean isPushable() {
+		return false;
+	}
+
+	@Override
+	protected void doPush(Entity entity) {
+	}
+
+	@Override
+	public boolean isPushedByFluid() {
+		return false;
+	}
+
+	@Override
+	public PushReaction getPistonPushReaction() {
+		return PushReaction.IGNORE_ENTITY;
+	}
+
+	@Override
+	protected boolean canRide(Entity vehicle) {
+		return false;
+	}
+
+	@Override
+	public float getPickRadius() {
+		return this.isStunned() || this.getSlamPhase() == SlamPhase.STUCK ? OPEN_BRANCH_PICK_RADIUS : 0.0F;
 	}
 
 	@Override

@@ -13,11 +13,13 @@ import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.WeatheringCopper;
 
 public class ElderwoodRenderer extends MobRenderer<Elderwood, ElderwoodRenderState, ElderwoodModel> {
 	public static final ModelLayerLocation LAYER = new ModelLayerLocation(VanillaReforged.id("elderwood"), "main");
-	public static final float SCALE = 1.4F;
+	// A sprout this fraction of its size breaks out of the stump and grows to full height.
+	private static final float SPROUT = 0.15F;
 	private static final Map<WeatheringCopper.WeatherState, Identifier> TEXTURES = new EnumMap<>(WeatheringCopper.WeatherState.class);
 	// Only the lens is opaque in this texture.
 	private static final Identifier LENS = texture("elderwood_lens");
@@ -29,7 +31,7 @@ public class ElderwoodRenderer extends MobRenderer<Elderwood, ElderwoodRenderSta
 	}
 
 	public ElderwoodRenderer(EntityRendererProvider.Context context) {
-		super(context, new ElderwoodModel(context.bakeLayer(LAYER)), 0.9F * SCALE);
+		super(context, new ElderwoodModel(context.bakeLayer(LAYER)), 2.0F);
 		this.addLayer(new ElderwoodLensLayer(this, LENS));
 		this.addLayer(new ElderwoodHeartsLayer(this));
 	}
@@ -56,12 +58,13 @@ public class ElderwoodRenderer extends MobRenderer<Elderwood, ElderwoodRenderSta
 		state.slamRightArm = entity.isSlammingRightArm();
 		state.slamPhaseAge = entity.getSlamPhaseAge() + partialTicks;
 		state.stunned = entity.isStunned();
-		state.canMove = true;
+		state.growth = entity.getGrowth(partialTicks);
 	}
 
 	@Override
 	protected void scale(ElderwoodRenderState state, PoseStack poseStack) {
-		poseStack.scale(SCALE, SCALE, SCALE);
+		float size = Mth.lerp(state.growth, SPROUT, 1.0F);
+		poseStack.scale(size, size, size);
 	}
 
 	@Override
