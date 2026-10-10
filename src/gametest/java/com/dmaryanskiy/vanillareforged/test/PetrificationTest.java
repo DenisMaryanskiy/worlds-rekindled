@@ -9,6 +9,9 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameType;
 
@@ -21,8 +24,12 @@ public class PetrificationTest {
 		Petrification.expose(player, Petrification.FULL / 2);
 
 		helper.assertValueEqual(Petrification.getProgress(player), 0.5F, "progress");
+		helper.assertValueEqual(player.getAttributeValue(Attributes.MOVEMENT_SPEED), baseSpeed, "movement speed at half");
+
+		Petrification.expose(player, Petrification.FULL / 4);
+
 		helper.assertValueEqual(player.getAttributeValue(Attributes.MOVEMENT_SPEED),
-				baseSpeed * (1.0 - Petrification.MAX_SLOWDOWN * 0.5F), "movement speed");
+				baseSpeed * (1.0 - Petrification.MAX_SLOWDOWN * 0.5F), "movement speed at three quarters");
 		helper.succeed();
 	}
 
@@ -78,8 +85,30 @@ public class PetrificationTest {
 		});
 	}
 
-	@GameTest(maxTicks = Petrification.PETRIFIED_TICKS + 40)
-	public void petrifiedPlayerCracksFreeAtHalf(GameTestHelper helper) {
+	// A plain mock player in the level ticks, which raising a shield needs.
+	@GameTest(maxTicks = 40)
+	public void aShieldRaisedTowardsTheGazeBlocksIt(GameTestHelper helper) {
+		Player player = helper.makeMockPlayer(GameType.SURVIVAL);
+		player.snapTo(helper.absoluteVec(new Vec3(3.5, 1.0, 3.5)), 0.0F, 0.0F);
+		helper.getLevel().addFreshEntity(player);
+		player.setItemInHand(InteractionHand.OFF_HAND, new ItemStack(Items.SHIELD));
+		player.startUsingItem(InteractionHand.OFF_HAND);
+		// It looks south, so a gaze from the south meets the shield and one from the north doesn't.
+		Vec3 inFront = player.getEyePosition().add(0.0, 2.0, 6.0);
+		Vec3 behind = player.getEyePosition().add(0.0, 2.0, -6.0);
+
+		helper.runAfterDelay(10, () -> {
+			helper.assertTrue(player.isBlocking(), "The shield should be up");
+			Petrification.expose(player, 10, inFront);
+			helper.assertValueEqual(Petrification.getMeter(player), 0, "meter behind the shield");
+			Petrification.expose(player, 10, behind);
+			helper.assertValueEqual(Petrification.getMeter(player), 10, "meter with the gaze at its back");
+			helper.succeed();
+		});
+	}
+
+	@GameTest(maxTicks = Petrification.PETRIFIED_TICKS + Petrification.IMMUNE_TICKS + 40)
+	public void petrifiedPlayerCracksFreeAndGetsABreather(GameTestHelper helper) {
 		Player player = helper.makeMockServerPlayer(GameType.SURVIVAL);
 		Petrification.expose(player, Petrification.FULL);
 		tickEachTick(helper, player);
@@ -88,8 +117,15 @@ public class PetrificationTest {
 				.thenExecuteAfter(Petrification.PETRIFIED_TICKS - 5, () ->
 						helper.assertTrue(Petrification.isPetrified(player), "still petrified even without a gaze"))
 				.thenWaitUntil(() -> helper.assertFalse(Petrification.isPetrified(player), "Player should crack free"))
-				.thenExecute(() -> helper.assertTrue(Petrification.getMeter(player) <= Petrification.FULL / 2,
-						"Cracking free should leave the meter at most half full"))
+				.thenExecute(() -> {
+					helper.assertValueEqual(Petrification.getMeter(player), 0, "meter after cracking free");
+					Petrification.expose(player, Petrification.FULL / 2);
+					helper.assertValueEqual(Petrification.getMeter(player), 0, "meter under a gaze right after cracking free");
+				})
+				.thenExecuteAfter(Petrification.IMMUNE_TICKS, () -> {
+					Petrification.expose(player, Petrification.FULL / 2);
+					helper.assertValueEqual(Petrification.getMeter(player), Petrification.FULL / 2, "meter once the breather is over");
+				})
 				.thenSucceed();
 	}
 
