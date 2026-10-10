@@ -7,6 +7,8 @@ import com.dmaryanskiy.vanillareforged.heart.HeartHit;
 import com.dmaryanskiy.vanillareforged.petrification.Petrification;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.BlockParticleOption;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -69,7 +71,10 @@ public class Elderwood extends Monster {
 	public static final int STUN_TICKS = 60;
 	public static final int STUN_IMMUNITY_TICKS = 100;
 	public static final float TURN_DEGREES_PER_TICK = 1.5F;
-	public static final int GROW_TICKS = 60;
+	public static final int GROW_STAGES = 3;
+	public static final int GROW_STAGE_TICKS = 20;
+	public static final int GROW_TICKS = GROW_STAGES * GROW_STAGE_TICKS;
+	private static final float GROW_SNAP_TICKS = 3.0F;
 	// Branch hearts hang well outside the trunk's box; while they're open, attacks aimed there count.
 	private static final float OPEN_BRANCH_PICK_RADIUS = 4.0F;
 
@@ -191,9 +196,21 @@ public class Elderwood extends Monster {
 		this.playSound(SoundEvents.CREAKING_SPAWN, 2.0F, 0.5F);
 	}
 
+	/** Which of its {@value #GROW_STAGES} sizes it has reached while growing, from 1. */
+	public int getGrowStage() {
+		return Math.min(this.growAge / GROW_STAGE_TICKS, GROW_STAGES - 1) + 1;
+	}
+
 	/** How much of its full size it has reached, for the client. */
 	public float getGrowth(float partialTicks) {
-		return this.isGrowing() ? Mth.clamp((this.growAge + partialTicks) / GROW_TICKS, 0.0F, 1.0F) : 1.0F;
+		if (!this.isGrowing()) {
+			return 1.0F;
+		}
+		// It doesn't grow smoothly: it bursts to each next size in a few ticks, then holds it.
+		int stage = this.getGrowStage();
+		float sinceBurst = this.growAge + partialTicks - (stage - 1) * GROW_STAGE_TICKS;
+		float snap = Mth.clamp(sinceBurst / GROW_SNAP_TICKS, 0.0F, 1.0F);
+		return Mth.lerp(snap, stage - 1.0F, stage) / GROW_STAGES;
 	}
 
 	/**
@@ -240,6 +257,8 @@ public class Elderwood extends Monster {
 			this.pushOutOfTheTrunk(level);
 			if (this.growAge >= GROW_TICKS) {
 				this.entityData.set(GROWING, false);
+			} else if (this.growAge > 0 && this.growAge % GROW_STAGE_TICKS == 0) {
+				this.burstToNextSize(level);
 			}
 			this.face(yaw);
 			return;
@@ -307,6 +326,16 @@ public class Elderwood extends Monster {
 	private boolean isInSlamArc(Entity target) {
 		return this.distanceToSqr(target) <= SLAM_REACH * SLAM_REACH
 				&& Math.abs(Mth.degreesDifference(this.yBodyRot, this.yawTo(target))) <= SLAM_ARC_DEGREES;
+	}
+
+	private void burstToNextSize(ServerLevel level) {
+		float size = this.getGrowStage() / (float) GROW_STAGES;
+		double height = this.getBbHeight() * size;
+		double width = this.getBbWidth() * size;
+		level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.PALE_OAK_LOG.defaultBlockState()),
+				this.getX(), this.getY() + height / 2.0, this.getZ(), (int) (120 * size), width / 2.0, height / 3.0, width / 2.0, 0.1);
+		this.playSound(SoundEvents.WOOD_BREAK, 2.0F, 0.6F);
+		this.playSound(SoundEvents.CREAKING_TWITCH, 2.0F, 0.4F + 0.15F * this.getGrowStage());
 	}
 
 	// The trunk becomes solid once it's grown; nobody should end up inside it.

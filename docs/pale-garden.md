@@ -269,9 +269,10 @@ iron/diamond gear: a huge, rooted tree fought by moving around it.
 - **Any copper block works, and it shows on the Elderwood** (kept): copper, exposed, weathered or
   oxidized, waxed or not. The woken tree's bands and plates take the collar's oxidation stage and
   keep it for the whole fight.
-- **It grows** over about 3 s, like a Warden digging out: the stump's blocks break and the trunk
-  rises. While growing it can't be hurt and doesn't attack. It faces the player who placed the
-  heart.
+- **It grows in three bursts** over 3 s, not smoothly: the stump's blocks break and a sprout a
+  third of its size stands in their place, then twice a second later it snaps to the next size
+  in a burst of wood splinters with a crack and a creak, reaching full size on the third. While
+  growing it can't be hurt and doesn't attack. It faces the player who placed the heart.
 - **Room to grow**: about 5 × 5 blocks around the stump and 10 up. Anything that isn't a full
   block (grass, flowers, snow, moss carpets) may stay and is left alone, as in the Watcher's
   pattern. If full blocks are in the way nothing is destroyed; the heart stays a block and the

@@ -54,6 +54,10 @@ public class ElderwoodTest {
 		helper.assertTrue(elderwood.isGrowing(), "It should start as a sprout");
 		helper.assertFalse(hit(helper, elderwood, ElderwoodHeart.RIGHT_CHEST, elderwood.getLookAngle()), "It can't be hurt while growing");
 		helper.assertFalse(elderwood.canBeCollidedWith(null), "It isn't solid until it's grown");
+		helper.assertValueEqual(elderwood.getGrowStage(), 1, "size right after waking");
+		helper.runAfterDelay(Elderwood.GROW_STAGE_TICKS + 2, () -> helper.assertValueEqual(elderwood.getGrowStage(), 2, "size after one burst"));
+		helper.runAfterDelay(2 * Elderwood.GROW_STAGE_TICKS + 2,
+				() -> helper.assertValueEqual(elderwood.getGrowStage(), 3, "size after two bursts"));
 		helper.succeedWhen(() -> {
 			helper.assertFalse(elderwood.isGrowing(), "It should finish growing");
 			helper.assertTrue(elderwood.canBeCollidedWith(null), "The grown trunk should be solid");

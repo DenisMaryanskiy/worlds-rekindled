@@ -13,13 +13,10 @@ import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.WeatheringCopper;
 
 public class ElderwoodRenderer extends MobRenderer<Elderwood, ElderwoodRenderState, ElderwoodModel> {
 	public static final ModelLayerLocation LAYER = new ModelLayerLocation(VanillaReforged.id("elderwood"), "main");
-	// A sprout this fraction of its size breaks out of the stump and grows to full height.
-	private static final float SPROUT = 0.15F;
 	private static final Map<WeatheringCopper.WeatherState, Identifier> TEXTURES = new EnumMap<>(WeatheringCopper.WeatherState.class);
 	// Only the lens is opaque in this texture.
 	private static final Identifier LENS = texture("elderwood_lens");
@@ -63,7 +60,7 @@ public class ElderwoodRenderer extends MobRenderer<Elderwood, ElderwoodRenderSta
 
 	@Override
 	protected void scale(ElderwoodRenderState state, PoseStack poseStack) {
-		float size = Mth.lerp(state.growth, SPROUT, 1.0F);
+		float size = Math.max(state.growth, 0.02F);
 		poseStack.scale(size, size, size);
 	}
 
