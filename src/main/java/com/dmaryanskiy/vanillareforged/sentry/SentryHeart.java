@@ -21,15 +21,8 @@ public final class SentryHeart {
 	}
 
 	/** Whether a hit cracks the heart: a player's cracking hit, or any mob's arrow or trident, on the heart. */
-	public static boolean isCrackedBy(HeartwoodSentry sentry, DamageSource source, float damage) {
-		return HeartHit.of(source, damage, true)
-				.filter(hit -> hit.comesFromTheFrontOf(forward(sentry)) && hit.passesThrough(box(sentry)))
-				.isPresent();
-	}
-
-	/** Whether a player's swing landed on the heart but was too weak to crack it. */
-	public static boolean isWeaklyHitBy(HeartwoodSentry sentry, DamageSource source, float damage) {
-		return HeartHit.ofWeakSwing(source, damage)
+	public static boolean isCrackedBy(HeartwoodSentry sentry, DamageSource source) {
+		return HeartHit.of(source, true)
 				.filter(hit -> hit.comesFromTheFrontOf(forward(sentry)) && hit.passesThrough(box(sentry)))
 				.isPresent();
 	}

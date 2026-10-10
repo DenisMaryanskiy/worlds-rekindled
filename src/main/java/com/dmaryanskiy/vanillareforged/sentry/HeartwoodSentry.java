@@ -1,7 +1,5 @@
 package com.dmaryanskiy.vanillareforged.sentry;
 
-import com.dmaryanskiy.vanillareforged.heart.HeartHit;
-
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -237,10 +235,7 @@ public class HeartwoodSentry extends AbstractGolem {
 			this.setTarget(shooter);
 		}
 		// Only through the heart: player hits and mob projectiles; mob melee and explosions do nothing.
-		if (this.crackCooldown > 0 || !SentryHeart.isCrackedBy(this, source, damage)) {
-			if (SentryHeart.isWeaklyHitBy(this, source, damage)) {
-				HeartHit.warnWeakSwing(this, source);
-			}
+		if (this.crackCooldown > 0 || !SentryHeart.isCrackedBy(this, source)) {
 			return false;
 		}
 		this.crackCooldown = CRACK_COOLDOWN_TICKS;

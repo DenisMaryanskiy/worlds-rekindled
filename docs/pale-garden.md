@@ -97,7 +97,7 @@ slowing it, done.
 - One crack per:
   - fully charged arrow on the heart (crossbow bolts count; partly charged arrows bounce off);
   - thrown trident on the heart;
-  - full-strength sword hit on the heart (riskier because of the Sentry's reach and launch).
+  - sword hit on the heart, at any charge (riskier because of the Sentry's reach and launch).
     Swords are the item tag `vanillareforged:cracks_sentry_hearts`, so packs can add weapons.
 - At most one crack per 0.5 s, so multishot volleys and quick double hits count once.
 - Crack count:
@@ -339,11 +339,11 @@ all around the trunk, so the player has to keep moving between the two.
     builds before or during the fight;
   - **the Pale Mask** (see Pale Mask).
 - **Hearts**: it can only be hurt through its hearts, each with crack stages like the Sentry's and
-  traced the same way (kept: a full-strength sword, a charged arrow or a trident, at most one
+  traced the same way (kept: a sword, a charged arrow or a trident, at most one
   crack per 0.5 s, players only). A glowing heart is one that can be hit right now; a destroyed
-  heart is a dark husk. A swing that lands on an open heart before the sword has recharged (it
-  needs about 90%, 0.55 s for a sword) used to look like a miss; it now gives a dull knock and
-  "A heart only cracks under a full-strength swing" above the hotbar, on the Sentry too.
+  heart is a dark husk. Any sword swing counts, however charged: the first version asked for a
+  full-strength swing, which in a fight read as misses with the crosshair on the heart. The
+  half-second between cracks is what paces it, on the Sentry too.
   **Seven hearts, 23 cracks**; the boss bar shows how many are left:
   - **4 trunk hearts** (3 cracks each) at sword height: front, back, left and right. **Always
     open**, each from its own side. The danger is where you have to stand: the front one is in

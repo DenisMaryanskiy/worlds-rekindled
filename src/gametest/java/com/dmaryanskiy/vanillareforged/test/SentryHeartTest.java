@@ -55,13 +55,13 @@ public class SentryHeartTest {
 	}
 
 	@GameTest(environment = MIDNIGHT)
-	public void weakSwordSwingDoesNotCrack(GameTestHelper helper) {
+	public void aQuickSwordSwingCracksToo(GameTestHelper helper) {
 		HeartwoodSentry sentry = sentry(helper);
 		Player player = swordsman(helper, IN_FRONT, 180.0F);
 
 		sentry.hurtServer(helper.getLevel(), helper.getLevel().damageSources().playerAttack(player), 0.2F * fullDamage(player));
 
-		helper.assertValueEqual(sentry.getCracks(), 0, "cracks");
+		helper.assertValueEqual(sentry.getCracks(), 1, "cracks");
 		helper.succeed();
 	}
 
