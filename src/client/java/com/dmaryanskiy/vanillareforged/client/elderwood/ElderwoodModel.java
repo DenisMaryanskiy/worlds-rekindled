@@ -42,8 +42,8 @@ public class ElderwoodModel extends EntityModel<ElderwoodRenderState> {
 	public void setupAnim(ElderwoodRenderState state) {
 		super.setupAnim(state);
 		float sway = Mth.sin(state.ageInTicks * 0.04F) * 0.02F;
-		this.pose(this.rightBranch, -1.0F, state, state.slamRightArm, sway);
-		this.pose(this.leftBranch, 1.0F, state, !state.slamRightArm, sway);
+		this.pose(this.rightBranch, -1.0F, state, state.slamRightBranch, sway);
+		this.pose(this.leftBranch, 1.0F, state, !state.slamRightBranch, sway);
 	}
 
 	private void pose(ModelPart branch, float side, ElderwoodRenderState state, boolean slamming, float sway) {

@@ -359,7 +359,7 @@ all around the trunk, so the player has to keep moving between the two.
   burst out: about 6 damage (the brittle bonus applies) and a toss into the air. Moving out of the
   cracked patch dodges it, like evoker fangs. It keeps circling and camping from being free.
 - **Burning resin** (kept): at a player in the gaze cone beyond the slam's reach it throws a glob
-  of burning resin from the crown, the first after 1 s and then every 3 s. A hit deals **5 damage
+  of burning resin from the lens, the first after 1 s and then every 3 s. A hit deals **5 damage
   and 5 s of fire**; blocks never catch fire. Its own look: a molten amber glob with a white-hot
   core, without vanilla's fire overlay.
 - **Hitting the resin back** (kept): a melee hit sends it where the player looks, like a ghast's
@@ -400,15 +400,16 @@ The rework into the Elderwood:
 2. **The tree**: the rooted, solid, slowly turning entity at its new size with the placeholder
    tree model, the stump pattern, growing, and the room and darkness messages. Done. Notes:
    - its collision box is the trunk (3 × 3 × 10); the crown and branches are only drawn;
-   - until steps 3 and 4 it keeps the Watcher's five hearts on the new body (two low on the
-     trunk's front, one on each main branch, the core under the lens), its all-round gaze and
-     its slam, which for now only starts at a player within 40° of straight ahead;
+   - until step 4 it keeps the Watcher's slam, which for now only starts at a player within
+     40° of straight ahead;
    - branch hearts hang outside the collision box, so while they're open (planted branch or
      stun) attacks aimed within 4 blocks of the box count as aimed at the tree. An arrow that
      misses the heart in that zone bounces off thin air; a part entity per branch heart would
      fix that if it bothers in play.
 3. **Hearts and gaze**: the seven hearts around the trunk, the gaze cone, and resin and stun
-   adjusted to the new body.
+   adjusted to the new body. Done. A trunk heart only opens to a hit that lands on its own side
+   of the trunk. The resin leaves from the lens, not the crown: it's only thrown at a player the
+   lens sees, so it always starts on the trunk's front.
 4. **Branch slam**: the longer slam, the planted branch bringing its heart down, and smashing
    soft cover.
 5. **Roots and dormancy**: the root eruption and falling dormant.

@@ -1,6 +1,8 @@
 package com.dmaryanskiy.vanillareforged.test;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.dmaryanskiy.vanillareforged.ModEntities;
 import com.dmaryanskiy.vanillareforged.ModItems;
@@ -52,7 +54,7 @@ public class ElderwoodTest {
 			helper.assertBlockPresent(Blocks.AIR, pos);
 		}
 		helper.assertTrue(elderwood.isGrowing(), "It should start as a sprout");
-		helper.assertFalse(hit(helper, elderwood, ElderwoodHeart.RIGHT_CHEST, elderwood.getLookAngle()), "It can't be hurt while growing");
+		helper.assertFalse(hit(helper, elderwood, ElderwoodHeart.TRUNK_FRONT, elderwood.getLookAngle()), "It can't be hurt while growing");
 		helper.assertFalse(elderwood.canBeCollidedWith(null), "It isn't solid until it's grown");
 		helper.assertValueEqual(elderwood.getGrowStage(), 1, "size right after waking");
 		helper.runAfterDelay(Elderwood.GROW_STAGE_TICKS + 2, () -> helper.assertValueEqual(elderwood.getGrowStage(), 2, "size after one burst"));
@@ -178,22 +180,60 @@ public class ElderwoodTest {
 	}
 
 	@GameTest(environment = MIDNIGHT)
-	public void swordOnAChestHeartCracksIt(GameTestHelper helper) {
+	public void swordOnATrunkHeartCracksIt(GameTestHelper helper) {
 		Elderwood elderwood = stillElderwood(helper);
 
-		boolean hurt = hit(helper, elderwood, ElderwoodHeart.RIGHT_CHEST, FRONT);
+		boolean hurt = hit(helper, elderwood, ElderwoodHeart.TRUNK_FRONT, FRONT);
 
-		helper.assertTrue(hurt, "A sword hit on a chest heart should land");
-		helper.assertValueEqual(elderwood.getCracks(ElderwoodHeart.RIGHT_CHEST), 1, "right chest cracks");
-		helper.assertValueEqual(elderwood.getCracks(ElderwoodHeart.LEFT_CHEST), 0, "left chest cracks");
+		helper.assertTrue(hurt, "A sword hit on a trunk heart should land");
+		helper.assertValueEqual(elderwood.getCracks(ElderwoodHeart.TRUNK_FRONT), 1, "front heart cracks");
+		helper.assertValueEqual(elderwood.getCracks(ElderwoodHeart.TRUNK_RIGHT), 0, "right heart cracks");
 		helper.succeed();
 	}
 
-	@GameTest(environment = MIDNIGHT)
-	public void chestHeartsCannotBeHitFromBehind(GameTestHelper helper) {
+	// Facing south, its right is to the west.
+	@GameTest(environment = MIDNIGHT, maxTicks = 80)
+	public void eachTrunkHeartOpensOnlyFromItsOwnSide(GameTestHelper helper) {
 		Elderwood elderwood = stillElderwood(helper);
+		Map<ElderwoodHeart, Vec3> sides = new LinkedHashMap<>();
+		sides.put(ElderwoodHeart.TRUNK_FRONT, FRONT);
+		sides.put(ElderwoodHeart.TRUNK_BACK, FRONT.scale(-1.0));
+		sides.put(ElderwoodHeart.TRUNK_RIGHT, new Vec3(-1.0, 0.0, 0.0));
+		sides.put(ElderwoodHeart.TRUNK_LEFT, new Vec3(1.0, 0.0, 0.0));
 
-		helper.assertFalse(hit(helper, elderwood, ElderwoodHeart.RIGHT_CHEST, FRONT.scale(-1.0)), "The body shields its hearts from behind");
+		GameTestSequence sequence = helper.startSequence();
+		sides.forEach((heart, side) -> sequence.thenExecuteAfter(12, () -> {
+			helper.assertFalse(hit(helper, elderwood, heart, side.scale(-1.0)), heart + " shouldn't open through the trunk");
+			helper.assertTrue(hit(helper, elderwood, heart, side), heart + " should open from its own side");
+			helper.assertValueEqual(elderwood.getCracks(heart), 1, heart + " cracks");
+		}));
+		sequence.thenSucceed();
+	}
+
+	@GameTest(environment = MIDNIGHT, maxTicks = 40)
+	public void itsGazeMissesAPlayerBehindIt(GameTestHelper helper) {
+		Elderwood elderwood = facingSouth(helper.spawn(ModEntities.ELDERWOOD, ELDERWOOD));
+		Player player = helper.makeMockServerPlayer(GameType.SURVIVAL);
+		player.snapTo(helper.absoluteVec(ELDERWOOD.add(0.5, 0.0, -7.0)), 0.0F, 0.0F);
+		elderwood.setTarget(player);
+
+		helper.runAfterDelay(20, () -> {
+			helper.assertFalse(elderwood.isWatching(player), "The lens shouldn't see behind the trunk");
+			helper.assertValueEqual(Petrification.getMeter(player), 0, "meter behind it");
+			helper.succeed();
+		});
+	}
+
+	@GameTest(environment = MIDNIGHT)
+	public void theLensSeesSixtyDegreesToEachSide(GameTestHelper helper) {
+		Elderwood elderwood = stillElderwood(helper);
+		Player player = helper.makeMockServerPlayer(GameType.SURVIVAL);
+
+		// 45 degrees off straight ahead, then 72.
+		player.snapTo(helper.absoluteVec(ELDERWOOD.add(3.0, 0.0, 3.0)), 0.0F, 0.0F);
+		helper.assertTrue(elderwood.isWatching(player), "It should see a player 45 degrees to the side");
+		player.snapTo(helper.absoluteVec(ELDERWOOD.add(3.0, 0.0, 1.0)), 0.0F, 0.0F);
+		helper.assertFalse(elderwood.isWatching(player), "It shouldn't see a player 72 degrees to the side");
 		helper.succeed();
 	}
 
@@ -207,10 +247,10 @@ public class ElderwoodTest {
 	}
 
 	@GameTest(environment = MIDNIGHT)
-	public void anArmHeartIsOutOfReachUntilTheArmIsStuck(GameTestHelper helper) {
+	public void aBranchHeartIsOutOfReachUntilTheBranchIsPlanted(GameTestHelper helper) {
 		Elderwood elderwood = stillElderwood(helper);
 
-		helper.assertFalse(hit(helper, elderwood, ElderwoodHeart.RIGHT_ARM, FRONT), "A hanging arm's heart can't be hit");
+		helper.assertFalse(hit(helper, elderwood, ElderwoodHeart.RIGHT_BRANCH, FRONT), "A branch heart overhead can't be hit");
 		helper.succeed();
 	}
 
@@ -218,17 +258,17 @@ public class ElderwoodTest {
 	@GameTest(environment = MIDNIGHT, maxTicks = 60)
 	public void thePlantedBranchBringsItsHeartWithinReach(GameTestHelper helper) {
 		Elderwood elderwood = facingSouth(helper.spawn(ModEntities.ELDERWOOD, ELDERWOOD));
-		boolean rightArm = elderwood.isSlammingRightArm();
-		ElderwoodHeart arm = rightArm ? ElderwoodHeart.RIGHT_ARM : ElderwoodHeart.LEFT_ARM;
+		boolean right = elderwood.isSlammingRightBranch();
+		ElderwoodHeart branch = right ? ElderwoodHeart.RIGHT_BRANCH : ElderwoodHeart.LEFT_BRANCH;
 		elderwood.startSlam();
 
 		helper.startSequence()
-				.thenWaitUntil(() -> helper.assertTrue(elderwood.getSlamPhase() == Elderwood.SlamPhase.STUCK, "arm stuck"))
+				.thenWaitUntil(() -> helper.assertTrue(elderwood.getSlamPhase() == Elderwood.SlamPhase.STUCK, "branch planted"))
 				.thenExecute(() -> {
-					helper.assertTrue(arm.box(elderwood).getCenter().y - elderwood.getY() < 2.0, "The planted branch's heart should be low");
-					helper.assertTrue(hit(helper, elderwood, arm, new Vec3(rightArm ? -1.0 : 1.0, 0.0, 0.0)),
-							"The stuck arm's heart should be open, from the side too");
-					helper.assertValueEqual(elderwood.getCracks(arm), 1, "arm cracks");
+					helper.assertTrue(branch.box(elderwood).getCenter().y - elderwood.getY() < 2.0, "The planted branch's heart should be low");
+					helper.assertTrue(hit(helper, elderwood, branch, new Vec3(right ? -1.0 : 1.0, 0.0, 0.0)),
+							"The planted branch's heart should be open, from the side too");
+					helper.assertValueEqual(elderwood.getCracks(branch), 1, "branch cracks");
 				})
 				.thenSucceed();
 	}
@@ -265,7 +305,7 @@ public class ElderwoodTest {
 		elderwood.startSlam();
 
 		helper.startSequence()
-				.thenWaitUntil(() -> helper.assertTrue(elderwood.getSlamPhase() == Elderwood.SlamPhase.STUCK, "arm stuck"))
+				.thenWaitUntil(() -> helper.assertTrue(elderwood.getSlamPhase() == Elderwood.SlamPhase.STUCK, "branch planted"))
 				.thenExecute(() -> {
 					helper.assertTrue(player.getHealth() < player.getMaxHealth() - Elderwood.SLAM_DAMAGE,
 							"A petrified player should take more than the slam's base damage");
@@ -283,7 +323,7 @@ public class ElderwoodTest {
 		elderwood.startSlam();
 
 		helper.startSequence()
-				.thenWaitUntil(() -> helper.assertTrue(elderwood.getSlamPhase() == Elderwood.SlamPhase.STUCK, "arm stuck"))
+				.thenWaitUntil(() -> helper.assertTrue(elderwood.getSlamPhase() == Elderwood.SlamPhase.STUCK, "branch planted"))
 				.thenExecute(() -> helper.assertValueEqual(player.getHealth(), player.getMaxHealth(), "health beside the slam"))
 				.thenSucceed();
 	}
@@ -363,7 +403,7 @@ public class ElderwoodTest {
 	}
 
 	@GameTest(environment = MIDNIGHT, maxTicks = 60)
-	public void stunnedItStopsGazingAndItsArmHeartsOpen(GameTestHelper helper) {
+	public void stunnedItStopsGazingAndItsBranchHeartsOpen(GameTestHelper helper) {
 		Elderwood elderwood = facingSouth(helper.spawn(ModEntities.ELDERWOOD, ELDERWOOD));
 		// Close enough not to draw resin, far enough not to draw a slam.
 		Player player = helper.makeMockServerPlayer(GameType.SURVIVAL);
@@ -374,8 +414,8 @@ public class ElderwoodTest {
 		helper.runAfterDelay(20, () -> {
 			helper.assertTrue(elderwood.isStunned(), "still stunned");
 			helper.assertValueEqual(Petrification.getMeter(player), 0, "meter while it's stunned");
-			helper.assertTrue(hit(helper, elderwood, ElderwoodHeart.LEFT_ARM, FRONT), "A stunned Elderwood's arm hearts should be open");
-			helper.assertValueEqual(elderwood.getCracks(ElderwoodHeart.LEFT_ARM), 1, "left arm cracks");
+			helper.assertTrue(hit(helper, elderwood, ElderwoodHeart.LEFT_BRANCH, FRONT), "A stunned Elderwood's branch hearts should be open");
+			helper.assertValueEqual(elderwood.getCracks(ElderwoodHeart.LEFT_BRANCH), 1, "left branch cracks");
 			helper.succeed();
 		});
 	}

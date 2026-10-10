@@ -54,6 +54,8 @@ import net.minecraft.world.phys.Vec3;
  */
 public class Elderwood extends Monster {
 	public static final double GAZE_RANGE = 24.0;
+	// The lens only sees this far to each side of straight ahead.
+	public static final float GAZE_ARC_DEGREES = 60.0F;
 	public static final int GAZE_RATE = 2;
 	public static final int CORE_GAZE_RATE = 3;
 	public static final double SLAM_REACH = 5.5;
@@ -84,7 +86,7 @@ public class Elderwood extends Monster {
 			EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Integer> SLAM_PHASE = SynchedEntityData.defineId(Elderwood.class,
 			EntityDataSerializers.INT);
-	private static final EntityDataAccessor<Boolean> SLAM_RIGHT_ARM = SynchedEntityData.defineId(Elderwood.class,
+	private static final EntityDataAccessor<Boolean> SLAM_RIGHT_BRANCH = SynchedEntityData.defineId(Elderwood.class,
 			EntityDataSerializers.BOOLEAN);
 	private static final EntityDataAccessor<Boolean> STUNNED = SynchedEntityData.defineId(Elderwood.class,
 			EntityDataSerializers.BOOLEAN);
@@ -130,7 +132,7 @@ public class Elderwood extends Monster {
 		builder.define(COPPER_STAGE, WeatheringCopper.WeatherState.WEATHERED.ordinal());
 		builder.define(HEART_CRACKS, 0);
 		builder.define(SLAM_PHASE, SlamPhase.NONE.ordinal());
-		builder.define(SLAM_RIGHT_ARM, true);
+		builder.define(SLAM_RIGHT_BRANCH, true);
 		builder.define(STUNNED, false);
 		builder.define(GROWING, false);
 	}
@@ -170,16 +172,16 @@ public class Elderwood extends Monster {
 			return false;
 		}
 		// A branch heart is out of reach until its branch is planted, or the stun makes both droop.
-		if (heart.isArm()) {
-			return this.isStunned() || this.isStuckArm(heart);
+		if (heart.isBranch()) {
+			return this.isStunned() || this.isPlanted(heart);
 		}
 		return heart != ElderwoodHeart.CORE || this.isCoreOpen();
 	}
 
-	/** Whether this is the heart of the arm that's planted in the ground right now. */
-	public boolean isStuckArm(ElderwoodHeart heart) {
-		return heart.isArm() && this.getSlamPhase() == SlamPhase.STUCK
-				&& (heart == ElderwoodHeart.RIGHT_ARM) == this.isSlammingRightArm();
+	/** Whether this is the heart of the branch that's planted in the ground right now. */
+	public boolean isPlanted(ElderwoodHeart heart) {
+		return heart.isBranch() && this.getSlamPhase() == SlamPhase.STUCK
+				&& (heart == ElderwoodHeart.RIGHT_BRANCH) == this.isSlammingRightBranch();
 	}
 
 	public boolean isStunned() {
@@ -231,8 +233,8 @@ public class Elderwood extends Monster {
 		return SlamPhase.values()[this.entityData.get(SLAM_PHASE)];
 	}
 
-	public boolean isSlammingRightArm() {
-		return this.entityData.get(SLAM_RIGHT_ARM);
+	public boolean isSlammingRightBranch() {
+		return this.entityData.get(SLAM_RIGHT_BRANCH);
 	}
 
 	public boolean canStartSlam() {
@@ -306,7 +308,7 @@ public class Elderwood extends Monster {
 			this.entityData.set(SLAM_PHASE, SlamPhase.STUCK.ordinal());
 		} else if (phase == SlamPhase.STUCK && this.slamTicks >= SLAM_STUCK_TICKS) {
 			this.entityData.set(SLAM_PHASE, SlamPhase.NONE.ordinal());
-			this.entityData.set(SLAM_RIGHT_ARM, !this.isSlammingRightArm());
+			this.entityData.set(SLAM_RIGHT_BRANCH, !this.isSlammingRightBranch());
 			this.slamCooldown = SLAM_COOLDOWN_TICKS;
 		}
 	}
@@ -406,7 +408,9 @@ public class Elderwood extends Monster {
 	}
 
 	public boolean isWatching(Player player) {
-		return this.distanceToSqr(player) <= GAZE_RANGE * GAZE_RANGE && this.getSensing().hasLineOfSight(player);
+		return this.distanceToSqr(player) <= GAZE_RANGE * GAZE_RANGE
+				&& Math.abs(Mth.degreesDifference(this.yBodyRot, this.yawTo(player))) <= GAZE_ARC_DEGREES
+				&& this.getSensing().hasLineOfSight(player);
 	}
 
 	@Override
