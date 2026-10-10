@@ -12,8 +12,8 @@ import net.minecraft.world.phys.Vec3;
  * <li>four trunk hearts at sword height, one on each side, always open, each only to a hit that
  * lands on its own side of the trunk;</li>
  * <li>a branch heart is a band around its main branch, so it moves with the branch: far overhead
- * at rest, lower while the stunned tree droops, and near the ground while the branch is planted
- * after a slam. It can be hit from any side whenever it's open;</li>
+ * at rest, lower while the stunned tree droops, and near the ground, most of the way to where the
+ * slam landed, while the branch is planted. It can be hit from any side whenever it's open;</li>
  * <li>the core, under the lens, only once every other heart is destroyed, from the front.</li>
  * </ul>
  */
@@ -34,7 +34,8 @@ public enum ElderwoodHeart {
 	private static final double ALONG_BRANCH = 4.03;
 	private static final Vec3 BRANCH_AT_REST = new Vec3(0.423, 0.906, 0.0);
 	private static final Vec3 BRANCH_STUNNED = new Vec3(0.940, 0.342, 0.0);
-	private static final Vec3 BRANCH_PLANTED = new Vec3(-0.214, -0.771, 0.600);
+	// A planted branch stretches from its pivot to where the slam landed, and the heart with it.
+	private static final double ALONG_PLANTED_BRANCH = 0.7;
 
 	private final int maxCracks;
 	private final double right;
@@ -60,8 +61,11 @@ public enum ElderwoodHeart {
 
 	public AABB box(Elderwood elderwood) {
 		Vec3 spot = new Vec3(this.right, this.up, this.forward);
-		if (this.isBranch()) {
-			Vec3 branch = elderwood.isPlanted(this) ? BRANCH_PLANTED : elderwood.isStunned() ? BRANCH_STUNNED : BRANCH_AT_REST;
+		if (elderwood.isPlanted(this)) {
+			Vec3 tip = new Vec3(elderwood.getSlamRight(), 0.0, elderwood.getSlamForward());
+			spot = spot.lerp(tip, ALONG_PLANTED_BRANCH);
+		} else if (this.isBranch()) {
+			Vec3 branch = elderwood.isStunned() ? BRANCH_STUNNED : BRANCH_AT_REST;
 			spot = spot.add(branch.multiply(Math.signum(this.right), 1.0, 1.0).scale(ALONG_BRANCH));
 		}
 		Vec3 center = elderwood.position().add(0.0, spot.y, 0.0).add(inWorld(elderwood, spot.x, spot.z));

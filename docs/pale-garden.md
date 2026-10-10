@@ -400,8 +400,6 @@ The rework into the Elderwood:
 2. **The tree**: the rooted, solid, slowly turning entity at its new size with the placeholder
    tree model, the stump pattern, growing, and the room and darkness messages. Done. Notes:
    - its collision box is the trunk (3 × 3 × 10); the crown and branches are only drawn;
-   - until step 4 it keeps the Watcher's slam, which for now only starts at a player within
-     40° of straight ahead;
    - branch hearts hang outside the collision box, so while they're open (planted branch or
      stun) attacks aimed within 4 blocks of the box count as aimed at the tree. An arrow that
      misses the heart in that zone bounces off thin air; a part entity per branch heart would
@@ -411,7 +409,14 @@ The rework into the Elderwood:
    of the trunk. The resin leaves from the lens, not the crown: it's only thrown at a player the
    lens sees, so it always starts on the trunk's front.
 4. **Branch slam**: the longer slam, the planted branch bringing its heart down, and smashing
-   soft cover.
+   soft cover. Done. Notes:
+   - it slams at a player within 75° of straight ahead and between 2.5 and 6 blocks from the
+     trunk's center (a closer or farther spot is pulled into that ring);
+   - the planted branch is drawn stretched or shortened so its tip is in the ground where the
+     slam landed, and its heart sits 70% of the way from the branch's base to that spot;
+   - soft blocks break within 1.5 blocks of the landing spot, from its level to 3 blocks above
+     it, so a wooden roof goes too but the ground it lands on stays. The tag holds logs, planks,
+     leaves, dirt, sand, wool and wooden slabs, stairs, fences, gates, doors and trapdoors.
 5. **Roots and dormancy**: the root eruption and falling dormant.
 
 Ruin Sentries' petrification and shard drops come with the Ruin.

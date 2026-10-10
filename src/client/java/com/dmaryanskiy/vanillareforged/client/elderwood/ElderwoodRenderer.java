@@ -54,6 +54,8 @@ public class ElderwoodRenderer extends MobRenderer<Elderwood, ElderwoodRenderSta
 		state.slamPhase = entity.getSlamPhase();
 		state.slamRightBranch = entity.isSlammingRightBranch();
 		state.slamPhaseAge = entity.getSlamPhaseAge() + partialTicks;
+		state.slamRight = entity.getSlamRight();
+		state.slamForward = entity.getSlamForward();
 		state.stunned = entity.isStunned();
 		state.growth = entity.getGrowth(partialTicks);
 	}
