@@ -284,10 +284,8 @@ roughly Elder Guardian tier) with a boss bar.
   animations apply; the first version reused the Creaking's stick body and was too slim to carry
   hearts); a boss bar; it hunts players only and never
   despawns. Its **gaze fills the petrification meter by 2 per tick** (petrified in about 2.5 s)
-  while it has line of sight to its target within 24 blocks. Melee: 10 damage with strong
-  knockback, a placeholder until the branch slam. It counts as gaze-resistant for the Pale Mask
-  (boss-strength slowing). Drops its lens and 2–4 resin clumps.
-- Until its hearts exist (step 5) it can't be hurt, except by commands like `/kill`.
+  while it has line of sight to its target within 24 blocks. It counts as gaze-resistant for the
+  Pale Mask (boss-strength slowing). Drops its lens and 2–4 resin clumps.
 - The summon is matched like vanilla's golems: a Mixin adds a placement hook to the Creaking Heart
   (it has none), the body's blocks are cleared with break particles, and any pale oak log or wood
   fills a log cell. Unlike the golems, the empty cells don't have to be pure air: anything that
@@ -328,6 +326,23 @@ roughly Elder Guardian tier) with a boss bar.
 - **Up close**: its gaze petrifies, and its **branch slam shatters the stone shell**: the
   petrification ends, the player takes the brittle bonus damage and is knocked away. The loop is
   gaze, petrify, slam, back to cover.
+- Implemented (step 5):
+  - **Five hearts**: two on the chest (3 cracks each), one on each forearm (3 each) and the core
+    in the middle of the chest (5), behind a copper shutter until the other four are destroyed.
+    17 cracks in all; the boss bar shows how many are left. Cracking rules are the Sentry's
+    (full-strength sword, charged arrow or trident, at most one crack per 0.5 s), players only.
+  - **A glowing heart is one you can hit right now**, with the lens's full-bright glow. Chest
+    hearts and the open core can be hit from the front; a destroyed heart is a dark husk.
+  - **Branch slam**: within 3.5 blocks it raises an arm for 0.75 s, then strikes the ground 1.8
+    blocks in front of where it faced when it started, so stepping aside dodges it. Players
+    within about 2 blocks of the strike take **10 damage** (15 when petrified, before armor),
+    their petrification shatters and they're thrown back.
+  - **Stuck arm**: the arm stays planted for 1.5 s. Its forearm heart glows and can be hit from
+    any side; bent over, the Watcher can't be hit in the chest and **doesn't gaze**. Arms
+    alternate, with 2 s between slams.
+  - With the core open its gaze fills the meter by 3 per tick.
+  - The hit tracing is shared with the Sentry (`HeartHit`); each heart is a box at a fixed spot
+    on the body, and the stuck arm's box sits where the planted forearm is.
 - **At range**: it throws **burning resin** with the Wither skull's mechanics. A hit sets the player
   on fire but never blocks, so nothing burns in a dungeon (Fire Resistance is a fair preparation).
 - **Reflecting the resin** (risky): hitting a resin ball back, like a Ghast fireball, does no
@@ -352,7 +367,7 @@ textures: amber resin glass in a weathered copper rim.
 **Build order** (proposed): (1) sturdier Sentry hearts and mob projectiles (a change to the
 Sentry), done; (2) Watcher's Lens, Lens Shard and the new Creaking Eye recipe, done; (3) petrification
 meter, its overlay and the mask's immunity, done; (4) summon pattern and the Watcher entity with its
-gaze, done; (5) body hearts, branch slam and the stuck-arm window; (6) burning resin and the reflect
+gaze, done; (5) body hearts, branch slam and the stuck-arm window, done; (6) burning resin and the reflect
 stun. Ruin Sentries' petrification and shard drops come with the Ruin.
 
 ## Parked for later (warrior content and extras)

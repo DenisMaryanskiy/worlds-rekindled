@@ -89,6 +89,13 @@ public final class Petrification {
 		}
 	}
 
+	/** A hard hit breaks the stone shell: the petrification ends at once. */
+	public static void shatter(Player player) {
+		if (getMeter(player) > 0) {
+			setMeter(player, 0);
+		}
+	}
+
 	public static void tick(Player player) {
 		int meter = getMeter(player);
 		if (meter > FULL) {

@@ -6,11 +6,17 @@ import com.dmaryanskiy.vanillareforged.ModEntities;
 import com.dmaryanskiy.vanillareforged.ModItems;
 import com.dmaryanskiy.vanillareforged.petrification.Petrification;
 import com.dmaryanskiy.vanillareforged.watcher.Watcher;
+import com.dmaryanskiy.vanillareforged.watcher.WatcherHeart;
 
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.gametest.framework.GameTestSequence;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -25,6 +31,9 @@ public class WatcherTest {
 	private static final String[] PATTERN = {"~~W~~", "LLCLL", "R~H~R", "~LLL~"};
 	private static final int TOP = 4;
 	private static final BlockPos HEART = new BlockPos(2, TOP - 2, 2);
+	private static final Vec3 WATCHER = new Vec3(3.5, 1.0, 2.5);
+	// It faces south (+z), so its front is on its +z side.
+	private static final Vec3 FRONT = new Vec3(0.0, 0.0, 1.0);
 
 	// Sky access removes the test's barrier ceiling, which would cut through the pattern.
 	@GameTest(environment = MIDNIGHT, skyAccess = true)
@@ -124,14 +133,114 @@ public class WatcherTest {
 	}
 
 	@GameTest(environment = MIDNIGHT)
-	public void playersCannotHurtItYet(GameTestHelper helper) {
-		Watcher watcher = helper.spawn(ModEntities.WATCHER, new Vec3(1.5, 1.0, 1.5));
-		Player player = helper.makeMockServerPlayer(GameType.SURVIVAL);
+	public void swordOnAChestHeartCracksIt(GameTestHelper helper) {
+		Watcher watcher = stillWatcher(helper);
 
-		boolean hurt = watcher.hurtServer(helper.getLevel(), helper.getLevel().damageSources().playerAttack(player), 20.0F);
+		boolean hurt = hit(helper, watcher, WatcherHeart.RIGHT_CHEST, FRONT);
 
-		helper.assertFalse(hurt, "Only its hearts will be able to hurt it");
+		helper.assertTrue(hurt, "A sword hit on a chest heart should land");
+		helper.assertValueEqual(watcher.getCracks(WatcherHeart.RIGHT_CHEST), 1, "right chest cracks");
+		helper.assertValueEqual(watcher.getCracks(WatcherHeart.LEFT_CHEST), 0, "left chest cracks");
 		helper.succeed();
+	}
+
+	@GameTest(environment = MIDNIGHT)
+	public void chestHeartsCannotBeHitFromBehind(GameTestHelper helper) {
+		Watcher watcher = stillWatcher(helper);
+
+		helper.assertFalse(hit(helper, watcher, WatcherHeart.RIGHT_CHEST, FRONT.scale(-1.0)), "The body shields its hearts from behind");
+		helper.succeed();
+	}
+
+	@GameTest(environment = MIDNIGHT)
+	public void theCoreIsShutWhileOtherHeartsLive(GameTestHelper helper) {
+		Watcher watcher = stillWatcher(helper);
+
+		helper.assertFalse(hit(helper, watcher, WatcherHeart.CORE, FRONT), "The core should be closed");
+		helper.assertValueEqual(watcher.getCracks(WatcherHeart.CORE), 0, "core cracks");
+		helper.succeed();
+	}
+
+	@GameTest(environment = MIDNIGHT)
+	public void anArmHeartIsOutOfReachUntilTheArmIsStuck(GameTestHelper helper) {
+		Watcher watcher = stillWatcher(helper);
+
+		helper.assertFalse(hit(helper, watcher, WatcherHeart.RIGHT_ARM, FRONT), "A hanging arm's heart can't be hit");
+		helper.succeed();
+	}
+
+	// The Watcher needs its AI for the slam to run, so these start it right after turning it south.
+	@GameTest(environment = MIDNIGHT, maxTicks = 60)
+	public void theStuckArmExposesItsHeartAndHidesTheChest(GameTestHelper helper) {
+		Watcher watcher = facingSouth(helper.spawn(ModEntities.WATCHER, WATCHER));
+		boolean rightArm = watcher.isSlammingRightArm();
+		WatcherHeart arm = rightArm ? WatcherHeart.RIGHT_ARM : WatcherHeart.LEFT_ARM;
+		watcher.startSlam();
+
+		helper.startSequence()
+				.thenWaitUntil(() -> helper.assertTrue(watcher.getSlamPhase() == Watcher.SlamPhase.STUCK, "arm stuck"))
+				.thenExecute(() -> {
+					helper.assertFalse(hit(helper, watcher, WatcherHeart.RIGHT_CHEST, FRONT), "Bent over, the chest can't be hit");
+					helper.assertTrue(hit(helper, watcher, arm, new Vec3(rightArm ? -1.0 : 1.0, 0.0, 0.0)),
+							"The stuck arm's heart should be open, from the side too");
+					helper.assertValueEqual(watcher.getCracks(arm), 1, "arm cracks");
+				})
+				.thenSucceed();
+	}
+
+	@GameTest(environment = MIDNIGHT, maxTicks = 100)
+	public void destroyingTheCoreLastKillsIt(GameTestHelper helper) {
+		Watcher watcher = stillWatcher(helper);
+		for (WatcherHeart heart : WatcherHeart.values()) {
+			if (heart != WatcherHeart.CORE) {
+				watcher.setCracks(heart, heart.maxCracks());
+			}
+		}
+		Runnable hitCore = () -> hit(helper, watcher, WatcherHeart.CORE, FRONT);
+
+		GameTestSequence sequence = helper.startSequence().thenExecute(hitCore);
+		for (int i = 1; i < WatcherHeart.CORE.maxCracks(); i++) {
+			sequence.thenExecute(() -> helper.assertTrue(watcher.isAlive(), "It should survive until the core's last crack"))
+					.thenExecuteAfter(12, hitCore);
+		}
+		sequence.thenExecute(() -> {
+			helper.assertFalse(watcher.isAlive(), "Destroying the core should kill it");
+			helper.assertItemEntityPresent(ModItems.WATCHERS_LENS);
+		}).thenSucceed();
+	}
+
+	@GameTest(environment = MIDNIGHT, maxTicks = 60)
+	public void theSlamHitsHarderOnAPetrifiedPlayerAndShattersTheStone(GameTestHelper helper) {
+		Watcher watcher = facingSouth(helper.spawn(ModEntities.WATCHER, WATCHER));
+		// A plain mock player: a mock ServerPlayer has no connection, which taking damage needs.
+		Player player = helper.makeMockPlayer(GameType.SURVIVAL);
+		player.snapTo(helper.absoluteVec(WATCHER.add(0.0, 0.0, 1.8)), 0.0F, 0.0F);
+		helper.getLevel().addFreshEntity(player);
+		Petrification.expose(player, Petrification.FULL);
+		watcher.startSlam();
+
+		helper.startSequence()
+				.thenWaitUntil(() -> helper.assertTrue(watcher.getSlamPhase() == Watcher.SlamPhase.STUCK, "arm stuck"))
+				.thenExecute(() -> {
+					helper.assertTrue(player.getHealth() < player.getMaxHealth() - Watcher.SLAM_DAMAGE,
+							"A petrified player should take more than the slam's base damage");
+					helper.assertValueEqual(Petrification.getMeter(player), 0, "meter after the slam");
+				})
+				.thenSucceed();
+	}
+
+	@GameTest(environment = MIDNIGHT, maxTicks = 60)
+	public void steppingOutOfTheSlamDodgesIt(GameTestHelper helper) {
+		Watcher watcher = facingSouth(helper.spawn(ModEntities.WATCHER, WATCHER));
+		Player player = helper.makeMockPlayer(GameType.SURVIVAL);
+		player.snapTo(helper.absoluteVec(WATCHER.add(-3.0, 0.0, 1.8)), 0.0F, 0.0F);
+		helper.getLevel().addFreshEntity(player);
+		watcher.startSlam();
+
+		helper.startSequence()
+				.thenWaitUntil(() -> helper.assertTrue(watcher.getSlamPhase() == Watcher.SlamPhase.STUCK, "arm stuck"))
+				.thenExecute(() -> helper.assertValueEqual(player.getHealth(), player.getMaxHealth(), "health beside the slam"))
+				.thenSucceed();
 	}
 
 	@GameTest(environment = MIDNIGHT)
@@ -142,6 +251,32 @@ public class WatcherTest {
 
 		helper.assertItemEntityPresent(ModItems.WATCHERS_LENS);
 		helper.succeed();
+	}
+
+	private static Watcher stillWatcher(GameTestHelper helper) {
+		Watcher watcher = facingSouth(helper.spawn(ModEntities.WATCHER, WATCHER));
+		watcher.setNoAi(true);
+		return watcher;
+	}
+
+	private static Watcher facingSouth(Watcher watcher) {
+		watcher.setYRot(0.0F);
+		watcher.setYHeadRot(0.0F);
+		watcher.setYBodyRot(0.0F);
+		return watcher;
+	}
+
+	/** A full-strength sword swing aimed at the heart by a player standing two blocks from it on the given side. */
+	private static boolean hit(GameTestHelper helper, Watcher watcher, WatcherHeart heart, Vec3 side) {
+		Vec3 target = heart.box(watcher).getCenter();
+		Vec3 eyes = target.add(side.normalize().scale(2.0));
+		Player player = helper.makeMockServerPlayer(GameType.SURVIVAL);
+		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.IRON_SWORD));
+		float yaw = (float) Math.toDegrees(Math.atan2(target.z - eyes.z, target.x - eyes.x)) - 90.0F;
+		player.snapTo(eyes.subtract(0.0, player.getEyeHeight(), 0.0), yaw, 0.0F);
+		player.setYHeadRot(yaw);
+		float damage = (float) player.getAttributeValue(Attributes.ATTACK_DAMAGE);
+		return watcher.hurtServer(helper.getLevel(), helper.getLevel().damageSources().playerAttack(player), damage);
 	}
 
 	private static void buildBody(GameTestHelper helper, Block copper) {
