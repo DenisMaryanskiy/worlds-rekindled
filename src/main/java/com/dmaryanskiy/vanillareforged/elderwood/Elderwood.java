@@ -76,6 +76,7 @@ public class Elderwood extends Monster {
 	private static final int SMASH_HEIGHT = 4;
 	public static final TagKey<Block> BREAKABLE = TagKey.create(Registries.BLOCK, VanillaReforged.id("elderwood_breakable"));
 	private static final int CRACK_COOLDOWN_TICKS = 10;
+	private static final double HEART_DEPTH = 0.75;
 	public static final double RESIN_MIN_RANGE = 6.0;
 	public static final int RESIN_INTERVAL_TICKS = 60;
 	private static final int RESIN_FIRST_TICKS = 20;
@@ -547,10 +548,16 @@ public class Elderwood extends Monster {
 
 	/** A hit that landed on one heart for certain, passed on by a branch heart's own entity. */
 	public boolean hurtHeart(ServerLevel level, ElderwoodHeart heart, DamageSource source, float damage) {
-		if (HeartHit.of(source, damage, false).isEmpty() || this.crackCooldown > 0 || !this.isVulnerable(heart)) {
+		if (!this.isVulnerable(heart)) {
 			return false;
 		}
-		return this.crack(level, source, heart);
+		if (HeartHit.of(source, damage, false).isEmpty()) {
+			if (HeartHit.ofWeakSwing(source, damage).isPresent()) {
+				HeartHit.warnWeakSwing(this, source);
+			}
+			return false;
+		}
+		return this.crackCooldown == 0 && this.crack(level, source, heart);
 	}
 
 	/** Ticks since the slam phase last changed, for the client's pose. */
@@ -573,16 +580,30 @@ public class Elderwood extends Monster {
 			return false;
 		}
 		// Only players can hurt it, and only through a heart that's open to them.
-		Optional<HeartHit> hit = HeartHit.of(source, damage, false);
-		if (hit.isEmpty() || this.crackCooldown > 0) {
+		Optional<HeartHit> hit = HeartHit.of(source, damage, false).map(this::intoTheTrunk);
+		if (hit.isEmpty()) {
+			if (HeartHit.ofWeakSwing(source, damage).map(this::intoTheTrunk).map(this::openHeartOn).isPresent()) {
+				HeartHit.warnWeakSwing(this, source);
+			}
 			return false;
 		}
+		ElderwoodHeart heart = this.openHeartOn(hit.get());
+		return heart != null && this.crackCooldown == 0 && this.crack(level, source, heart);
+	}
+
+	// Its box doesn't turn with it: turned, a trunk heart sits up to this deep inside the box's corner,
+	// and a swing at the very end of a player's reach would stop at the box's face, short of it.
+	private HeartHit intoTheTrunk(HeartHit hit) {
+		return hit.carriedOn(HEART_DEPTH);
+	}
+
+	private ElderwoodHeart openHeartOn(HeartHit hit) {
 		for (ElderwoodHeart heart : ElderwoodHeart.values()) {
-			if (this.isVulnerable(heart) && heart.isHitBy(this, hit.get())) {
-				return this.crack(level, source, heart);
+			if (this.isVulnerable(heart) && heart.isHitBy(this, hit)) {
+				return heart;
 			}
 		}
-		return false;
+		return null;
 	}
 
 	private boolean crack(ServerLevel level, DamageSource source, ElderwoodHeart heart) {

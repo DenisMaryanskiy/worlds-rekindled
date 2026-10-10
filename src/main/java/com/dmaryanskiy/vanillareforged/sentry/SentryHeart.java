@@ -27,6 +27,13 @@ public final class SentryHeart {
 				.isPresent();
 	}
 
+	/** Whether a player's swing landed on the heart but was too weak to crack it. */
+	public static boolean isWeaklyHitBy(HeartwoodSentry sentry, DamageSource source, float damage) {
+		return HeartHit.ofWeakSwing(source, damage)
+				.filter(hit -> hit.comesFromTheFrontOf(forward(sentry)) && hit.passesThrough(box(sentry)))
+				.isPresent();
+	}
+
 	private static Vec3 forward(HeartwoodSentry sentry) {
 		return Vec3.directionFromRotation(0.0F, sentry.yBodyRot);
 	}
