@@ -1,0 +1,34 @@
+{
+  "parent": "minecraft:adventure/heart_transplanter",
+  "criteria": {
+    "summoned_elderwood": {
+      "conditions": {
+        "entity": {
+          "type": "minecraft:entity_properties",
+          "entity": "this",
+          "predicate": {
+            "minecraft:entity_type": "vanillareforged:elderwood"
+          }
+        }
+      },
+      "trigger": "minecraft:summoned_entity"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.vanillareforged.old_growth.description"
+    },
+    "frame": "goal",
+    "icon": {
+      "id": "minecraft:creaking_heart"
+    },
+    "title": {
+      "translate": "advancements.vanillareforged.old_growth.title"
+    }
+  },
+  "requirements": [
+    [
+      "summoned_elderwood"
+    ]
+  ]
+}

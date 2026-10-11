@@ -1,0 +1,34 @@
+{
+  "parent": "vanillareforged:adventure/old_growth",
+  "criteria": {
+    "killed_elderwood": {
+      "conditions": {
+        "entity": {
+          "type": "minecraft:entity_properties",
+          "entity": "this",
+          "predicate": {
+            "minecraft:entity_type": "vanillareforged:elderwood"
+          }
+        }
+      },
+      "trigger": "minecraft:player_killed_entity"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.vanillareforged.deadwood.description"
+    },
+    "frame": "goal",
+    "icon": {
+      "id": "vanillareforged:elderwood_lens"
+    },
+    "title": {
+      "translate": "advancements.vanillareforged.deadwood.title"
+    }
+  },
+  "requirements": [
+    [
+      "killed_elderwood"
+    ]
+  ]
+}

@@ -33,7 +33,14 @@ public abstract class CreakingMixin extends Monster {
 	// Vanilla routes both targeting and the "frozen while watched" check through canAttack.
 	@Override
 	public boolean canAttack(LivingEntity target) {
-		return !PaleMaskStealth.isHiddenFrom(target, vanillareforged$revealedTo) && super.canAttack(target);
+		if (!super.canAttack(target)) {
+			return false;
+		}
+		if (!PaleMaskStealth.isHiddenFrom(target, vanillareforged$revealedTo)) {
+			return true;
+		}
+		PaleMaskStealth.onIgnored(this, target);
+		return false;
 	}
 
 	@Inject(method = "hurtServer", at = @At("HEAD"))
