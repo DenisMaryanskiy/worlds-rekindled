@@ -13,18 +13,18 @@ import net.minecraft.resources.Identifier;
 
 /**
  * While the Sentry is awake its heart glows like the Creaking's eyes, marking its weak point, and a
- * jack o'lantern face glows too. There's a heart texture per crack count, since the additive glow
+ * glowing face (a jack o'lantern's, or a Ruin Sentry's eye) does too. There's a heart texture per crack count, since the additive glow
  * would otherwise light up the dark cracks.
  */
 public class SentryGlowLayer extends RenderLayer<HeartwoodSentryRenderState, HeartwoodSentryModel> {
 	private final List<Identifier> hearts;
-	private final Identifier jackOLanternFace;
+	private final Identifier face;
 
 	public SentryGlowLayer(RenderLayerParent<HeartwoodSentryRenderState, HeartwoodSentryModel> renderer, List<Identifier> hearts,
-			Identifier jackOLanternFace) {
+			Identifier face) {
 		super(renderer);
 		this.hearts = hearts;
-		this.jackOLanternFace = jackOLanternFace;
+		this.face = face;
 	}
 
 	@Override
@@ -34,8 +34,8 @@ public class SentryGlowLayer extends RenderLayer<HeartwoodSentryRenderState, Hea
 			return;
 		}
 		this.glow(this.hearts.get(Math.min(state.cracks, this.hearts.size() - 1)), poseStack, submitNodeCollector, lightCoords, state);
-		if (state.jackOLantern) {
-			this.glow(this.jackOLanternFace, poseStack, submitNodeCollector, lightCoords, state);
+		if (state.glowingFace) {
+			this.glow(this.face, poseStack, submitNodeCollector, lightCoords, state);
 		}
 	}
 

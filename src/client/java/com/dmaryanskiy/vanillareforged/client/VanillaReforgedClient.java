@@ -4,6 +4,7 @@ import com.dmaryanskiy.vanillareforged.ModEntities;
 import com.dmaryanskiy.vanillareforged.ModItems;
 import com.dmaryanskiy.vanillareforged.client.sentry.HeartwoodSentryModel;
 import com.dmaryanskiy.vanillareforged.client.sentry.HeartwoodSentryRenderer;
+import com.dmaryanskiy.vanillareforged.client.sentry.RuinSentryRenderer;
 import com.dmaryanskiy.vanillareforged.client.elderwood.ElderwoodModel;
 import com.dmaryanskiy.vanillareforged.client.elderwood.ElderwoodRenderer;
 import com.dmaryanskiy.vanillareforged.client.elderwood.ElderwoodRootsRenderer;
@@ -23,6 +24,7 @@ public class VanillaReforgedClient implements ClientModInitializer {
 
 		ModelLayerRegistry.registerModelLayer(HeartwoodSentryRenderer.LAYER, HeartwoodSentryModel::createBodyLayer);
 		EntityRendererRegistry.register(ModEntities.HEARTWOOD_SENTRY, HeartwoodSentryRenderer::new);
+		EntityRendererRegistry.register(ModEntities.RUIN_SENTRY, RuinSentryRenderer::new);
 
 		ModelLayerRegistry.registerModelLayer(ElderwoodRenderer.LAYER, ElderwoodModel::createBodyLayer);
 		EntityRendererRegistry.register(ModEntities.ELDERWOOD, ElderwoodRenderer::new);

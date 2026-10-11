@@ -4,7 +4,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.WeakHashMap;
 
-import com.dmaryanskiy.vanillareforged.sentry.HeartwoodSentry;
+import com.dmaryanskiy.vanillareforged.sentry.AbstractSentry;
 
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.core.registries.Registries;
@@ -81,10 +81,10 @@ public final class ElderwoodGaze {
 		return hit.getEntity() instanceof LivingEntity living && isHostileTo(living, player) ? Optional.of(living) : Optional.empty();
 	}
 
-	/** Sentries aren't monsters, so they're only slowed while hunting the wearer: looking at your own guard is free. */
+	/** Sentries aren't monsters, so each kind says for itself when it's after the wearer. */
 	private static boolean isHostileTo(LivingEntity mob, Player player) {
-		if (mob instanceof HeartwoodSentry sentry) {
-			return !sentry.isStatue() && sentry.getTarget() == player;
+		if (mob instanceof AbstractSentry sentry) {
+			return sentry.isHostileTo(player);
 		}
 		return mob instanceof Enemy;
 	}

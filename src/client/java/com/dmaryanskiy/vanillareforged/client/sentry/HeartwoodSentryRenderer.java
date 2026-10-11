@@ -17,11 +17,11 @@ public class HeartwoodSentryRenderer extends MobRenderer<HeartwoodSentry, Heartw
 	private static final Identifier STATUE = texture("heartwood_sentry_statue");
 
 	// Only the heart (or the face) is opaque in these textures.
-	private static final List<Identifier> HEART_GLOW = List.of(texture("heartwood_sentry_heart"),
+	static final List<Identifier> HEART_GLOW = List.of(texture("heartwood_sentry_heart"),
 			texture("heartwood_sentry_heart_cracked_1"), texture("heartwood_sentry_heart_cracked_2"),
 			texture("heartwood_sentry_heart_cracked_3"), texture("heartwood_sentry_heart_cracked_4"));
 	private static final Identifier JACK_O_LANTERN_GLOW = texture("heartwood_sentry_jack_o_lantern_glow");
-	private static final List<Identifier> CRACKS = List.of(texture("heartwood_sentry_cracks_1"), texture("heartwood_sentry_cracks_2"),
+	static final List<Identifier> CRACKS = List.of(texture("heartwood_sentry_cracks_1"), texture("heartwood_sentry_cracks_2"),
 			texture("heartwood_sentry_cracks_3"), texture("heartwood_sentry_cracks_4"));
 
 	public HeartwoodSentryRenderer(EntityRendererProvider.Context context) {
@@ -30,7 +30,7 @@ public class HeartwoodSentryRenderer extends MobRenderer<HeartwoodSentry, Heartw
 		this.addLayer(new SentryGlowLayer(this, HEART_GLOW, JACK_O_LANTERN_GLOW));
 	}
 
-	private static Identifier texture(String name) {
+	static Identifier texture(String name) {
 		return VanillaReforged.id("textures/entity/heartwood_sentry/" + name + ".png");
 	}
 
@@ -44,13 +44,13 @@ public class HeartwoodSentryRenderer extends MobRenderer<HeartwoodSentry, Heartw
 		super.extractRenderState(entity, state, partialTicks);
 		state.attackAnimationState.copyFrom(entity.attackAnimationState);
 		state.statue = entity.isStatue();
-		state.jackOLantern = entity.isJackOLantern();
+		state.glowingFace = entity.isJackOLantern();
 		state.cracks = entity.getCracks();
 		state.canMove = !state.statue;
 	}
 
 	@Override
 	public Identifier getTextureLocation(HeartwoodSentryRenderState state) {
-		return state.statue ? STATUE : state.jackOLantern ? JACK_O_LANTERN : CARVED;
+		return state.statue ? STATUE : state.glowingFace ? JACK_O_LANTERN : CARVED;
 	}
 }

@@ -1,7 +1,7 @@
 # Pale Garden: design
 
-Status: features 1, 2, 3, 5 and 6 are implemented with placeholder art and sound; the Pale Ruin (4) is
-designed but not built. Everything still to do is collected under [What's left](#whats-left).
+Status: features 1, 2, 3, 5 and 6 are implemented with placeholder art and sound; of the Pale Ruin (4)
+only its Sentries exist. Everything still to do is collected under [What's left](#whats-left).
 
 ## Problem
 
@@ -126,7 +126,7 @@ slowing it, done.
 - **Sneak + use an axe** on it takes it apart at any time (including Sentries that never see
   daylight), returning the heart and the head. Costs 1 axe durability; the pedestal log stays.
   Doesn't work while the Sentry is hunting that player: an angry Sentry must be killed. Ruin
-  Sentries won't allow it either, once they exist.
+  Sentries don't allow it at all.
 
 **Technical**
 - Heart hitbox: a small box (0.5 blocks) in the chest, front side. Hits on the Sentry are traced
@@ -180,8 +180,8 @@ slowing it, done.
 
 ### 4. Pale Ruin (structure)
 
-> Designed, not built. Its loot items (trim, sherds) are implemented and creative-only until then.
-> One question is open: [how the Ruin tells the player about the heart](#the-missing-heart-open).
+> The Ruin Sentry is implemented, without its fear of sunlight yet. The structure isn't built: its
+> loot items (trim, sherds) are implemented and creative-only until then.
 
 The ancient builders' temple, where they bound Creakings to guard and woke the Elderwood. The
 woods have grown over it and their roots through it.
@@ -228,6 +228,23 @@ woods have grown over it and their roots through it.
   - melee: Pale Mask to slow them, then a sword on the heart.
 - **Leashed to the Ruin**: it never chases the player outside the structure, so it can't be
   lured to the surface.
+- Implemented, as its own entity (`ruin_sentry`, with a spawn egg) sharing the Heartwood Sentry's
+  heart, cracks, healing and melee. Notes:
+  - **the gaze** fills the meter by **1 a tick** (the Elderwood: 2, or 3 with its core open), so
+    5 s of being watched petrifies. It reaches **12 blocks**, 60 degrees to each side of where
+    its head points, and needs a clear line: a column breaks it. It only holds its target;
+  - **the leash** is to its **post**, the spot where it first stands, and **16 blocks** long. It
+    doesn't pick, keep or follow a target beyond that. Tying it to the structure's bounds
+    instead comes with the structure;
+  - **cracks**: 4 on Easy and Peaceful, 5 on Normal, 6 on Hard, as in the table above;
+  - **drops**: 1-3 resin clumps, 1-2 Elderwood Lens Shards and 10 XP;
+  - it isn't a monster by vanilla's rules (a golem, like the player's Sentry), so it stays on
+    Peaceful, where it stands guard without attacking, and a player's Sentry or an iron golem
+    doesn't go for it. The Pale Mask's gaze slows it whether or not it's hunting the wearer;
+  - **look**: the Heartwood Sentry's model with a bark head and one eye, a lens shard that always
+    glows. Placeholder textures;
+  - not yet: the fear of sunlight below, and a player shooting it from beyond its leash is left
+    alone.
 - **Fear of sunlight** (precedent: undead burning in the sun). Underground it only matters if the
   player digs the roof open, which is allowed but deliberately expensive: the Ruin is deep and
   its stone slow to mine, and it only buys safety during the day.
@@ -257,22 +274,24 @@ woods have grown over it and their roots through it.
     placeholder textures; vanilla already has a "heart" sherd, hence the names.
 - The **Buried Garden** advancement for entering it.
 
-#### The missing heart (open)
+#### The missing heart
 
 The stump shows that something goes on top; nothing says it's a Creaking Heart, or how to get one
 whole. Facts: a heart drops itself only with **Silk Touch** (otherwise 1-3 resin clumps), and it
 can also be **crafted** from two pale oak logs and a block of resin, a recipe vanilla unlocks on
-picking up a resin block. So Silk Touch is a shortcut, not a requirement. Options, not exclusive:
+picking up a resin block. So Silk Touch is a shortcut, not a requirement. The Ruin says it twice:
 
 1. **A heart is given**: one whole Creaking Heart kept in the hall or the room before it (on a
    pedestal, or in a pot or chest), so the first fight needs no outside knowledge.
 2. **The builders' tool**: a worn iron axe with Silk Touch in the loot of a room where a root's
-   heart is in plain sight. Precedent: Swift Sneak books in Ancient Cities.
-3. **The picture**: the Creaking sherd (a tree with a heart) guaranteed in the hall's pots, and a
-   mural of the tree with its hearts on the hall's wall.
-4. **Advancement text**: Old Growth's description already names the heart and the stump.
+   heart is in plain sight, for every fight after the first. Precedent: Swift Sneak books in
+   Ancient Cities.
 
-Build order: the Ruin Sentry first (testable without a structure), then the structure, then the
+On top of that, as decoration: the Creaking sherd (a tree with a heart) guaranteed in the hall's
+pots and a mural of the tree with its hearts on the hall's wall, and Old Growth's description,
+which already names the heart and the stump.
+
+Build order: the Ruin Sentry (done but for its fear of sunlight), then the structure, then the
 loot, the archaeology and the advancement.
 
 ### 5. The Elderwood (boss)
@@ -498,7 +517,7 @@ The rework into the Elderwood:
      landing doesn't hurt);
    - dormant after 30 s without a target; it then mends one crack every 5 s.
 
-Ruin Sentries' petrification and shard drops come with the Ruin.
+Ruin Sentries petrify too, more slowly (feature 4).
 
 ### 6. Advancements
 
@@ -551,10 +570,10 @@ Five are in (feature 6). Left:
 
 ### B. Finish what's on hold
 
-- **The Pale Ruin** (feature 4): designed, with how it hints at the missing heart still open.
-  To build, in order: the Ruin Sentry variant (no pumpkin, the weaker petrifying gaze, leash to
-  the structure, shard drops, no taking it apart, fear of sunlight and shielding its heart); the
-  structure's jigsaw pieces and worldgen; the loot, the archaeology and Buried Garden.
+- **The Pale Ruin** (feature 4): designed, and its Sentry exists. To build, in order: the
+  Sentry's fear of sunlight (statue in direct sun, paths that avoid it, shielding its heart);
+  the structure's jigsaw pieces and worldgen, with the Sentries' leash tied to its bounds; the
+  loot (the given heart, the Silk Touch axe), the archaeology and Buried Garden.
 - **Second playtest of the Elderwood** after the easing in PRs #27 to #30 (breather after
   petrification, shield blocking the gaze, any sword swing, staged death). The demo video
   predates all of it and should be re-recorded once the numbers settle.
@@ -582,7 +601,7 @@ first:
   the pattern and is the first place to summon.
 - **The sherds and the Ruin tell it**: the Creaking sherd already shows a tree with a heart; the
   Ruin could hold a broken Sentry frame on its pedestal and a mural of the tree with seven hearts.
-  See the open question on the missing heart in feature 4.
+  See the missing heart in feature 4.
 - **In-fight hints**: a hit on bark or copper that does nothing gives a dull thud and no chips, so
   the contrast with a heart is heard at once (to check what a bark hit does today).
 - A written book in Ruin loot from the builders, if the rest isn't enough. Least vanilla-like.
