@@ -1,6 +1,7 @@
 # Pale Garden: design
 
-Status: agreed in brainstorming, not yet implemented.
+Status: features 1, 2, 3 and 5 are implemented with placeholder art and sound; the Pale Ruin (4) is
+on hold. Everything still to do is collected under [What's left](#whats-left).
 
 ## Problem
 
@@ -458,8 +459,141 @@ Ruin Sentries' petrification and shard drops come with the Ruin.
 - Gaze block for redstoners: outputs a signal while a player looks at it.
 - Other resin uses: slowing resin-coated blocks, amber preservation displays, tool handle upgrade.
 
-## Open questions / TODO
+## What's left
 
-1. **Elderwood numbers**: cracks per heart, turn speed, root damage, stun length, gaze fill rate,
-   resin damage and the summon's resin cost: tuned when implemented.
-2. **Ruin Sentry count** per structure: TODO, decided when the structure is built.
+Nothing in this section is implemented or agreed in detail. It's the backlog: ideas to pick from,
+roughly in the order they'd pay off.
+
+### A. Advancements
+
+None exist yet apart from the recipe unlocks. Proposal: hang them in vanilla's **Adventure** tab
+(no tab of our own, like a Mojang update would), with their descriptions doubling as the hints
+the mod otherwise lacks (see [Discoverability](#c-discoverability)). Names are working titles.
+
+| Advancement | Earned by | Frame | Needs |
+|---|---|---|---|
+| **Sap Happy** | Crafting a sticky piston with a resin clump | task | data only (`recipe_crafted` with an ingredient) |
+| **Night Watch** | Building a Heartwood Sentry | task | data only: the build already fires `summoned_entity` |
+| **Change of Heart** | Taking a Sentry apart with an axe and getting its heart back | task | a trigger call in the take-apart code |
+| **Eye to Eye** | Obtaining an Elderwood Lens Shard (first Ruin Sentry down) | task | data only (`inventory_changed`); waits for the Ruin |
+| **Buried Garden** | Entering a Pale Ruin | task | data only (`location` in a structure); waits for the Ruin |
+| **Old Growth** | Waking the Elderwood | goal | data only: the summon already fires `summoned_entity` |
+| **Set in Stone** | Being fully petrified and living through it | task | custom trigger |
+| **Return to Cinder** | Stunning the Elderwood with its own burning resin | task | custom trigger |
+| **Low-Hanging Fruit** | Destroying a branch heart with a sword | task | custom trigger |
+| **Deadwood** | Killing the Elderwood | goal | `player_killed_entity`, if the kill is credited to the player (to check: it dies through its core, not through health) |
+| **Eye of the Beholder** | Crafting a Creaking Eye | task | data only (`inventory_changed`) |
+| **One of Them** | Wearing a Pale Mask next to a Creaking that ignores you | task | custom trigger, or `inventory_changed` for "obtain a Pale Mask" as the cheap version |
+| **If Looks Could Slow** | Slowing a Wither, Warden or Elder Guardian with Elderwood's Gaze | goal | custom trigger |
+| **Don't Blink** | Killing the Elderwood without being petrified once | challenge, with XP | per-fight tracking on the tree |
+| **Bare-Faced** | Killing the Elderwood with no Pale Mask and no shield raised | challenge | per-fight tracking; optional |
+
+Notes:
+- Tree shape: Night Watch and Sap Happy hang off vanilla's Creaking advancement if there is a
+  fitting one, otherwise off the Adventure root; Old Growth leads to the fight's four, to
+  Deadwood, and from there to the eye, the mask and the two challenges.
+- Custom triggers are small (one registered `CriterionTrigger` each, or one shared trigger with
+  an "event" field). Each new one gets a GameTest; whether mock players can be granted
+  advancements in GameTests is to be checked first.
+- Vanilla's "Crafting a New Look" and "Smithing with Style" list trim recipes and templates by
+  id, so the Elderwood trim doesn't count towards them. Adding it means overriding vanilla's
+  advancement files; probably not worth it for the second one, which would become harder.
+- Every title and description goes in `en_us.json`.
+
+### B. Finish what's on hold
+
+- **The Pale Ruin** (feature 4): the layout is the open decision. Then the structure NBT and
+  worldgen, the archaeology loot (trim, sherds), and the Ruin Sentry variant: no pumpkin, fear of
+  sunlight, leash to the structure, shielding its heart, the weaker petrifying gaze, shard drops,
+  no taking it apart. Sentry count per structure is decided with the layout.
+- **Second playtest of the Elderwood** after the easing in PRs #27 to #30 (breather after
+  petrification, shield blocking the gaze, any sword swing, staged death). The demo video
+  predates all of it and should be re-recorded once the numbers settle.
+- **Elderwood numbers**: cracks per heart, turn speed, root damage, stun length, gaze fill rate,
+  resin damage and the summon's resin cost are first guesses.
+- **Terrain damage**: the slam breaks dirt and sand as well as wood, so a long fight chews up the
+  ground around the tree. Keep, or limit the tag to player-placed cover materials.
+- **Difficulty**: the Sentry's cracks scale with difficulty, the Elderwood's nothing does.
+  Candidates: gaze fill rate, slam damage, root interval. Also what Peaceful means for it (it's
+  a monster, so it would vanish; refusing to wake may read better).
+- **Multiplayer**: whom it targets and turns to with several players around, the gaze holding
+  only one of them, more cracks per heart with more players, and loot (one lens for the group).
+  Petrification isn't saved, so relogging mid-fight clears it; fine alone, an exploit in a group.
+- **Dedicated server run**: everything so far was tested through GameTests and a single-player
+  client.
+
+### C. Discoverability
+
+Nothing in the game tells the player any of this exists: the Sentry and stump patterns, that only
+hearts can be hurt, that resin can be hit back, that a shield stops the gaze. Ideas, cheapest
+first:
+
+- **Advancement descriptions** as hints (above): "Old Growth" visible once the player has a
+  Creaking Heart, describing the stump.
+- **The felled stump as a natural feature**: the story says a stump with its copper collar is all
+  that's left. Generating one (pale oak log, resin roots, oxidized copper on top, no heart) rarely
+  in Pale Gardens shows the pattern and gives the first place to summon. Small worldgen feature,
+  independent of the Ruin.
+- **The sherds and the Ruin tell it**: the Creaking sherd already shows a tree with a heart; the
+  Ruin could hold a broken Sentry frame on its pedestal and a mural of the tree with seven hearts.
+- **In-fight hints**: a hit on bark or copper that does nothing gives a dull thud and no chips, so
+  the contrast with a heart is heard at once (to check what a bark hit does today).
+- A written book in Ruin loot from the builders, if the rest isn't enough. Least vanilla-like.
+
+### D. More reasons to come back
+
+The loop's last step, "return for more resin and hearts", is thin once the player has a mask.
+
+- **More uses for the lens**: after the first mask a second kill gives nothing new. Candidates:
+  the gaze block for redstone (parked below) made from a lens; a spyglass upgrade that outlines
+  mobs in view; repairing a mask with a lens shard for a big chunk of durability.
+- **A trophy**: a decorative drop from the tree with a low chance or from the challenge
+  advancements, e.g. its dead heart as a block that pulses faintly, or a copper-banded pale log.
+- **Something left behind**: after the death burst, a dead stump remains (decorative, or a
+  one-time source of pale oak and the copper collar back).
+- **Healing a Sentry by hand** with a resin clump, like an iron golem with ingots: resin gets a
+  repeat use and guarding a base gets less fiddly than waiting for dawn.
+- **Sentry quality of life**: name tags showing on the statue, a visible range marker when
+  placing the pedestal, and whether a Sentry should follow orders at all (stay, or guard a wider
+  radius). Decide what's vanilla-like before adding any.
+- The power bow rule (a Power IV+ arrow cracks 2) is still open for both the Sentry and the tree.
+
+### E. Art and audio
+
+All of it is placeholder made in code or by script, and the user reviews but doesn't draw. To
+replace:
+
+- **Models**: the Elderwood (the part names in `ElderwoodModel` are the contract), its roots,
+  the burning resin glob, the Pale Mask's 3D mask.
+- **Textures**: the tree in four oxidation stages with its lens and heart overlays, the Sentry
+  (awake, statue, crack stages, glowing face), the mask, every item (lens, shard, eye, both
+  sherds, the trim template and its armor overlays), the petrification screen overlay, the mod
+  icon.
+- **Animation**: the tree only has code-driven branch poses and a shake. A real model would want
+  an idle sway, a wind-up worth reading, and growth and decay made as animations.
+- **Audio**: 15 Elderwood sound events have their own subtitles and play vanilla sounds; the
+  Sentry and the mask use vanilla events directly. Possibly boss music while the bar is up.
+- When the real tree model lands, delete `tools/` (the placeholder generator) and its README note.
+
+### F. Release
+
+- **License**: still "All rights reserved"; needed before publishing anywhere.
+- **Publishing**: Modrinth and CurseForge pages, versioning and a changelog, a release workflow
+  next to the CI build, screenshots and the fight video.
+- **Ids freeze at the first release**: until then renames cost nothing (as with Watcher to
+  Elderwood); after it they need migration.
+- **Translations**: only `en_us` exists.
+- **Compatibility pass**: shaders and Sodium with the full-bright heart and lens layers and the
+  JSON-loaded model; recipe viewers (EMI, REI, JEI) with the tag-based sticky piston recipe; the
+  overridden vanilla recipe and tag files next to other mods that touch them.
+- **Config**: none. The fight's numbers are constants; if packs should tune them, the natural
+  place is data (like the tags are now), not a config screen.
+- **Mixins**: four server-side ones today. Re-check each against Fabric API on every Minecraft
+  update, since a new event would let one go.
+
+### G. Housekeeping
+
+- `tools/__pycache__/png.cpython-314.pyc` was committed by mistake in PR #31: remove it and add
+  `__pycache__/` to `.gitignore`.
+- The Elderwood section above still carries the history of the Watcher rework ("kept", the
+  build-order notes). Once the fight is stable, trim it to what the tree is now.
