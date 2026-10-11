@@ -472,26 +472,16 @@ the mod otherwise lacks (see [Discoverability](#c-discoverability)). Names are w
 
 | Advancement | Earned by | Frame | Needs |
 |---|---|---|---|
-| **Sap Happy** | Crafting a sticky piston with a resin clump | task | data only (`recipe_crafted` with an ingredient) |
-| **Night Watch** | Building a Heartwood Sentry | task | data only: the build already fires `summoned_entity` |
-| **Change of Heart** | Taking a Sentry apart with an axe and getting its heart back | task | a trigger call in the take-apart code |
-| **Eye to Eye** | Obtaining an Elderwood Lens Shard (first Ruin Sentry down) | task | data only (`inventory_changed`); waits for the Ruin |
 | **Buried Garden** | Entering a Pale Ruin | task | data only (`location` in a structure); waits for the Ruin |
 | **Old Growth** | Waking the Elderwood | goal | data only: the summon already fires `summoned_entity` |
 | **Set in Stone** | Being fully petrified and living through it | task | custom trigger |
-| **Return to Cinder** | Stunning the Elderwood with its own burning resin | task | custom trigger |
-| **Low-Hanging Fruit** | Destroying a branch heart with a sword | task | custom trigger |
 | **Deadwood** | Killing the Elderwood | goal | `player_killed_entity`, if the kill is credited to the player (to check: it dies through its core, not through health) |
-| **Eye of the Beholder** | Crafting a Creaking Eye | task | data only (`inventory_changed`) |
 | **One of Them** | Wearing a Pale Mask next to a Creaking that ignores you | task | custom trigger, or `inventory_changed` for "obtain a Pale Mask" as the cheap version |
-| **If Looks Could Slow** | Slowing a Wither, Warden or Elder Guardian with Elderwood's Gaze | goal | custom trigger |
 | **Don't Blink** | Killing the Elderwood without being petrified once | challenge, with XP | per-fight tracking on the tree |
-| **Bare-Faced** | Killing the Elderwood with no Pale Mask and no shield raised | challenge | per-fight tracking; optional |
-
 Notes:
-- Tree shape: Night Watch and Sap Happy hang off vanilla's Creaking advancement if there is a
-  fitting one, otherwise off the Adventure root; Old Growth leads to the fight's four, to
-  Deadwood, and from there to the eye, the mask and the two challenges.
+- Tree shape: Buried Garden hangs off vanilla's Creaking advancement if there is a fitting one,
+  otherwise off the Adventure root; Old Growth leads to Set in Stone and Deadwood, and from
+  there to One of Them and Don't Blink.
 - Custom triggers are small (one registered `CriterionTrigger` each, or one shared trigger with
   an "event" field). Each new one gets a GameTest; whether mock players can be granted
   advancements in GameTests is to be checked first.
@@ -511,8 +501,6 @@ Notes:
   predates all of it and should be re-recorded once the numbers settle.
 - **Elderwood numbers**: cracks per heart, turn speed, root damage, stun length, gaze fill rate,
   resin damage and the summon's resin cost are first guesses.
-- **Terrain damage**: the slam breaks dirt and sand as well as wood, so a long fight chews up the
-  ground around the tree. Keep, or limit the tag to player-placed cover materials.
 - **Difficulty**: the Sentry's cracks scale with difficulty, the Elderwood's nothing does.
   Candidates: gaze fill rate, slam damage, root interval. Also what Peaceful means for it (it's
   a monster, so it would vanish; refusing to wake may read better).
@@ -548,7 +536,7 @@ The loop's last step, "return for more resin and hearts", is thin once the playe
   the gaze block for redstone (parked below) made from a lens; a spyglass upgrade that outlines
   mobs in view; repairing a mask with a lens shard for a big chunk of durability.
 - **A trophy**: a decorative drop from the tree with a low chance or from the challenge
-  advancements, e.g. its dead heart as a block that pulses faintly, or a copper-banded pale log.
+  advancement, e.g. its dead heart as a block that pulses faintly, or a copper-banded pale log.
 - **Something left behind**: after the death burst, a dead stump remains (decorative, or a
   one-time source of pale oak and the copper collar back).
 - **Healing a Sentry by hand** with a resin clump, like an iron golem with ingots: resin gets a
