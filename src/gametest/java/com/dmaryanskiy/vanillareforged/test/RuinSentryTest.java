@@ -20,14 +20,20 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 
 public class RuinSentryTest {
+	private static final String NOON = "vanillareforged-test:noon";
+	// Barriers let skylight through, so under the test's ceiling it's daylight too: everything that
+	// isn't about the sun runs at night.
+	private static final String MIDNIGHT = "vanillareforged-test:midnight";
 	private static final Vec3 SENTRY = new Vec3(1.5, 1.0, 1.5);
+	private static final BlockPos SENTRY_POS = BlockPos.containing(SENTRY);
+	private static final int ROOF_Y = 5;
 	private static final double HEART_Y = SENTRY.y + 1.53;
 	private static final double PLAYER_EYE_HEIGHT = 1.62;
 	// The Sentry faces south (+z), so its heart and its eye are on its +z side.
 	private static final Vec3 IN_FRONT = new Vec3(1.5, HEART_Y - PLAYER_EYE_HEIGHT, 4.0);
 	private static final Vec3 BEHIND = new Vec3(1.5, HEART_Y - PLAYER_EYE_HEIGHT, -1.0);
 
-	@GameTest(maxTicks = 40)
+	@GameTest(environment = MIDNIGHT, maxTicks = 40)
 	public void itsGazePetrifiesThePlayerItFaces(GameTestHelper helper) {
 		RuinSentry sentry = sentry(helper);
 		Player player = player(helper, IN_FRONT, 180.0F);
@@ -36,7 +42,7 @@ public class RuinSentryTest {
 		helper.succeedWhen(() -> helper.assertTrue(Petrification.getMeter(player) > 0, "The gaze should petrify the player"));
 	}
 
-	@GameTest(maxTicks = 40)
+	@GameTest(environment = MIDNIGHT, maxTicks = 40)
 	public void itsGazeMissesAPlayerBehindIt(GameTestHelper helper) {
 		RuinSentry sentry = sentry(helper);
 		Player player = player(helper, BEHIND, 0.0F);
@@ -48,7 +54,7 @@ public class RuinSentryTest {
 		});
 	}
 
-	@GameTest(maxTicks = 40)
+	@GameTest(environment = MIDNIGHT, maxTicks = 40)
 	public void aWallBlocksItsGaze(GameTestHelper helper) {
 		for (int y = 1; y <= 4; y++) {
 			for (int x = 0; x <= 3; x++) {
@@ -65,7 +71,7 @@ public class RuinSentryTest {
 		});
 	}
 
-	@GameTest(maxTicks = 40)
+	@GameTest(environment = MIDNIGHT, maxTicks = 40)
 	public void itsGazeIsWeakerThanTheElderwoods(GameTestHelper helper) {
 		RuinSentry sentry = sentry(helper);
 		Player player = player(helper, IN_FRONT, 180.0F);
@@ -78,7 +84,7 @@ public class RuinSentryTest {
 		});
 	}
 
-	@GameTest(maxTicks = 40)
+	@GameTest(environment = MIDNIGHT, maxTicks = 40)
 	public void itLetsGoOfAPlayerBeyondItsLeash(GameTestHelper helper) {
 		RuinSentry sentry = sentry(helper);
 		Player player = player(helper, SENTRY.add(RuinSentry.LEASH_RADIUS + 4.0, 0.0, 0.0), 0.0F);
@@ -90,7 +96,7 @@ public class RuinSentryTest {
 		});
 	}
 
-	@GameTest
+	@GameTest(environment = MIDNIGHT)
 	public void itTakesItsPostWhereItFirstStands(GameTestHelper helper) {
 		RuinSentry sentry = helper.spawn(ModEntities.RUIN_SENTRY, SENTRY);
 		sentry.setNoAi(true);
@@ -101,7 +107,7 @@ public class RuinSentryTest {
 		});
 	}
 
-	@GameTest
+	@GameTest(environment = MIDNIGHT)
 	public void aSwordOnItsHeartCracksItAndTurnsItOnThePlayer(GameTestHelper helper) {
 		RuinSentry sentry = sentry(helper);
 		Player player = swordsman(helper, IN_FRONT, 180.0F);
@@ -114,7 +120,7 @@ public class RuinSentryTest {
 		helper.succeed();
 	}
 
-	@GameTest
+	@GameTest(environment = MIDNIGHT)
 	public void aHitFromBehindMissesItsHeart(GameTestHelper helper) {
 		RuinSentry sentry = sentry(helper);
 
@@ -124,7 +130,7 @@ public class RuinSentryTest {
 		helper.succeed();
 	}
 
-	@GameTest
+	@GameTest(environment = MIDNIGHT)
 	public void theLastCrackKillsItAndItDropsLensShards(GameTestHelper helper) {
 		RuinSentry sentry = sentry(helper);
 		sentry.setCracks(sentry.getMaxCracks() - 1);
@@ -137,7 +143,7 @@ public class RuinSentryTest {
 		helper.succeed();
 	}
 
-	@GameTest
+	@GameTest(environment = MIDNIGHT)
 	public void sneakingWithAnAxeDoesNotTakeItApart(GameTestHelper helper) {
 		RuinSentry sentry = sentry(helper);
 		Player player = player(helper, IN_FRONT, 180.0F);
@@ -151,7 +157,7 @@ public class RuinSentryTest {
 		helper.succeed();
 	}
 
-	@GameTest
+	@GameTest(environment = MIDNIGHT)
 	public void thePaleMasksGazeFindsItWithoutBeingHunted(GameTestHelper helper) {
 		RuinSentry sentry = sentry(helper);
 		Player player = player(helper, new Vec3(1.5, 1.0, 5.5), 180.0F);
@@ -162,9 +168,108 @@ public class RuinSentryTest {
 		helper.succeed();
 	}
 
+	@GameTest(environment = NOON, skyAccess = true, maxTicks = 40)
+	public void directSunlightTurnsItIntoAStatueAndClearsItsCracks(GameTestHelper helper) {
+		RuinSentry sentry = sentry(helper);
+		sentry.setCracks(2);
+
+		helper.succeedWhen(() -> {
+			helper.assertTrue(sentry.isStatue(), "It should be a statue in direct sunlight");
+			helper.assertTrue(sentry.isNoAi(), "A statue shouldn't run AI");
+			helper.assertValueEqual(sentry.getCracks(), 0, "cracks");
+			helper.assertFalse(hit(helper, sentry, swordsman(helper, IN_FRONT, 180.0F)), "A statue can't be hurt");
+			helper.assertValueEqual(sentry.getCracks(), 0, "cracks after a hit");
+		});
+	}
+
+	// Sky access is read from skylight, which the light engine updates lazily, so allow it time.
+	@GameTest(environment = NOON, skyAccess = true, maxTicks = 300)
+	public void itWakesOnceItIsShaded(GameTestHelper helper) {
+		RuinSentry sentry = sentry(helper);
+
+		helper.startSequence()
+				.thenWaitUntil(() -> helper.assertTrue(sentry.isStatue(), "statue first"))
+				.thenExecute(() -> helper.setBlock(SENTRY_POS.atY(ROOF_Y), Blocks.STONE))
+				.thenWaitUntil(() -> helper.assertFalse(sentry.isStatue(), "It should wake in the shade"))
+				.thenExecute(() -> helper.assertFalse(sentry.isNoAi(), "Awake, it runs its AI again"))
+				.thenSucceed();
+	}
+
+	@GameTest(environment = MIDNIGHT, skyAccess = true, maxTicks = 40)
+	public void anOpenSkyAtNightDoesNothingToIt(GameTestHelper helper) {
+		RuinSentry sentry = sentry(helper);
+
+		helper.runAfterDelay(20, () -> {
+			helper.assertFalse(sentry.isStatue(), "Only sunlight turns it into a statue");
+			helper.succeed();
+		});
+	}
+
+	@GameTest(environment = NOON, skyAccess = true, maxTicks = 300)
+	public void aHitFromASunlitSpotBouncesOffItsShieldedHeart(GameTestHelper helper) {
+		roof(helper, 2);
+		RuinSentry sentry = sentry(helper);
+		Player player = swordsman(helper, IN_FRONT, 180.0F);
+
+		helper.startSequence()
+				.thenWaitUntil(() -> {
+					helper.assertFalse(sentry.isSunlit(sentry.blockPosition()), "The Sentry should be in the shade");
+					helper.assertFalse(sentry.isStatue(), "In the shade it's awake");
+				})
+				.thenExecute(() -> {
+					// Waking gave it its AI back; pin it again so it keeps facing the player.
+					sentry.setNoAi(true);
+					helper.assertTrue(sentry.isSunlit(player.blockPosition()), "The player should stand in the sun");
+					helper.assertFalse(hit(helper, sentry, player), "A hit from the sun shouldn't land");
+					helper.assertValueEqual(sentry.getCracks(), 0, "cracks");
+				})
+				.thenWaitUntil(() -> helper.assertTrue(sentry.isShielding(), "It should shield its heart from a target in the sun"))
+				.thenSucceed();
+	}
+
+	@GameTest(environment = NOON, skyAccess = true, maxTicks = 300)
+	public void itDoesNotFollowItsTargetIntoTheSun(GameTestHelper helper) {
+		floor(helper);
+		roof(helper, 3);
+		RuinSentry sentry = helper.spawn(ModEntities.RUIN_SENTRY, new Vec3(3.5, 1.0, 1.5));
+		sentry.setPost(helper.absolutePos(SENTRY_POS));
+		Player player = player(helper, new Vec3(3.5, 1.0, 6.5), 180.0F);
+
+		helper.startSequence()
+				.thenWaitUntil(() -> {
+					helper.assertFalse(sentry.isSunlit(sentry.blockPosition()), "The Sentry should be in the shade");
+					helper.assertFalse(sentry.isStatue(), "In the shade it's awake");
+				})
+				.thenExecute(() -> sentry.setTarget(player))
+				.thenExecuteAfter(100, () -> {
+					helper.assertFalse(sentry.isStatue(), "It shouldn't have walked into the sun");
+					helper.assertFalse(sentry.isSunlit(sentry.blockPosition()), "It should still be in the shade");
+					helper.assertTrue(sentry.isShielding(), "It should shield its heart from a target in the sun");
+				})
+				.thenSucceed();
+	}
+
+	// The default test structure is empty and floats above the ground, so a walking Sentry needs a floor.
+	private static void floor(GameTestHelper helper) {
+		for (int x = 0; x < 8; x++) {
+			for (int z = 0; z < 8; z++) {
+				helper.setBlock(new BlockPos(x, 0, z), Blocks.STONE);
+			}
+		}
+	}
+
+	/** A roof over the test's north side, up to and including row {@code lastZ}; the rest stays open to the sky. */
+	private static void roof(GameTestHelper helper, int lastZ) {
+		for (int x = 0; x < 8; x++) {
+			for (int z = 0; z <= lastZ; z++) {
+				helper.setBlock(new BlockPos(x, ROOF_Y, z), Blocks.STONE);
+			}
+		}
+	}
+
 	private static RuinSentry sentry(GameTestHelper helper) {
 		RuinSentry sentry = helper.spawn(ModEntities.RUIN_SENTRY, SENTRY);
-		sentry.setPost(helper.absolutePos(BlockPos.containing(SENTRY)));
+		sentry.setPost(helper.absolutePos(SENTRY_POS));
 		sentry.setNoAi(true);
 		sentry.setYRot(0.0F);
 		sentry.setYHeadRot(0.0F);

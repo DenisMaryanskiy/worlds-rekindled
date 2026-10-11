@@ -9,6 +9,7 @@ import net.minecraft.resources.Identifier;
 /** The Heartwood Sentry's model and heart with a bark head: its one eye, a lens shard, always glows. */
 public class RuinSentryRenderer extends MobRenderer<RuinSentry, HeartwoodSentryRenderState, HeartwoodSentryModel> {
 	private static final Identifier TEXTURE = HeartwoodSentryRenderer.texture("ruin_sentry");
+	private static final Identifier STATUE = HeartwoodSentryRenderer.texture("ruin_sentry_statue");
 	private static final Identifier EYE_GLOW = HeartwoodSentryRenderer.texture("ruin_sentry_eye_glow");
 
 	public RuinSentryRenderer(EntityRendererProvider.Context context) {
@@ -28,12 +29,13 @@ public class RuinSentryRenderer extends MobRenderer<RuinSentry, HeartwoodSentryR
 		state.attackAnimationState.copyFrom(entity.attackAnimationState);
 		state.statue = entity.isStatue();
 		state.glowingFace = true;
+		state.shielding = entity.isShielding();
 		state.cracks = entity.getCracks();
 		state.canMove = !state.statue;
 	}
 
 	@Override
 	public Identifier getTextureLocation(HeartwoodSentryRenderState state) {
-		return TEXTURE;
+		return state.statue ? STATUE : TEXTURE;
 	}
 }
