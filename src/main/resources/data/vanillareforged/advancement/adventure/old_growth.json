@@ -20,7 +20,7 @@
     },
     "frame": "goal",
     "icon": {
-      "id": "minecraft:creaking_heart"
+      "id": "minecraft:pale_oak_sapling"
     },
     "title": {
       "translate": "advancements.vanillareforged.old_growth.title"
