@@ -1,6 +1,6 @@
 # Pale Garden: design
 
-Status: features 1, 2, 3 and 5 are implemented with placeholder art and sound; the Pale Ruin (4) is
+Status: features 1, 2, 3, 5 and 6 are implemented with placeholder art and sound; the Pale Ruin (4) is
 on hold. Everything still to do is collected under [What's left](#whats-left).
 
 ## Problem
@@ -452,6 +452,33 @@ The rework into the Elderwood:
 
 Ruin Sentries' petrification and shard drops come with the Ruin.
 
+### 6. Advancements
+
+Five advancements in vanilla's **Adventure** tab (no tab of our own, like a Mojang update would).
+Their descriptions double as the hints the mod otherwise lacks.
+
+| Advancement | Earned by | Frame | Trigger |
+|---|---|---|---|
+| **Old Growth** | Waking the Elderwood | goal | vanilla `summoned_entity`, which the summon fires for players within 8 blocks |
+| **Set in Stone** | Being fully petrified and living through it | task | `vanillareforged:survived_petrification` |
+| **Deadwood** | Killing the Elderwood | goal | vanilla `player_killed_entity`: the core's last crack is credited to whoever dealt it |
+| **One of Them** | Wearing a Pale Mask next to a Creaking that ignores you | task | `vanillareforged:ignored_by_creaking` |
+| **Don't Blink** | Killing the Elderwood without being petrified once | challenge, 100 XP | `vanillareforged:killed_elderwood_unpetrified` |
+
+- **Tree**: Old Growth hangs off vanilla's **Heart Transplanter** (placing a Creaking Heart), so
+  its description, which spells out the stump, shows up for anyone who has started the Adventure
+  tab. It leads to Set in Stone and Deadwood, and Deadwood to One of Them and Don't Blink.
+- **Triggers**: the three of our own are plain vanilla `PlayerTrigger`s registered under our ids
+  (`ModCriteria`), like vanilla's `avoid_vibration`: the code decides when they fire.
+- **Set in Stone** is granted when the stone cracks open, by time or by a hit, if the player is
+  still alive then. A meter that never filled doesn't count.
+- **One of Them** needs the Creaking to be one that would otherwise attack (so not in Creative)
+  and within **4 blocks**.
+- **Don't Blink**: the tree remembers whom its gaze has petrified, saved with it so relogging
+  doesn't clear it, and forgets once it has gone dormant and mended every crack: that's a new
+  fight. Only the player who lands the last crack is checked and rewarded, like Deadwood. A Pale
+  Mask makes it easy, which fits: that's the second kill.
+
 ## Parked for later (warrior content and extras)
 
 - **Resin Tappers**: illager-type faction that farms resin from captive hearts, uses resin traps.
@@ -466,29 +493,13 @@ roughly in the order they'd pay off.
 
 ### A. Advancements
 
-None exist yet apart from the recipe unlocks. Proposal: hang them in vanilla's **Adventure** tab
-(no tab of our own, like a Mojang update would), with their descriptions doubling as the hints
-the mod otherwise lacks (see [Discoverability](#c-discoverability)). Names are working titles.
+Five are in (feature 6). Left:
 
-| Advancement | Earned by | Frame | Needs |
-|---|---|---|---|
-| **Buried Garden** | Entering a Pale Ruin | task | data only (`location` in a structure); waits for the Ruin |
-| **Old Growth** | Waking the Elderwood | goal | data only: the summon already fires `summoned_entity` |
-| **Set in Stone** | Being fully petrified and living through it | task | custom trigger |
-| **Deadwood** | Killing the Elderwood | goal | `player_killed_entity`, if the kill is credited to the player (to check: it dies through its core, not through health) |
-| **One of Them** | Wearing a Pale Mask next to a Creaking that ignores you | task | custom trigger, or `inventory_changed` for "obtain a Pale Mask" as the cheap version |
-| **Don't Blink** | Killing the Elderwood without being petrified once | challenge, with XP | per-fight tracking on the tree |
-Notes:
-- Tree shape: Buried Garden hangs off vanilla's Creaking advancement if there is a fitting one,
-  otherwise off the Adventure root; Old Growth leads to Set in Stone and Deadwood, and from
-  there to One of Them and Don't Blink.
-- Custom triggers are small (one registered `CriterionTrigger` each, or one shared trigger with
-  an "event" field). Each new one gets a GameTest; whether mock players can be granted
-  advancements in GameTests is to be checked first.
+- **Buried Garden** (task): entering a Pale Ruin. Data only (`location` in a structure), but it
+  waits for the Ruin. It hangs off Heart Transplanter or the Adventure root.
 - Vanilla's "Crafting a New Look" and "Smithing with Style" list trim recipes and templates by
   id, so the Elderwood trim doesn't count towards them. Adding it means overriding vanilla's
   advancement files; probably not worth it for the second one, which would become harder.
-- Every title and description goes in `en_us.json`.
 
 ### B. Finish what's on hold
 
@@ -516,8 +527,9 @@ Nothing in the game tells the player any of this exists: the Sentry and stump pa
 hearts can be hurt, that resin can be hit back, that a shield stops the gaze. Ideas, cheapest
 first:
 
-- **Advancement descriptions** as hints (above): "Old Growth" visible once the player has a
-  Creaking Heart, describing the stump.
+- **Advancement descriptions** as hints: done for the stump (Old Growth), the hearts (Deadwood)
+  and the mask (One of Them). Nothing yet says that resin can be hit back or that a shield stops
+  the gaze.
 - **The felled stump as a natural feature**: the story says a stump with its copper collar is all
   that's left. Generating one (pale oak log, resin roots, oxidized copper on top, no heart) rarely
   in Pale Gardens shows the pattern and gives the first place to summon. Small worldgen feature,

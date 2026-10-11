@@ -1,0 +1,24 @@
+{
+  "parent": "vanillareforged:adventure/deadwood",
+  "criteria": {
+    "ignored_by_creaking": {
+      "trigger": "vanillareforged:ignored_by_creaking"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.vanillareforged.one_of_them.description"
+    },
+    "icon": {
+      "id": "vanillareforged:pale_mask"
+    },
+    "title": {
+      "translate": "advancements.vanillareforged.one_of_them.title"
+    }
+  },
+  "requirements": [
+    [
+      "ignored_by_creaking"
+    ]
+  ]
+}

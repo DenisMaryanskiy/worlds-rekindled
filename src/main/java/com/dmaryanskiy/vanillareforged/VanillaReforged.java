@@ -26,6 +26,7 @@ public class VanillaReforged implements ModInitializer {
 		ModSounds.initialize();
 		ModEntities.initialize();
 		ModItems.initialize();
+		ModCriteria.initialize();
 		ElderwoodGaze.initialize();
 		Petrification.initialize();
 

@@ -43,6 +43,9 @@ public final class ElderwoodLens {
 	/** One tick of holding a player it sees. */
 	void watch(ServerLevel level, Player player) {
 		Petrification.expose(player, this.tree.isCoreOpen() ? CORE_GAZE_RATE : GAZE_RATE, this.tree.getEyePosition());
+		if (Petrification.isPetrified(player)) {
+			this.tree.rememberPetrifying(player);
+		}
 		this.showGaze(level, player);
 		this.throwResin(level, player);
 	}

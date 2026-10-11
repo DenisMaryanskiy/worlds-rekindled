@@ -1,9 +1,15 @@
 package com.dmaryanskiy.vanillareforged.elderwood;
 
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
+
+import com.dmaryanskiy.vanillareforged.ModCriteria;
 import com.dmaryanskiy.vanillareforged.ModSounds;
 import com.dmaryanskiy.vanillareforged.heart.HeartHit;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
@@ -108,6 +114,7 @@ public class Elderwood extends Monster {
 	private int crackCooldown;
 	private int idleTicks;
 	private DamageSource killedBy;
+	private final Set<UUID> petrifiedThisFight = new HashSet<>();
 
 	public Elderwood(EntityType<? extends Elderwood> type, Level level) {
 		super(type, level);
@@ -383,6 +390,15 @@ public class Elderwood extends Monster {
 		return this.lens.sees(player);
 	}
 
+	void rememberPetrifying(Player player) {
+		this.petrifiedThisFight.add(player.getUUID());
+	}
+
+	/** Whether its gaze has turned the player to stone since it was last whole. */
+	public boolean hasPetrified(Player player) {
+		return this.petrifiedThisFight.contains(player.getUUID());
+	}
+
 	public SlamPhase getSlamPhase() {
 		return SLAM_PHASES[this.entityData.get(SLAM_PHASE)];
 	}
@@ -483,11 +499,22 @@ public class Elderwood extends Monster {
 				return;
 			}
 		}
+		// Whole again: whoever comes next starts a new fight.
+		this.petrifiedThisFight.clear();
 	}
 
 	/** How far it has fallen apart while dying (see {@link ElderwoodDecay#stage}). */
 	public int getDecayStage() {
 		return ElderwoodDecay.stage(this.deathTime);
+	}
+
+	@Override
+	public void die(DamageSource source) {
+		boolean wasAlive = !this.dead;
+		super.die(source);
+		if (wasAlive && source.getEntity() instanceof ServerPlayer killer && !this.hasPetrified(killer)) {
+			ModCriteria.KILLED_ELDERWOOD_UNPETRIFIED.trigger(killer);
+		}
 	}
 
 	@Override
@@ -633,6 +660,7 @@ public class Elderwood extends Monster {
 		super.addAdditionalSaveData(output);
 		output.putInt("copper_stage", this.getCopperStage().ordinal());
 		output.putInt("heart_cracks", this.entityData.get(HEART_CRACKS));
+		output.store("petrified_this_fight", UUIDUtil.CODEC_SET, this.petrifiedThisFight);
 	}
 
 	@Override
@@ -641,6 +669,8 @@ public class Elderwood extends Monster {
 		int stage = input.getIntOr("copper_stage", WeatheringCopper.WeatherState.WEATHERED.ordinal());
 		this.setCopperStage(COPPER_STAGES[Mth.clamp(stage, 0, COPPER_STAGES.length - 1)]);
 		this.entityData.set(HEART_CRACKS, input.getIntOr("heart_cracks", 0));
+		this.petrifiedThisFight.clear();
+		input.read("petrified_this_fight", UUIDUtil.CODEC_SET).ifPresent(this.petrifiedThisFight::addAll);
 		this.showCracksOnTheBossBar();
 		if (this.hasCustomName()) {
 			this.bossEvent.setName(this.getDisplayName());

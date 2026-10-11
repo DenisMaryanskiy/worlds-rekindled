@@ -1,0 +1,24 @@
+{
+  "parent": "vanillareforged:adventure/old_growth",
+  "criteria": {
+    "survived_petrification": {
+      "trigger": "vanillareforged:survived_petrification"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.vanillareforged.set_in_stone.description"
+    },
+    "icon": {
+      "id": "minecraft:stone"
+    },
+    "title": {
+      "translate": "advancements.vanillareforged.set_in_stone.title"
+    }
+  },
+  "requirements": [
+    [
+      "survived_petrification"
+    ]
+  ]
+}

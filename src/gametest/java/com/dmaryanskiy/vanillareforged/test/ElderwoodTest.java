@@ -41,13 +41,13 @@ import net.minecraft.world.phys.Vec3;
 
 public class ElderwoodTest {
 	private static final String NOON = "vanillareforged-test:noon";
-	private static final String MIDNIGHT = "vanillareforged-test:midnight";
+	static final String MIDNIGHT = "vanillareforged-test:midnight";
 	// The wide tree, top row first, in the x/y plane at z = 2; the heart is placed last.
 	private static final BlockPos LOG = new BlockPos(3, 1, 3);
-	private static final BlockPos HEART = LOG.above(2);
-	private static final Vec3 ELDERWOOD = new Vec3(3.5, 1.0, 2.5);
+	static final BlockPos HEART = LOG.above(2);
+	static final Vec3 ELDERWOOD = new Vec3(3.5, 1.0, 2.5);
 	// It faces south (+z), so its front is on its +z side.
-	private static final Vec3 FRONT = new Vec3(0.0, 0.0, 1.0);
+	static final Vec3 FRONT = new Vec3(0.0, 0.0, 1.0);
 
 	// Sky access removes the test's barrier ceiling: the tree needs more room than the test is tall.
 	@GameTest(environment = MIDNIGHT, skyAccess = true, maxTicks = Elderwood.GROW_TICKS + 40)
@@ -641,13 +641,13 @@ public class ElderwoodTest {
 		return resin;
 	}
 
-	private static Elderwood stillElderwood(GameTestHelper helper) {
+	static Elderwood stillElderwood(GameTestHelper helper) {
 		Elderwood elderwood = facingSouth(helper.spawn(ModEntities.ELDERWOOD, ELDERWOOD));
 		elderwood.setNoAi(true);
 		return elderwood;
 	}
 
-	private static Elderwood facingSouth(Elderwood elderwood) {
+	static Elderwood facingSouth(Elderwood elderwood) {
 		elderwood.setYRot(0.0F);
 		elderwood.setYHeadRot(0.0F);
 		elderwood.setYBodyRot(0.0F);
@@ -660,9 +660,13 @@ public class ElderwoodTest {
 	}
 
 	private static boolean hit(GameTestHelper helper, Elderwood elderwood, ElderwoodHeart heart, Vec3 side, double distance, float strength) {
+		return hitAs(helper, helper.makeMockServerPlayer(GameType.SURVIVAL), elderwood, heart, side, distance, strength);
+	}
+
+	static boolean hitAs(GameTestHelper helper, Player player, Elderwood elderwood, ElderwoodHeart heart, Vec3 side, double distance,
+			float strength) {
 		Vec3 target = heart.box(elderwood).getCenter();
 		Vec3 eyes = target.add(side.normalize().scale(distance));
-		Player player = helper.makeMockServerPlayer(GameType.SURVIVAL);
 		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.IRON_SWORD));
 		float yaw = (float) Math.toDegrees(Math.atan2(target.z - eyes.z, target.x - eyes.x)) - 90.0F;
 		player.snapTo(eyes.subtract(0.0, player.getEyeHeight(), 0.0), yaw, 0.0F);
@@ -672,7 +676,7 @@ public class ElderwoodTest {
 	}
 
 	/** The stump without its heart, on a stone floor for the tree to stand on. */
-	private static void buildStump(GameTestHelper helper, Block copper) {
+	static void buildStump(GameTestHelper helper, Block copper) {
 		for (int x = -2; x <= 2; x++) {
 			for (int z = -2; z <= 2; z++) {
 				helper.setBlock(LOG.offset(x, -1, z), Blocks.STONE);

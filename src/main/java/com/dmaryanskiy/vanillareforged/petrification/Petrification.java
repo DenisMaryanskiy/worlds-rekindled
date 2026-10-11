@@ -3,6 +3,7 @@ package com.dmaryanskiy.vanillareforged.petrification;
 import java.util.Map;
 import java.util.WeakHashMap;
 
+import com.dmaryanskiy.vanillareforged.ModCriteria;
 import com.dmaryanskiy.vanillareforged.ModItems;
 import com.dmaryanskiy.vanillareforged.VanillaReforged;
 import com.dmaryanskiy.vanillareforged.ElderwoodGaze;
@@ -13,6 +14,7 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -130,8 +132,13 @@ public final class Petrification {
 	}
 
 	private static void breakFree(Player player) {
+		boolean wasPetrified = isPetrified(player);
 		setMeter(player, 0);
 		IMMUNE_UNTIL.put(player, player.level().getGameTime() + IMMUNE_TICKS);
+		// The hit that shatters the stone lands first, and may have killed them.
+		if (wasPetrified && player.isAlive() && player instanceof ServerPlayer serverPlayer) {
+			ModCriteria.SURVIVED_PETRIFICATION.trigger(serverPlayer);
+		}
 	}
 
 	public static void tick(Player player) {

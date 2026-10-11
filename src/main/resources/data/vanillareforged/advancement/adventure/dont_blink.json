@@ -1,0 +1,28 @@
+{
+  "parent": "vanillareforged:adventure/deadwood",
+  "criteria": {
+    "killed_elderwood_unpetrified": {
+      "trigger": "vanillareforged:killed_elderwood_unpetrified"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.vanillareforged.dont_blink.description"
+    },
+    "frame": "challenge",
+    "icon": {
+      "id": "vanillareforged:creaking_eye"
+    },
+    "title": {
+      "translate": "advancements.vanillareforged.dont_blink.title"
+    }
+  },
+  "requirements": [
+    [
+      "killed_elderwood_unpetrified"
+    ]
+  ],
+  "rewards": {
+    "experience": 100
+  }
+}

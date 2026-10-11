@@ -16,7 +16,8 @@
 			"com.dmaryanskiy.vanillareforged.test.SentryHeartTest",
 			"com.dmaryanskiy.vanillareforged.test.ElderwoodLensTest",
 			"com.dmaryanskiy.vanillareforged.test.PetrificationTest",
-			"com.dmaryanskiy.vanillareforged.test.ElderwoodTest"
+			"com.dmaryanskiy.vanillareforged.test.ElderwoodTest",
+			"com.dmaryanskiy.vanillareforged.test.AdvancementTest"
 		]
 	},
 	"depends": {
