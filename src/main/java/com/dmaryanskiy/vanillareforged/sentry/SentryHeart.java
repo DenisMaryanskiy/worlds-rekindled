@@ -15,19 +15,19 @@ public final class SentryHeart {
 	private SentryHeart() {
 	}
 
-	public static AABB box(HeartwoodSentry sentry) {
+	public static AABB box(AbstractSentry sentry) {
 		Vec3 center = sentry.position().add(0.0, HEIGHT, 0.0).add(forward(sentry).scale(FORWARD));
 		return AABB.ofSize(center, SIZE, SIZE, SIZE);
 	}
 
 	/** Whether a hit cracks the heart: a player's cracking hit, or any mob's arrow or trident, on the heart. */
-	public static boolean isCrackedBy(HeartwoodSentry sentry, DamageSource source) {
+	public static boolean isCrackedBy(AbstractSentry sentry, DamageSource source) {
 		return HeartHit.of(source, true)
 				.filter(hit -> hit.comesFromTheFrontOf(forward(sentry)) && hit.passesThrough(box(sentry)))
 				.isPresent();
 	}
 
-	private static Vec3 forward(HeartwoodSentry sentry) {
+	private static Vec3 forward(AbstractSentry sentry) {
 		return Vec3.directionFromRotation(0.0F, sentry.yBodyRot);
 	}
 }

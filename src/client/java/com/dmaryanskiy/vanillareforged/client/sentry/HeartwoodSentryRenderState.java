@@ -4,6 +4,6 @@ import net.minecraft.client.renderer.entity.state.CreakingRenderState;
 
 public class HeartwoodSentryRenderState extends CreakingRenderState {
 	public boolean statue;
-	public boolean jackOLantern;
+	public boolean glowingFace;
 	public int cracks;
 }

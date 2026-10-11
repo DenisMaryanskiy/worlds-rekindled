@@ -35,6 +35,8 @@ public final class ModItems {
 	public static final Item BURNING_RESIN = register("burning_resin", Item::new, new Item.Properties());
 	public static final Item HEARTWOOD_SENTRY_SPAWN_EGG = register("heartwood_sentry_spawn_egg",
 			SpawnEggItem::new, new Item.Properties().spawnEgg(ModEntities.HEARTWOOD_SENTRY));
+	public static final Item RUIN_SENTRY_SPAWN_EGG = register("ruin_sentry_spawn_egg",
+			SpawnEggItem::new, new Item.Properties().spawnEgg(ModEntities.RUIN_SENTRY));
 
 	private ModItems() {
 	}
@@ -48,7 +50,7 @@ public final class ModItems {
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.COMBAT).register(output ->
 				output.insertAfter(Items.TURTLE_HELMET, PALE_MASK));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.SPAWN_EGGS).register(output ->
-				output.insertAfter(Items.IRON_GOLEM_SPAWN_EGG, HEARTWOOD_SENTRY_SPAWN_EGG));
+				output.insertAfter(Items.IRON_GOLEM_SPAWN_EGG, HEARTWOOD_SENTRY_SPAWN_EGG, RUIN_SENTRY_SPAWN_EGG));
 	}
 
 	private static Item register(String name, Function<Item.Properties, Item> factory, Item.Properties properties) {

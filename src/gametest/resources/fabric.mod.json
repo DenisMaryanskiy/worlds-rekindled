@@ -17,7 +17,8 @@
 			"com.dmaryanskiy.vanillareforged.test.ElderwoodLensTest",
 			"com.dmaryanskiy.vanillareforged.test.PetrificationTest",
 			"com.dmaryanskiy.vanillareforged.test.ElderwoodTest",
-			"com.dmaryanskiy.vanillareforged.test.AdvancementTest"
+			"com.dmaryanskiy.vanillareforged.test.AdvancementTest",
+			"com.dmaryanskiy.vanillareforged.test.RuinSentryTest"
 		]
 	},
 	"depends": {

@@ -1,6 +1,7 @@
 package com.dmaryanskiy.vanillareforged;
 
 import com.dmaryanskiy.vanillareforged.sentry.HeartwoodSentry;
+import com.dmaryanskiy.vanillareforged.sentry.RuinSentry;
 import com.dmaryanskiy.vanillareforged.elderwood.BurningResin;
 import com.dmaryanskiy.vanillareforged.elderwood.Elderwood;
 import com.dmaryanskiy.vanillareforged.elderwood.ElderwoodBranchHeart;
@@ -18,6 +19,8 @@ import net.minecraft.world.entity.MobCategory;
 public final class ModEntities {
 	public static final EntityType<HeartwoodSentry> HEARTWOOD_SENTRY = register("heartwood_sentry",
 			EntityType.Builder.of(HeartwoodSentry::new, MobCategory.MISC).sized(0.9F, 2.7F).eyeHeight(2.3F).clientTrackingRange(10));
+	public static final EntityType<RuinSentry> RUIN_SENTRY = register("ruin_sentry",
+			EntityType.Builder.of(RuinSentry::new, MobCategory.MISC).sized(0.9F, 2.7F).eyeHeight(2.3F).clientTrackingRange(10));
 	public static final EntityType<Elderwood> ELDERWOOD = register("elderwood",
 			EntityType.Builder.of(Elderwood::new, MobCategory.MONSTER).sized(3.0F, 10.0F).eyeHeight(4.0F).clientTrackingRange(10));
 	public static final EntityType<BurningResin> BURNING_RESIN = register("burning_resin",
@@ -37,6 +40,7 @@ public final class ModEntities {
 
 	public static void initialize() {
 		FabricDefaultAttributeRegistry.register(HEARTWOOD_SENTRY, HeartwoodSentry.createAttributes());
+		FabricDefaultAttributeRegistry.register(RUIN_SENTRY, RuinSentry.createAttributes());
 		FabricDefaultAttributeRegistry.register(ELDERWOOD, Elderwood.createAttributes());
 	}
 
