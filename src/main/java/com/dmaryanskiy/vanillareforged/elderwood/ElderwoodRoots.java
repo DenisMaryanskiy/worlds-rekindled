@@ -3,13 +3,13 @@ package com.dmaryanskiy.vanillareforged.elderwood;
 import org.jspecify.annotations.Nullable;
 
 import com.dmaryanskiy.vanillareforged.ModEntities;
+import com.dmaryanskiy.vanillareforged.ModSounds;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
@@ -58,7 +58,7 @@ public class ElderwoodRoots extends Entity {
 		super.tick();
 		if (this.level() instanceof ServerLevel level) {
 			if (this.tickCount == 1) {
-				this.playSound(SoundEvents.ROOTED_DIRT_BREAK, 1.5F, 0.6F);
+				this.playSound(ModSounds.ELDERWOOD_ROOTS_CRACK, 1.5F, 0.6F);
 			}
 			if (this.tickCount == WARNING_TICKS) {
 				this.erupt(level);
@@ -72,8 +72,8 @@ public class ElderwoodRoots extends Entity {
 	}
 
 	private void erupt(ServerLevel level) {
-		this.playSound(SoundEvents.CREAKING_ATTACK, 1.5F, 0.8F);
-		this.playSound(SoundEvents.WOOD_BREAK, 1.5F, 0.7F);
+		this.playSound(ModSounds.ELDERWOOD_ROOTS_ERUPT, 1.5F, 0.8F);
+		this.playSound(ModSounds.ELDERWOOD_SPLINTER, 1.5F, 0.7F);
 		LivingEntity owner = EntityReference.getLivingEntity(this.owner, level);
 		DamageSource source = owner == null ? this.damageSources().magic() : this.damageSources().indirectMagic(this, owner);
 		for (Player player : level.getEntitiesOfClass(Player.class, this.getBoundingBox().inflate(0.2, 0.0, 0.2))) {

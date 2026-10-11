@@ -9,7 +9,8 @@ import net.minecraft.util.Mth;
 
 /**
  * An old pale oak: a thick trunk on spreading roots, a crown of bare branches, and the builders'
- * copper. Only its two main branches move. Their poses are mirrored on the server by the branch
+ * copper, in three layers (stump, upper trunk, crown) that a dying tree loses one by one. Alive, only
+ * its two main branches move. Their poses are mirrored on the server by the branch
  * hearts' spots in {@code ElderwoodHeart}, so the two must change together.
  */
 public class ElderwoodModel extends EntityModel<ElderwoodRenderState> {
@@ -25,14 +26,19 @@ public class ElderwoodModel extends EntityModel<ElderwoodRenderState> {
 	private static final float SLAM_TICKS = 3.0F;
 	private static final float RECOVER_TICKS = 6.0F;
 
+	private final ModelPart tree;
+	private final ModelPart upper;
+	private final ModelPart crown;
 	private final ModelPart rightBranch;
 	private final ModelPart leftBranch;
 
 	public ElderwoodModel(ModelPart root) {
 		super(root);
-		ModelPart tree = root.getChild("tree");
-		this.rightBranch = tree.getChild("right_branch");
-		this.leftBranch = tree.getChild("left_branch");
+		this.tree = root.getChild("tree");
+		this.upper = this.tree.getChild("upper");
+		this.crown = this.upper.getChild("crown");
+		this.rightBranch = this.crown.getChild("right_branch");
+		this.leftBranch = this.crown.getChild("left_branch");
 	}
 
 	public static LayerDefinition createBodyLayer() {
@@ -42,6 +48,15 @@ public class ElderwoodModel extends EntityModel<ElderwoodRenderState> {
 	@Override
 	public void setupAnim(ElderwoodRenderState state) {
 		super.setupAnim(state);
+		// Dying, it shakes harder with every piece it loses: first the crown, then the upper trunk.
+		this.crown.visible = state.decayStage < 1;
+		this.upper.visible = state.decayStage < 2;
+		if (state.deathTime > 0.0F) {
+			float strength = 1.0F + state.decayStage;
+			this.tree.x += Mth.sin(state.deathTime * 2.7F) * 0.6F * strength;
+			this.tree.z += Mth.cos(state.deathTime * 3.1F) * 0.4F * strength;
+			this.tree.zRot += Mth.sin(state.deathTime * 1.9F) * 0.012F * strength;
+		}
 		float sway = Mth.sin(state.ageInTicks * 0.04F) * 0.02F;
 		this.pose(this.rightBranch, -1.0F, state, state.slamRightBranch, sway);
 		this.pose(this.leftBranch, 1.0F, state, !state.slamRightBranch, sway);

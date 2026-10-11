@@ -1,0 +1,137 @@
+{
+  "entity.elderwood.ambient": {
+    "subtitle": "subtitles.vanillareforged.entity.elderwood.ambient",
+    "sounds": [
+      {
+        "name": "minecraft:entity.creaking.ambient",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.elderwood.heart_crack": {
+    "subtitle": "subtitles.vanillareforged.entity.elderwood.heart_crack",
+    "sounds": [
+      {
+        "name": "minecraft:block.creaking_heart.hurt",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.elderwood.heart_break": {
+    "subtitle": "subtitles.vanillareforged.entity.elderwood.heart_break",
+    "sounds": [
+      {
+        "name": "minecraft:block.creaking_heart.break",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.elderwood.death": {
+    "subtitle": "subtitles.vanillareforged.entity.elderwood.death",
+    "sounds": [
+      {
+        "name": "minecraft:entity.creaking.death",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.elderwood.grow": {
+    "subtitle": "subtitles.vanillareforged.entity.elderwood.grow",
+    "sounds": [
+      {
+        "name": "minecraft:entity.creaking.spawn",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.elderwood.splinter": {
+    "subtitle": "subtitles.vanillareforged.entity.elderwood.splinter",
+    "sounds": [
+      {
+        "name": "minecraft:block.wood.break",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.elderwood.raise_branch": {
+    "subtitle": "subtitles.vanillareforged.entity.elderwood.raise_branch",
+    "sounds": [
+      {
+        "name": "minecraft:entity.creaking.attack",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.elderwood.slam": {
+    "subtitle": "subtitles.vanillareforged.entity.elderwood.slam",
+    "sounds": [
+      {
+        "name": "minecraft:entity.warden.attack_impact",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.elderwood.stun": {
+    "subtitle": "subtitles.vanillareforged.entity.elderwood.stun",
+    "sounds": [
+      {
+        "name": "minecraft:entity.creaking.freeze",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.elderwood.throw": {
+    "subtitle": "subtitles.vanillareforged.entity.elderwood.throw",
+    "sounds": [
+      {
+        "name": "minecraft:entity.blaze.shoot",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.elderwood.mend": {
+    "subtitle": "subtitles.vanillareforged.entity.elderwood.mend",
+    "sounds": [
+      {
+        "name": "minecraft:block.creaking_heart.idle",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.elderwood.roots_crack": {
+    "subtitle": "subtitles.vanillareforged.entity.elderwood.roots_crack",
+    "sounds": [
+      {
+        "name": "minecraft:block.rooted_dirt.break",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.elderwood.roots_erupt": {
+    "subtitle": "subtitles.vanillareforged.entity.elderwood.roots_erupt",
+    "sounds": [
+      {
+        "name": "minecraft:entity.creaking.twitch",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.elderwood.break_apart": {
+    "subtitle": "subtitles.vanillareforged.entity.elderwood.break_apart",
+    "sounds": [
+      {
+        "name": "minecraft:entity.zombie.break_wooden_door",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.elderwood.burst": {
+    "subtitle": "subtitles.vanillareforged.entity.elderwood.burst",
+    "sounds": [
+      {
+        "name": "minecraft:entity.generic.explode",
+        "type": "event"
+      }
+    ]
+  }
+}

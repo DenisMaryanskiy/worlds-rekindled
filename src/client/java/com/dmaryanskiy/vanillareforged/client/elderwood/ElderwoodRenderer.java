@@ -58,12 +58,22 @@ public class ElderwoodRenderer extends MobRenderer<Elderwood, ElderwoodRenderSta
 		state.slamForward = entity.getSlamForward();
 		state.stunned = entity.isStunned();
 		state.growth = entity.getGrowth(partialTicks);
+		state.decayStage = entity.getDecayStage();
+		state.dormant = entity.isDormant();
+		// A cracked heart shows on the heart itself; the whole tree turning red reads as nothing in particular.
+		state.hasRedOverlay = false;
 	}
 
 	@Override
 	protected void scale(ElderwoodRenderState state, PoseStack poseStack) {
 		float size = Math.max(state.growth, 0.02F);
 		poseStack.scale(size, size, size);
+	}
+
+	// It falls apart in place instead of tipping over.
+	@Override
+	protected float getFlipDegrees() {
+		return 0.0F;
 	}
 
 	@Override

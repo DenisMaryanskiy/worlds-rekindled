@@ -319,7 +319,6 @@ public class ElderwoodTest {
 		}
 		sequence.thenExecute(() -> {
 			helper.assertFalse(elderwood.isAlive(), "Destroying the core should kill it");
-			helper.assertItemEntityPresent(ModItems.ELDERWOOD_LENS);
 		}).thenSucceed();
 	}
 
@@ -459,14 +458,23 @@ public class ElderwoodTest {
 				.thenSucceed();
 	}
 
-	@GameTest(environment = MIDNIGHT)
-	public void itDropsItsLens(GameTestHelper helper) {
+	@GameTest(environment = MIDNIGHT, maxTicks = Elderwood.DECAY_TICKS + 20)
+	public void itFallsApartInStagesAndLeavesItsLensWhereItStood(GameTestHelper helper) {
 		Elderwood elderwood = helper.spawn(ModEntities.ELDERWOOD, new Vec3(1.5, 1.0, 1.5));
 
 		elderwood.kill(helper.getLevel());
 
-		helper.assertItemEntityPresent(ModItems.ELDERWOOD_LENS);
-		helper.succeed();
+		helper.runAfterDelay(5, () -> helper.assertValueEqual(elderwood.getDecayStage(), 0, "decay stage while it only shakes"));
+		helper.runAfterDelay(Elderwood.DECAY_STAGE_TICKS + 5, () -> {
+			helper.assertFalse(elderwood.isRemoved(), "It should still be falling apart");
+			helper.assertValueEqual(elderwood.getDecayStage(), 1, "decay stage once its crown is gone");
+			helper.assertFalse(elderwood.isVulnerable(ElderwoodHeart.TRUNK_FRONT), "A dying Elderwood's hearts should be dark");
+			helper.assertItemEntityNotPresent(ModItems.ELDERWOOD_LENS);
+		});
+		helper.succeedWhen(() -> {
+			helper.assertTrue(elderwood.isRemoved(), "It should be gone once the stump has burst");
+			helper.assertItemEntityPresent(ModItems.ELDERWOOD_LENS);
+		});
 	}
 
 	@GameTest(environment = MIDNIGHT, maxTicks = 60)

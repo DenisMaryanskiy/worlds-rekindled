@@ -380,7 +380,19 @@ all around the trunk, so the player has to keep moving between the two.
   sword). This is how a ranged player opens them without baiting a slam.
 - **Falling dormant**: with no player within 32 blocks for 30 s it stops, and its hearts heal one
   crack every few seconds, destroyed ones included. Walking away resets the fight; it doesn't let
-  the player whittle it down from safety.
+  the player whittle it down from safety. Its lens is dark while it's dormant.
+- **Reading the fight** (polish):
+  - **the gaze shows**: a thin trail of amber motes runs from the lens towards whoever it holds,
+    so the cone can be seen before the stone creeps in, and by other players;
+  - **a crack shows on its heart**: resin chips fly from the heart that took it, and the heart's
+    own shards when it breaks. The tree doesn't flash red: on a model this size that read as
+    nothing in particular;
+  - **its own sounds**, with their own subtitles ("Elderwood raises a branch", "Ground cracks",
+    "Elderwood is stunned"…). They still play vanilla audio; real audio is for a sound designer.
+- **Death**: it doesn't tip over like other mobs. Its lens and hearts go dark and it shakes itself
+  apart over about 4 s in three loud breaks: the crown and branches come off, then the upper
+  trunk, and then the stump bursts (an explosion that harms nothing). Its lens and resin are
+  left where the trunk stood. The model is built in those three layers for it.
 - The hit tracing is shared with the Sentry (`HeartHit`, kept); each heart is a box at a fixed
   spot on the tree, and a planted branch's box sits where its heart ends up.
 
