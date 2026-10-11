@@ -1,6 +1,8 @@
 package com.dmaryanskiy.vanillareforged.client.elderwood;
 
+import com.dmaryanskiy.vanillareforged.client.JsonGeometry;
 import com.dmaryanskiy.vanillareforged.elderwood.Elderwood;
+import com.dmaryanskiy.vanillareforged.elderwood.ElderwoodSlam;
 
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.geom.ModelPart;
@@ -9,8 +11,11 @@ import net.minecraft.util.Mth;
 
 /**
  * An old pale oak: a thick trunk on spreading roots, a crown of bare branches, and the builders'
- * copper, in three layers (stump, upper trunk, crown) that a dying tree loses one by one. Alive, only
- * its two main branches move. Their poses are mirrored on the server by the branch
+ * copper, in three layers (stump, upper trunk, crown) that a dying tree loses one by one. Its boxes
+ * are data ({@code geometry/elderwood.json}, written with its placeholder textures by
+ * {@code tools/elderwood_model.py}); this class only animates them.
+ * <p>
+ * Alive, only its two main branches move. Their poses are mirrored on the server by the branch
  * hearts' spots in {@code ElderwoodHeart}, so the two must change together.
  */
 public class ElderwoodModel extends EntityModel<ElderwoodRenderState> {
@@ -19,7 +24,7 @@ public class ElderwoodModel extends EntityModel<ElderwoodRenderState> {
 	private static final float STUNNED_SPREAD = 1.222F;
 	private static final float RAISED_SPREAD = 0.15F;
 	private static final float RAISED_BACK = -0.5F;
-	// A main branch's pivot and length in model pixels (ElderwoodGeometry), to aim its tip at the slam.
+	// A main branch's pivot and length in model pixels (geometry/elderwood.json), to aim its tip at the slam.
 	private static final float PIVOT_SIDE = 20.0F;
 	private static final float PIVOT_HEIGHT = 72.0F;
 	private static final float BRANCH_LENGTH = 92.0F;
@@ -42,7 +47,7 @@ public class ElderwoodModel extends EntityModel<ElderwoodRenderState> {
 	}
 
 	public static LayerDefinition createBodyLayer() {
-		return ElderwoodGeometry.create();
+		return JsonGeometry.load("elderwood");
 	}
 
 	@Override
@@ -69,13 +74,13 @@ public class ElderwoodModel extends EntityModel<ElderwoodRenderState> {
 		if (state.stunned) {
 			spread = STUNNED_SPREAD;
 		} else if (slamming && state.slamPhase == Elderwood.SlamPhase.WINDUP) {
-			float raise = Mth.clamp(state.slamPhaseAge / Elderwood.SLAM_WINDUP_TICKS, 0.0F, 1.0F);
+			float raise = Mth.clamp(state.slamPhaseAge / ElderwoodSlam.WINDUP_TICKS, 0.0F, 1.0F);
 			forward = RAISED_BACK * raise;
 			spread = Mth.lerp(raise, REST_SPREAD, RAISED_SPREAD);
 		} else if (slamming && state.slamPhase == Elderwood.SlamPhase.STUCK) {
 			// The branch comes down fast, stays planted, and lifts back just before it lets go.
 			float down = Mth.clamp(state.slamPhaseAge / SLAM_TICKS, 0.0F, 1.0F);
-			float held = Mth.clamp((Elderwood.SLAM_STUCK_TICKS - state.slamPhaseAge) / RECOVER_TICKS, 0.0F, 1.0F);
+			float held = Mth.clamp((ElderwoodSlam.STUCK_TICKS - state.slamPhaseAge) / RECOVER_TICKS, 0.0F, 1.0F);
 			// From the pivot to where the slam landed, in model space: x to its left, y down, z to its back.
 			float x = -state.slamRight * 16.0F - side * PIVOT_SIDE;
 			float z = -state.slamForward * 16.0F;

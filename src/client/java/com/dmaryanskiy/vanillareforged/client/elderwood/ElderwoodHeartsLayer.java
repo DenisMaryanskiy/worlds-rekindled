@@ -19,16 +19,15 @@ import net.minecraft.resources.Identifier;
  * the core's copper shutter is replaced by the open heart once the others are gone.
  */
 public class ElderwoodHeartsLayer extends RenderLayer<ElderwoodRenderState, ElderwoodModel> {
-	private static final ElderwoodHeart[] HEARTS = ElderwoodHeart.values();
 	private static final Identifier CORE_OPEN = texture("core_open");
 
-	private final Identifier[] glowing = new Identifier[HEARTS.length];
-	private final Identifier[] cracked = new Identifier[HEARTS.length];
-	private final Identifier[] broken = new Identifier[HEARTS.length];
+	private final Identifier[] glowing = new Identifier[ElderwoodHeart.ALL.size()];
+	private final Identifier[] cracked = new Identifier[ElderwoodHeart.ALL.size()];
+	private final Identifier[] broken = new Identifier[ElderwoodHeart.ALL.size()];
 
 	public ElderwoodHeartsLayer(RenderLayerParent<ElderwoodRenderState, ElderwoodModel> renderer) {
 		super(renderer);
-		for (ElderwoodHeart heart : HEARTS) {
+		for (ElderwoodHeart heart : ElderwoodHeart.ALL) {
 			String name = heart.name().toLowerCase(Locale.ROOT);
 			this.glowing[heart.ordinal()] = texture(name);
 			this.cracked[heart.ordinal()] = texture(name + "_cracked");
@@ -46,7 +45,7 @@ public class ElderwoodHeartsLayer extends RenderLayer<ElderwoodRenderState, Elde
 		if (state.isInvisible) {
 			return;
 		}
-		for (ElderwoodHeart heart : HEARTS) {
+		for (ElderwoodHeart heart : ElderwoodHeart.ALL) {
 			int i = heart.ordinal();
 			if (state.heartCracks[i] >= heart.maxCracks()) {
 				renderColoredCutoutModel(this.getParentModel(), this.broken[i], poseStack, submitNodeCollector, lightCoords, state, -1, 1);

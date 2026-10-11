@@ -9,6 +9,9 @@ import com.dmaryanskiy.vanillareforged.ModItems;
 import com.dmaryanskiy.vanillareforged.petrification.Petrification;
 import com.dmaryanskiy.vanillareforged.elderwood.BurningResin;
 import com.dmaryanskiy.vanillareforged.elderwood.Elderwood;
+import com.dmaryanskiy.vanillareforged.elderwood.ElderwoodDecay;
+import com.dmaryanskiy.vanillareforged.elderwood.ElderwoodLens;
+import com.dmaryanskiy.vanillareforged.elderwood.ElderwoodSlam;
 import com.dmaryanskiy.vanillareforged.elderwood.ElderwoodBranchHeart;
 import com.dmaryanskiy.vanillareforged.elderwood.ElderwoodHeart;
 import com.dmaryanskiy.vanillareforged.elderwood.ElderwoodRoots;
@@ -327,7 +330,7 @@ public class ElderwoodTest {
 		Elderwood elderwood = facingSouth(helper.spawn(ModEntities.ELDERWOOD, ELDERWOOD));
 		// A plain mock player: a mock ServerPlayer has no connection, which taking damage needs.
 		Player player = helper.makeMockPlayer(GameType.SURVIVAL);
-		player.snapTo(helper.absoluteVec(ELDERWOOD.add(0.0, 0.0, Elderwood.SLAM_DISTANCE)), 0.0F, 0.0F);
+		player.snapTo(helper.absoluteVec(ELDERWOOD.add(0.0, 0.0, ElderwoodSlam.DISTANCE)), 0.0F, 0.0F);
 		helper.getLevel().addFreshEntity(player);
 		Petrification.expose(player, Petrification.FULL);
 		elderwood.startSlam();
@@ -335,7 +338,7 @@ public class ElderwoodTest {
 		helper.startSequence()
 				.thenWaitUntil(() -> helper.assertTrue(elderwood.getSlamPhase() == Elderwood.SlamPhase.STUCK, "branch planted"))
 				.thenExecute(() -> {
-					helper.assertTrue(player.getHealth() < player.getMaxHealth() - Elderwood.SLAM_DAMAGE,
+					helper.assertTrue(player.getHealth() < player.getMaxHealth() - ElderwoodSlam.DAMAGE,
 							"A petrified player should take more than the slam's base damage");
 					helper.assertValueEqual(Petrification.getMeter(player), 0, "meter after the slam");
 				})
@@ -448,7 +451,7 @@ public class ElderwoodTest {
 	public void steppingOutOfTheSlamDodgesIt(GameTestHelper helper) {
 		Elderwood elderwood = facingSouth(helper.spawn(ModEntities.ELDERWOOD, ELDERWOOD));
 		Player player = helper.makeMockPlayer(GameType.SURVIVAL);
-		player.snapTo(helper.absoluteVec(ELDERWOOD.add(-3.0, 0.0, Elderwood.SLAM_DISTANCE)), 0.0F, 0.0F);
+		player.snapTo(helper.absoluteVec(ELDERWOOD.add(-3.0, 0.0, ElderwoodSlam.DISTANCE)), 0.0F, 0.0F);
 		helper.getLevel().addFreshEntity(player);
 		elderwood.startSlam();
 
@@ -458,14 +461,14 @@ public class ElderwoodTest {
 				.thenSucceed();
 	}
 
-	@GameTest(environment = MIDNIGHT, maxTicks = Elderwood.DECAY_TICKS + 20)
+	@GameTest(environment = MIDNIGHT, maxTicks = ElderwoodDecay.TICKS + 20)
 	public void itFallsApartInStagesAndLeavesItsLensWhereItStood(GameTestHelper helper) {
 		Elderwood elderwood = helper.spawn(ModEntities.ELDERWOOD, new Vec3(1.5, 1.0, 1.5));
 
 		elderwood.kill(helper.getLevel());
 
 		helper.runAfterDelay(5, () -> helper.assertValueEqual(elderwood.getDecayStage(), 0, "decay stage while it only shakes"));
-		helper.runAfterDelay(Elderwood.DECAY_STAGE_TICKS + 5, () -> {
+		helper.runAfterDelay(ElderwoodDecay.STAGE_TICKS + 5, () -> {
 			helper.assertFalse(elderwood.isRemoved(), "It should still be falling apart");
 			helper.assertValueEqual(elderwood.getDecayStage(), 1, "decay stage once its crown is gone");
 			helper.assertFalse(elderwood.isVulnerable(ElderwoodHeart.TRUNK_FRONT), "A dying Elderwood's hearts should be dark");
@@ -607,7 +610,7 @@ public class ElderwoodTest {
 				.thenSucceed();
 	}
 
-	@GameTest(environment = MIDNIGHT, maxTicks = Elderwood.RESIN_INTERVAL_TICKS + 60)
+	@GameTest(environment = MIDNIGHT, maxTicks = ElderwoodLens.RESIN_INTERVAL_TICKS + 60)
 	public void itThrowsBurningResinAtADistantPlayer(GameTestHelper helper) {
 		// The test structure floats, and this takes a few seconds: without a floor both would fall out of it.
 		for (int x = 0; x < 8; x++) {

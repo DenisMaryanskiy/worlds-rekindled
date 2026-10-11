@@ -18,6 +18,13 @@ meaningful rewards: new items, ingredients and mechanics that fit the base game.
 ./gradlew vscode       # regenerate VS Code launch configurations
 ```
 
+The Elderwood's placeholder model and textures are generated from one spec, so their boxes and UVs
+always agree. After changing the spec, regenerate both (plain Python 3, no dependencies):
+
+```bash
+python3 tools/elderwood_model.py
+```
+
 ## License
 
 All rights reserved until a license is chosen.

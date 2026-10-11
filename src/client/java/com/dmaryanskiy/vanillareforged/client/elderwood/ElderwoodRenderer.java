@@ -46,7 +46,7 @@ public class ElderwoodRenderer extends MobRenderer<Elderwood, ElderwoodRenderSta
 	public void extractRenderState(Elderwood entity, ElderwoodRenderState state, float partialTicks) {
 		super.extractRenderState(entity, state, partialTicks);
 		state.copperStage = entity.getCopperStage();
-		for (ElderwoodHeart heart : ElderwoodHeart.values()) {
+		for (ElderwoodHeart heart : ElderwoodHeart.ALL) {
 			state.heartCracks[heart.ordinal()] = entity.getCracks(heart);
 			state.heartVulnerable[heart.ordinal()] = entity.isVulnerable(heart);
 		}
