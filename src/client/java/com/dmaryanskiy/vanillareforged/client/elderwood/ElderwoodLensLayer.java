@@ -9,7 +9,7 @@ import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.Identifier;
 
-/** The lens glows like the Creaking's eyes, and goes dark while the Elderwood is stunned. */
+/** The lens glows like the Creaking's eyes, and goes dark while the Elderwood is stunned, dormant or dying. */
 public class ElderwoodLensLayer extends RenderLayer<ElderwoodRenderState, ElderwoodModel> {
 	private final Identifier texture;
 
@@ -21,7 +21,7 @@ public class ElderwoodLensLayer extends RenderLayer<ElderwoodRenderState, Elderw
 	@Override
 	public void submit(PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int lightCoords,
 			ElderwoodRenderState state, float yRot, float xRot) {
-		if (!state.isInvisible && !state.stunned) {
+		if (!state.isInvisible && !state.stunned && !state.dormant && state.deathTime <= 0.0F) {
 			submitNodeCollector.order(1).submitModel(this.getParentModel(), state, poseStack, RenderTypes.eyes(this.texture),
 					lightCoords, OverlayTexture.NO_OVERLAY, state.outlineColor);
 		}

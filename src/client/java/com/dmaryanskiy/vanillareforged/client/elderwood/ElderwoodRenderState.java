@@ -18,4 +18,6 @@ public class ElderwoodRenderState extends LivingEntityRenderState {
 	public float slamForward;
 	public boolean stunned;
 	public float growth = 1.0F;
+	public int decayStage;
+	public boolean dormant;
 }
