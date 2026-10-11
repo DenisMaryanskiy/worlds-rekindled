@@ -180,8 +180,8 @@ slowing it, done.
 
 ### 4. Pale Ruin (structure)
 
-> The Ruin Sentry is implemented, without its fear of sunlight yet. The structure isn't built: its
-> loot items (trim, sherds) are implemented and creative-only until then.
+> The Ruin Sentry is implemented. The structure isn't built: its loot items (trim, sherds) are
+> implemented and creative-only until then.
 
 The ancient builders' temple, where they bound Creakings to guard and woke the Elderwood. The
 woods have grown over it and their roots through it.
@@ -243,8 +243,7 @@ woods have grown over it and their roots through it.
     doesn't go for it. The Pale Mask's gaze slows it whether or not it's hunting the wearer;
   - **look**: the Heartwood Sentry's model with a bark head and one eye, a lens shard that always
     glows. Placeholder textures;
-  - not yet: the fear of sunlight below, and a player shooting it from beyond its leash is left
-    alone.
+  - not yet: a player shooting it from beyond its leash is left alone.
 - **Fear of sunlight** (precedent: undead burning in the sun). Underground it only matters if the
   player digs the roof open, which is allowed but deliberately expensive: the Ruin is deep and
   its stone slow to mine, and it only buys safety during the day.
@@ -257,6 +256,17 @@ woods have grown over it and their roots through it.
     heart with its arms** (hits on the heart bounce off) and backs away out of line of sight. This
     stops the player from killing it risk-free from inside a sunlit spot.
   - Only sunlight counts. Torches and other artificial light do nothing.
+  - Implemented. Notes:
+    - direct sunlight is daytime with open sky above, read from skylight like the player's
+      Sentry: glass lets it through;
+    - it shields its heart while **its target** stands in sunlight, with its arms crossed over
+      its chest, and backs away through the shade, never past its leash, until that player has
+      no line of sight to it. In a room with nowhere to hide it ends up against the far wall;
+    - a hit bounces off (with a dull knock on wood) whenever **the attacker** stands in sunlight,
+      target or not, so a second player can't snipe from a light patch either;
+    - its gaze still works from the shade: standing in the sun is safe from its arms, not from
+      being petrified;
+    - at night an open roof changes nothing.
 
 #### Rewards
 
@@ -291,8 +301,8 @@ On top of that, as decoration: the Creaking sherd (a tree with a heart) guarante
 pots and a mural of the tree with its hearts on the hall's wall, and Old Growth's description,
 which already names the heart and the stump.
 
-Build order: the Ruin Sentry (done but for its fear of sunlight), then the structure, then the
-loot, the archaeology and the advancement.
+Build order: the Ruin Sentry (done), then the structure, then the loot, the archaeology and the
+advancement.
 
 ### 5. The Elderwood (boss)
 
@@ -570,10 +580,9 @@ Five are in (feature 6). Left:
 
 ### B. Finish what's on hold
 
-- **The Pale Ruin** (feature 4): designed, and its Sentry exists. To build, in order: the
-  Sentry's fear of sunlight (statue in direct sun, paths that avoid it, shielding its heart);
-  the structure's jigsaw pieces and worldgen, with the Sentries' leash tied to its bounds; the
-  loot (the given heart, the Silk Touch axe), the archaeology and Buried Garden.
+- **The Pale Ruin** (feature 4): designed, and its Sentry is done. To build, in order: the
+  structure's jigsaw pieces and worldgen, with the Sentries' leash tied to its bounds; the loot
+  (the given heart, the Silk Touch axe), the archaeology and Buried Garden.
 - **Second playtest of the Elderwood** after the easing in PRs #27 to #30 (breather after
   petrification, shield blocking the gaze, any sword swing, staged death). The demo video
   predates all of it and should be re-recorded once the numbers settle.

@@ -7,14 +7,35 @@ import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.client.model.monster.creaking.CreakingModel;
+import net.minecraft.client.renderer.entity.state.CreakingRenderState;
 
 /**
  * The Creaking's body with a pumpkin head. Part names match {@link CreakingModel} so its walk and
  * attack animations apply; the UV layout is our own (128x64).
  */
 public class HeartwoodSentryModel extends CreakingModel {
+	private final ModelPart rightArm;
+	private final ModelPart leftArm;
+
 	public HeartwoodSentryModel(ModelPart root) {
 		super(root);
+		ModelPart upperBody = root.getChild("root").getChild("upper_body");
+		this.rightArm = upperBody.getChild("right_arm");
+		this.leftArm = upperBody.getChild("left_arm");
+	}
+
+	@Override
+	public void setupAnim(CreakingRenderState state) {
+		super.setupAnim(state);
+		// A Ruin Sentry shielding its heart crosses its arms over its chest.
+		if (state instanceof HeartwoodSentryRenderState sentry && sentry.shielding) {
+			this.rightArm.xRot = -1.15F;
+			this.rightArm.yRot = -0.75F;
+			this.rightArm.zRot = 0.0F;
+			this.leftArm.xRot = -1.15F;
+			this.leftArm.yRot = 0.75F;
+			this.leftArm.zRot = 0.0F;
+		}
 	}
 
 	public static LayerDefinition createBodyLayer() {
