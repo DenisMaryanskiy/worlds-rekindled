@@ -1,18 +1,11 @@
 package com.dmaryanskiy.vanillareforged.elderwood;
 
-import java.util.Arrays;
-import java.util.Optional;
-
 import com.dmaryanskiy.vanillareforged.ModSounds;
-import com.dmaryanskiy.vanillareforged.VanillaReforged;
 import com.dmaryanskiy.vanillareforged.heart.HeartHit;
-import com.dmaryanskiy.vanillareforged.petrification.Petrification;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -22,7 +15,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.tags.DamageTypeTags;
-import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.damagesource.DamageSource;
@@ -36,15 +28,11 @@ import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.gamerules.GameRules;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.LevelEvent;
 import net.minecraft.world.level.block.WeatheringCopper;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -53,57 +41,35 @@ import net.minecraft.world.phys.Vec3;
  * Grown by placing a Creaking Heart on its stump (see {@link ElderwoodSummon}).
  * <p>
  * It's rooted: it never leaves its spot and only turns, slower than a player can circle it. It can
- * only be hurt through its hearts (see {@link ElderwoodHeart}). Up close it slams a branch down: the
- * hit shatters a petrified player's stone shell, and the branch then stays stuck in the ground for a
- * moment, bringing its heart within reach.
+ * only be hurt through its hearts (see {@link ElderwoodHeart}).
+ * <p>
+ * This class holds its state and its life from growing to dying. What it does to players lives in
+ * its parts: the gaze and the resin in {@link ElderwoodLens}, the branch slam in
+ * {@link ElderwoodSlam}, the roots in {@link ElderwoodRoots}, and its death in {@link ElderwoodDecay}.
  */
 public class Elderwood extends Monster {
-	public static final double GAZE_RANGE = 24.0;
-	// The lens only sees this far to each side of straight ahead.
-	public static final float GAZE_ARC_DEGREES = 60.0F;
-	public static final int GAZE_RATE = 2;
-	public static final int CORE_GAZE_RATE = 3;
-	public static final double SLAM_REACH = 6.0;
-	// Closer than this the branch would have to come down through its own trunk.
-	public static final double SLAM_MIN_DISTANCE = 2.5;
-	public static final float SLAM_DAMAGE = 10.0F;
-	public static final int SLAM_WINDUP_TICKS = 15;
-	public static final int SLAM_STUCK_TICKS = 30;
-	private static final int SLAM_COOLDOWN_TICKS = 40;
-	public static final double SLAM_DISTANCE = 3.5;
-	public static final float SLAM_ARC_DEGREES = 75.0F;
-	private static final double SLAM_RADIUS = 2.2;
-	private static final double SMASH_RADIUS = 1.5;
-	private static final int SMASH_HEIGHT = 4;
-	public static final TagKey<Block> BREAKABLE = TagKey.create(Registries.BLOCK, VanillaReforged.id("elderwood_breakable"));
-	private static final int CRACK_COOLDOWN_TICKS = 10;
-	private static final double HEART_DEPTH = 0.75;
-	public static final double RESIN_MIN_RANGE = 6.0;
-	public static final int RESIN_INTERVAL_TICKS = 60;
-	private static final int RESIN_FIRST_TICKS = 20;
+	public static final float TURN_DEGREES_PER_TICK = 1.5F;
+	public static final int GROW_STAGES = 3;
+	public static final int GROW_STAGE_TICKS = 20;
+	public static final int GROW_TICKS = GROW_STAGES * GROW_STAGE_TICKS;
+	private static final float GROW_SNAP_TICKS = 3.0F;
+	public static final int STUN_TICKS = 60;
+	public static final int STUN_IMMUNITY_TICKS = 100;
 	public static final double ROOT_RANGE = 12.0;
 	public static final int ROOT_INTERVAL_TICKS = 50;
 	private static final int ROOT_FIRST_TICKS = 20;
 	private static final int ROOT_GROUND_SEARCH = 4;
 	public static final int DORMANT_AFTER_TICKS = 600;
 	public static final int HEAL_INTERVAL_TICKS = 100;
-	public static final int STUN_TICKS = 60;
-	public static final int STUN_IMMUNITY_TICKS = 100;
-	public static final float TURN_DEGREES_PER_TICK = 1.5F;
-	public static final int GROW_STAGES = 3;
-	public static final int GROW_STAGE_TICKS = 20;
-	public static final int GROW_TICKS = GROW_STAGES * GROW_STAGE_TICKS;
-	private static final float GROW_SNAP_TICKS = 3.0F;
-	public static final int DECAY_STAGES = 3;
-	public static final int DECAY_STAGE_TICKS = 25;
-	public static final int DECAY_TICKS = DECAY_STAGES * DECAY_STAGE_TICKS;
-	// Where the model's layers meet (ElderwoodGeometry): the crown sits on the upper trunk, which sits on the stump.
-	private static final double CROWN_HEIGHT = 8.4;
-	private static final double UPPER_HEIGHT = 3.5;
-	private static final int GAZE_TRAIL_INTERVAL_TICKS = 4;
-	private static final double GAZE_TRAIL_SPACING = 1.5;
-	private static final DustParticleOptions GAZE_TRAIL = new DustParticleOptions(0xFAB326, 0.7F);
+	private static final int CRACK_COOLDOWN_TICKS = 10;
+	private static final double HEART_DEPTH = 0.75;
 	private static final ElderwoodHeart[] BRANCH_HEARTS = {ElderwoodHeart.RIGHT_BRANCH, ElderwoodHeart.LEFT_BRANCH};
+	private static final SlamPhase[] SLAM_PHASES = SlamPhase.values();
+	private static final WeatheringCopper.WeatherState[] COPPER_STAGES = WeatheringCopper.WeatherState.values();
+	static final BlockParticleOption SPLINTERS = new BlockParticleOption(ParticleTypes.BLOCK, Blocks.PALE_OAK_LOG.defaultBlockState());
+	private static final BlockParticleOption RESIN_CHIPS = new BlockParticleOption(ParticleTypes.BLOCK, Blocks.RESIN_BLOCK.defaultBlockState());
+	private static final BlockParticleOption HEART_SHARDS = new BlockParticleOption(ParticleTypes.BLOCK,
+			Blocks.CREAKING_HEART.defaultBlockState());
 
 	private static final EntityDataAccessor<Integer> COPPER_STAGE = SynchedEntityData.defineId(Elderwood.class,
 			EntityDataSerializers.INT);
@@ -129,21 +95,19 @@ public class Elderwood extends Monster {
 		NONE, WINDUP, STUCK
 	}
 
-	private int slamTicks;
-	private int slamPhaseAge;
-	private int slamCooldown;
-	private double slamHeight;
-	private int crackCooldown;
-	private int resinCooldown = RESIN_FIRST_TICKS;
-	private int rootCooldown = ROOT_FIRST_TICKS;
-	private int idleTicks;
-	private DamageSource killedBy;
+	private final ElderwoodLens lens = new ElderwoodLens(this);
+	private final ElderwoodSlam slam = new ElderwoodSlam(this);
 	private final ElderwoodBranchHeart[] branchHearts = new ElderwoodBranchHeart[BRANCH_HEARTS.length];
-	private int stunTicks;
-	private int stunImmunity;
-	private int growAge;
 	private final ServerBossEvent bossEvent = new ServerBossEvent(Mth.createInsecureUUID(this.random), this.getDisplayName(),
 			BossEvent.BossBarColor.YELLOW, BossEvent.BossBarOverlay.PROGRESS);
+	private int growAge;
+	private int slamPhaseAge;
+	private int stunTicks;
+	private int stunImmunity;
+	private int rootCooldown = ROOT_FIRST_TICKS;
+	private int crackCooldown;
+	private int idleTicks;
+	private DamageSource killedBy;
 
 	public Elderwood(EntityType<? extends Elderwood> type, Level level) {
 		super(type, level);
@@ -172,7 +136,7 @@ public class Elderwood extends Monster {
 		builder.define(SLAM_PHASE, SlamPhase.NONE.ordinal());
 		builder.define(SLAM_RIGHT_BRANCH, true);
 		builder.define(SLAM_RIGHT, 0.0F);
-		builder.define(SLAM_FORWARD, (float) SLAM_DISTANCE);
+		builder.define(SLAM_FORWARD, (float) ElderwoodSlam.DISTANCE);
 		builder.define(STUNNED, false);
 		builder.define(GROWING, false);
 		builder.define(DORMANT, false);
@@ -180,11 +144,26 @@ public class Elderwood extends Monster {
 
 	/** The collar's oxidation stage, which its copper plates show. */
 	public WeatheringCopper.WeatherState getCopperStage() {
-		return WeatheringCopper.WeatherState.values()[this.entityData.get(COPPER_STAGE)];
+		return COPPER_STAGES[this.entityData.get(COPPER_STAGE)];
 	}
 
 	public void setCopperStage(WeatheringCopper.WeatherState stage) {
 		this.entityData.set(COPPER_STAGE, stage.ordinal());
+	}
+
+	Vec3 facing() {
+		return Vec3.directionFromRotation(0.0F, this.yBodyRot);
+	}
+
+	float yawTo(Entity target) {
+		return (float) (Mth.atan2(target.getZ() - this.getZ(), target.getX() - this.getX()) * Mth.RAD_TO_DEG) - 90.0F;
+	}
+
+	// The whole trunk turns as one: there's no head to look around with.
+	private void face(float yaw) {
+		this.setYRot(yaw);
+		this.yBodyRot = yaw;
+		this.yHeadRot = yaw;
 	}
 
 	public int getCracks(ElderwoodHeart heart) {
@@ -193,6 +172,7 @@ public class Elderwood extends Monster {
 
 	public void setCracks(ElderwoodHeart heart, int cracks) {
 		this.entityData.set(HEART_CRACKS, heart.withCracks(this.entityData.get(HEART_CRACKS), cracks));
+		this.showCracksOnTheBossBar();
 	}
 
 	public boolean isDestroyed(ElderwoodHeart heart) {
@@ -201,15 +181,17 @@ public class Elderwood extends Monster {
 
 	/** The core only opens once every other heart is destroyed. */
 	public boolean isCoreOpen() {
-		return Arrays.stream(ElderwoodHeart.values()).allMatch(heart -> heart == ElderwoodHeart.CORE || this.isDestroyed(heart));
+		for (ElderwoodHeart heart : ElderwoodHeart.ALL) {
+			if (heart != ElderwoodHeart.CORE && !this.isDestroyed(heart)) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	/** Whether the heart can be hit right now; these are the hearts that glow. */
 	public boolean isVulnerable(ElderwoodHeart heart) {
-		if (this.isDestroyed(heart)) {
-			return false;
-		}
-		if (this.isGrowing() || !this.isAlive()) {
+		if (this.isDestroyed(heart) || this.isGrowing() || !this.isAlive()) {
 			return false;
 		}
 		// A branch heart is out of reach until its branch is planted, or the stun makes both droop.
@@ -225,8 +207,77 @@ public class Elderwood extends Monster {
 				&& (heart == ElderwoodHeart.RIGHT_BRANCH) == this.isSlammingRightBranch();
 	}
 
-	public boolean isStunned() {
-		return this.entityData.get(STUNNED);
+	private void showCracksOnTheBossBar() {
+		int cracks = 0;
+		for (ElderwoodHeart heart : ElderwoodHeart.ALL) {
+			cracks += this.getCracks(heart);
+		}
+		this.bossEvent.setProgress(1.0F - cracks / (float) ElderwoodHeart.TOTAL_CRACKS);
+	}
+
+	@Override
+	public boolean hurtServer(ServerLevel level, DamageSource source, float damage) {
+		if (source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
+			return super.hurtServer(level, source, damage);
+		}
+		// Only players can hurt it, and only through a heart that's open to them.
+		ElderwoodHeart heart = HeartHit.of(source, false).map(this::intoTheTrunk).map(this::openHeartOn).orElse(null);
+		return heart != null && this.crackCooldown == 0 && this.crack(level, source, heart);
+	}
+
+	/** A hit that landed on one heart for certain, passed on by a branch heart's own entity. */
+	public boolean hurtHeart(ServerLevel level, ElderwoodHeart heart, DamageSource source) {
+		return this.isVulnerable(heart) && HeartHit.of(source, false).isPresent() && this.crackCooldown == 0
+				&& this.crack(level, source, heart);
+	}
+
+	// Its box doesn't turn with it: turned, a trunk heart sits up to this deep inside the box's corner,
+	// and a swing at the very end of a player's reach would stop at the box's face, short of it.
+	private HeartHit intoTheTrunk(HeartHit hit) {
+		return hit.carriedOn(HEART_DEPTH);
+	}
+
+	private ElderwoodHeart openHeartOn(HeartHit hit) {
+		for (ElderwoodHeart heart : ElderwoodHeart.ALL) {
+			if (this.isVulnerable(heart) && heart.isHitBy(this, hit)) {
+				return heart;
+			}
+		}
+		return null;
+	}
+
+	private boolean crack(ServerLevel level, DamageSource source, ElderwoodHeart heart) {
+		this.crackCooldown = CRACK_COOLDOWN_TICKS;
+		this.setCracks(heart, this.getCracks(heart) + 1);
+		// Every crack shows on the heart that took it: resin chips, and the heart's own shards when it breaks.
+		Vec3 at = heart.box(this).getCenter();
+		boolean destroyed = this.isDestroyed(heart);
+		level.sendParticles(destroyed ? HEART_SHARDS : RESIN_CHIPS, at.x, at.y, at.z, destroyed ? 40 : 12, 0.2, 0.2, 0.2, 0.1);
+		if (destroyed) {
+			this.playSound(ModSounds.ELDERWOOD_HEART_BREAK, 2.0F, 0.8F);
+			if (heart == ElderwoodHeart.CORE) {
+				return super.hurtServer(level, source, Float.MAX_VALUE);
+			}
+		}
+		level.broadcastDamageEvent(this, source);
+		return true;
+	}
+
+	// The branch hearts hang outside its own box, so each has an entity of its own to be hit through.
+	private void carryBranchHearts(ServerLevel level) {
+		for (int i = 0; i < BRANCH_HEARTS.length; i++) {
+			ElderwoodBranchHeart part = this.branchHearts[i];
+			boolean missing = part == null || part.isRemoved();
+			if (missing) {
+				part = new ElderwoodBranchHeart(level, this, BRANCH_HEARTS[i]);
+				this.branchHearts[i] = part;
+			}
+			Vec3 spot = BRANCH_HEARTS[i].box(this).getCenter();
+			part.setPos(spot.x, spot.y - part.getBbHeight() / 2.0, spot.z);
+			if (missing) {
+				level.addFreshEntity(part);
+			}
+		}
 	}
 
 	public boolean isGrowing() {
@@ -256,30 +307,96 @@ public class Elderwood extends Monster {
 		return Mth.lerp(snap, stage - 1.0F, stage) / GROW_STAGES;
 	}
 
-	/**
-	 * Its own resin, hit back at it, stuns it: it stops gazing, turning and attacking, and its
-	 * branches droop with their hearts open. It can't be stunned again right away.
-	 */
-	public void stun() {
-		if (this.isStunned() || this.isGrowing() || this.stunImmunity > 0) {
+	private void tickGrowth(ServerLevel level) {
+		this.pushOutOfTheTrunk(level);
+		if (this.growAge >= GROW_TICKS) {
+			this.entityData.set(GROWING, false);
+		} else if (this.growAge > 0 && this.growAge % GROW_STAGE_TICKS == 0) {
+			this.burstToNextSize(level);
+		}
+		this.face(this.yBodyRot);
+	}
+
+	private void burstToNextSize(ServerLevel level) {
+		float size = this.getGrowStage() / (float) GROW_STAGES;
+		double height = this.getBbHeight() * size;
+		double width = this.getBbWidth() * size;
+		level.sendParticles(SPLINTERS, this.getX(), this.getY() + height / 2.0, this.getZ(), (int) (120 * size),
+				width / 2.0, height / 3.0, width / 2.0, 0.1);
+		this.playSound(ModSounds.ELDERWOOD_SPLINTER, 2.0F, 0.6F);
+		this.playSound(ModSounds.ELDERWOOD_GROW, 2.0F, 0.4F + 0.15F * this.getGrowStage());
+	}
+
+	// The trunk becomes solid once it's grown; nobody should end up inside it.
+	private void pushOutOfTheTrunk(ServerLevel level) {
+		for (Entity entity : level.getEntities(this, this.getBoundingBox(), e -> !e.isSpectator() && e.isPushable())) {
+			Vec3 away = new Vec3(entity.getX() - this.getX(), 0.0, entity.getZ() - this.getZ());
+			Vec3 push = (away.lengthSqr() < 1.0E-4 ? this.facing() : away.normalize()).scale(0.2);
+			entity.push(push.x, 0.0, push.z);
+		}
+	}
+
+	@Override
+	protected void customServerAiStep(ServerLevel level) {
+		super.customServerAiStep(level);
+		if (this.isGrowing()) {
+			this.tickGrowth(level);
 			return;
 		}
-		this.entityData.set(STUNNED, true);
-		this.entityData.set(SLAM_PHASE, SlamPhase.NONE.ordinal());
-		this.stunTicks = STUN_TICKS;
-		this.playSound(ModSounds.ELDERWOOD_STUN, 1.5F, 0.6F);
+		if (this.stunImmunity > 0) {
+			this.stunImmunity--;
+		}
+		LivingEntity target = this.getTarget();
+		// It turns only while it's free: a planted branch or a stun holds it where it faced.
+		boolean free = !this.isStunned() && this.getSlamPhase() == SlamPhase.NONE;
+		this.face(free && target != null ? Mth.approachDegrees(this.yBodyRot, this.yawTo(target), TURN_DEGREES_PER_TICK) : this.yBodyRot);
+		if (this.isStunned()) {
+			if (--this.stunTicks <= 0) {
+				this.entityData.set(STUNNED, false);
+				this.stunImmunity = STUN_IMMUNITY_TICKS;
+			}
+		} else {
+			this.slam.tick(level);
+			if (target != null) {
+				this.attack(level, target);
+			}
+		}
+		this.tickDormancy();
+	}
+
+	private void attack(ServerLevel level, LivingEntity target) {
+		if (this.slam.reaches(target)) {
+			this.slam.start(target.position());
+		}
+		if (!(target instanceof Player player)) {
+			return;
+		}
+		// While a branch is planted it strains at it and does not gaze.
+		if (this.getSlamPhase() != SlamPhase.STUCK && this.lens.sees(player)) {
+			this.lens.watch(level, player);
+		} else {
+			this.tickRoots(level, player);
+		}
+	}
+
+	public boolean isWatching(Player player) {
+		return this.lens.sees(player);
 	}
 
 	public SlamPhase getSlamPhase() {
-		return SlamPhase.values()[this.entityData.get(SLAM_PHASE)];
+		return SLAM_PHASES[this.entityData.get(SLAM_PHASE)];
+	}
+
+	void setSlamPhase(SlamPhase phase) {
+		this.entityData.set(SLAM_PHASE, phase.ordinal());
 	}
 
 	public boolean isSlammingRightBranch() {
 		return this.entityData.get(SLAM_RIGHT_BRANCH);
 	}
 
-	public boolean canStartSlam() {
-		return !this.isStunned() && !this.isGrowing() && this.getSlamPhase() == SlamPhase.NONE && this.slamCooldown == 0;
+	void switchSlamBranch() {
+		this.entityData.set(SLAM_RIGHT_BRANCH, !this.isSlammingRightBranch());
 	}
 
 	public float getSlamRight() {
@@ -290,197 +407,47 @@ public class Elderwood extends Monster {
 		return this.entityData.get(SLAM_FORWARD);
 	}
 
+	void aimSlam(float right, float forward) {
+		this.entityData.set(SLAM_RIGHT, right);
+		this.entityData.set(SLAM_FORWARD, forward);
+	}
+
+	/** Ticks since the slam phase last changed, for the client's pose. */
+	public int getSlamPhaseAge() {
+		return this.slamPhaseAge;
+	}
+
 	/** Slams straight ahead. */
 	public void startSlam() {
-		this.startSlam(this.position().add(Vec3.directionFromRotation(0.0F, this.yBodyRot).scale(SLAM_DISTANCE)));
+		this.startSlam(this.position().add(this.facing().scale(ElderwoodSlam.DISTANCE)));
 	}
 
-	/**
-	 * Raises a branch; after the wind-up it comes down on {@code point}, wherever its target has gone
-	 * by then, so stepping aside dodges it.
-	 */
+	/** Slams at {@code point}, or as near to it as its branches reach. */
 	public void startSlam(Vec3 point) {
-		if (!this.canStartSlam()) {
-			return;
-		}
-		Vec3 facing = Vec3.directionFromRotation(0.0F, this.yBodyRot);
-		Vec3 offset = point.subtract(this.position());
-		Vec3 flat = new Vec3(offset.x, 0.0, offset.z);
-		flat = flat.normalize().scale(Mth.clamp(flat.length(), SLAM_MIN_DISTANCE, SLAM_REACH));
-		this.entityData.set(SLAM_RIGHT, (float) (-facing.z * flat.x + facing.x * flat.z));
-		this.entityData.set(SLAM_FORWARD, (float) flat.dot(facing));
-		this.slamHeight = Mth.clamp(offset.y, -1.0, 3.0);
-		this.slamTicks = 0;
-		this.entityData.set(SLAM_PHASE, SlamPhase.WINDUP.ordinal());
-		this.playSound(ModSounds.ELDERWOOD_RAISE_BRANCH, 1.5F, 0.6F);
+		this.slam.start(point);
 	}
 
-	@Override
-	protected void customServerAiStep(ServerLevel level) {
-		super.customServerAiStep(level);
-		float yaw = this.yBodyRot;
-		if (this.isGrowing()) {
-			this.pushOutOfTheTrunk(level);
-			if (this.growAge >= GROW_TICKS) {
-				this.entityData.set(GROWING, false);
-			} else if (this.growAge > 0 && this.growAge % GROW_STAGE_TICKS == 0) {
-				this.burstToNextSize(level);
-			}
-			this.face(yaw);
-			return;
-		}
-		if (this.stunImmunity > 0) {
-			this.stunImmunity--;
-		}
-		// It turns only while it's free: a planted branch or a stun holds it where it faced.
-		if (!this.isStunned() && this.getSlamPhase() == SlamPhase.NONE && this.getTarget() != null) {
-			yaw = Mth.approachDegrees(yaw, this.yawTo(this.getTarget()), TURN_DEGREES_PER_TICK);
-		}
-		this.face(yaw);
-		if (this.isStunned()) {
-			if (--this.stunTicks <= 0) {
-				this.entityData.set(STUNNED, false);
-				this.stunImmunity = STUN_IMMUNITY_TICKS;
-			}
-		} else {
-			this.tickSlam(level);
-			if (this.getTarget() != null && this.isInSlamArc(this.getTarget())) {
-				this.startSlam(this.getTarget().position());
-			}
-			// While a branch is planted it strains at it and does not gaze.
-			if (this.getSlamPhase() != SlamPhase.STUCK && this.getTarget() instanceof Player player && this.isWatching(player)) {
-				Petrification.expose(player, this.isCoreOpen() ? CORE_GAZE_RATE : GAZE_RATE, this.getEyePosition());
-				this.showGaze(level, player);
-				this.tickResin(level, player);
-			} else if (this.getTarget() instanceof Player player) {
-				this.tickRoots(level, player);
-			}
-		}
-		this.tickDormancy();
-		int cracks = Arrays.stream(ElderwoodHeart.values()).mapToInt(this::getCracks).sum();
-		this.bossEvent.setProgress(1.0F - cracks / (float) ElderwoodHeart.TOTAL_CRACKS);
-	}
-
-	private void tickSlam(ServerLevel level) {
-		if (this.slamCooldown > 0) {
-			this.slamCooldown--;
-		}
-		SlamPhase phase = this.getSlamPhase();
-		if (phase == SlamPhase.NONE) {
-			return;
-		}
-		this.slamTicks++;
-		if (phase == SlamPhase.WINDUP && this.slamTicks >= SLAM_WINDUP_TICKS) {
-			this.strike(level);
-			this.slamTicks = 0;
-			this.entityData.set(SLAM_PHASE, SlamPhase.STUCK.ordinal());
-		} else if (phase == SlamPhase.STUCK && this.slamTicks >= SLAM_STUCK_TICKS) {
-			this.entityData.set(SLAM_PHASE, SlamPhase.NONE.ordinal());
-			this.entityData.set(SLAM_RIGHT_BRANCH, !this.isSlammingRightBranch());
-			this.slamCooldown = SLAM_COOLDOWN_TICKS;
-		}
-	}
-
-	// The whole trunk turns as one: there's no head to look around with.
-	private void face(float yaw) {
-		this.setYRot(yaw);
-		this.yBodyRot = yaw;
-		this.yHeadRot = yaw;
-	}
-
-	private float yawTo(Entity target) {
-		return (float) (Mth.atan2(target.getZ() - this.getZ(), target.getX() - this.getX()) * Mth.RAD_TO_DEG) - 90.0F;
-	}
-
-	// Its main branches only swing forwards, so it can't slam at a player beside or behind it.
-	private boolean isInSlamArc(Entity target) {
-		return this.distanceToSqr(target) <= SLAM_REACH * SLAM_REACH
-				&& Math.abs(Mth.degreesDifference(this.yBodyRot, this.yawTo(target))) <= SLAM_ARC_DEGREES;
-	}
-
-	private void burstToNextSize(ServerLevel level) {
-		this.splinter(level, this.getGrowStage() / (float) GROW_STAGES);
-		this.playSound(ModSounds.ELDERWOOD_GROW, 2.0F, 0.4F + 0.15F * this.getGrowStage());
-	}
-
-	/** A burst of splinters around the trunk at {@code size} of its full height, as it grows. */
-	private void splinter(ServerLevel level, float size) {
-		double height = this.getBbHeight() * size;
-		double width = this.getBbWidth() * size;
-		level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.PALE_OAK_LOG.defaultBlockState()),
-				this.getX(), this.getY() + height / 2.0, this.getZ(), (int) (120 * size), width / 2.0, height / 3.0, width / 2.0, 0.1);
-		this.playSound(ModSounds.ELDERWOOD_SPLINTER, 2.0F, 0.6F);
+	public boolean isStunned() {
+		return this.entityData.get(STUNNED);
 	}
 
 	/**
-	 * It doesn't tip over like other mobs. Its lens and hearts go dark and it shakes itself apart in
-	 * three breaks: the crown and branches come off, then the upper trunk, and then the stump bursts.
-	 * What it drops is left where the trunk stood once it's gone.
+	 * Its own resin, hit back at it, stuns it: it stops gazing, turning and attacking, and its
+	 * branches droop with their hearts open. It can't be stunned again right away.
 	 */
-	@Override
-	protected void tickDeath() {
-		this.deathTime++;
-		if (!(this.level() instanceof ServerLevel level) || this.isRemoved()) {
+	public void stun() {
+		if (this.isStunned() || this.isGrowing() || this.stunImmunity > 0) {
 			return;
 		}
-		// Bark dust shakes loose the whole time.
-		level.sendParticles(new BlockParticleOption(ParticleTypes.FALLING_DUST, Blocks.PALE_OAK_LOG.defaultBlockState()),
-				this.getX(), this.getY() + this.remainingHeight() / 2.0, this.getZ(), 3, 1.5, this.remainingHeight() / 3.0, 1.5, 0.0);
-		if (this.deathTime % DECAY_STAGE_TICKS != 0) {
-			return;
-		}
-		int stage = this.getDecayStage();
-		if (stage == 1) {
-			this.breakApart(level, CROWN_HEIGHT, 3.5, 250);
-		} else if (stage == 2) {
-			this.breakApart(level, UPPER_HEIGHT, 1.4, 200);
-		} else {
-			this.breakApart(level, 0.0, 1.6, 300);
-			level.sendParticles(ParticleTypes.EXPLOSION_EMITTER, this.getX(), this.getY() + 1.5, this.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
-			this.playSound(ModSounds.ELDERWOOD_BURST, 4.0F, 0.7F);
-			super.dropAllDeathLoot(level, this.killedBy != null ? this.killedBy : this.damageSources().generic());
-			this.remove(RemovalReason.KILLED);
-		}
-	}
-
-	/** How far it has fallen apart: 0 whole, 1 without its crown and branches, 2 only a stump, 3 gone. */
-	public int getDecayStage() {
-		return Math.min(this.deathTime / DECAY_STAGE_TICKS, DECAY_STAGES);
-	}
-
-	// Everything from this height up breaks off: splinters fill the space it took, with a loud crack.
-	private void breakApart(ServerLevel level, double fromHeight, double spread, int splinters) {
-		double top = this.remainingHeight(this.getDecayStage() - 1);
-		level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.PALE_OAK_LOG.defaultBlockState()),
-				this.getX(), this.getY() + (fromHeight + top) / 2.0, this.getZ(), splinters, spread, (top - fromHeight) / 3.0, spread, 0.15);
-		this.playSound(ModSounds.ELDERWOOD_BREAK_APART, 4.0F, 0.5F);
-	}
-
-	private double remainingHeight() {
-		return this.remainingHeight(this.getDecayStage());
-	}
-
-	private double remainingHeight(int stage) {
-		return stage <= 0 ? this.getBbHeight() : stage == 1 ? CROWN_HEIGHT : UPPER_HEIGHT;
-	}
-
-	@Override
-	protected void dropAllDeathLoot(ServerLevel level, DamageSource source) {
-		this.killedBy = source;
-	}
-
-	// The trunk becomes solid once it's grown; nobody should end up inside it.
-	private void pushOutOfTheTrunk(ServerLevel level) {
-		for (Entity entity : level.getEntities(this, this.getBoundingBox(), e -> !e.isSpectator() && e.isPushable())) {
-			Vec3 away = new Vec3(entity.getX() - this.getX(), 0.0, entity.getZ() - this.getZ());
-			Vec3 push = (away.lengthSqr() < 1.0E-4 ? Vec3.directionFromRotation(0.0F, this.yBodyRot) : away.normalize()).scale(0.2);
-			entity.push(push.x, 0.0, push.z);
-		}
+		this.entityData.set(STUNNED, true);
+		this.setSlamPhase(SlamPhase.NONE);
+		this.stunTicks = STUN_TICKS;
+		this.playSound(ModSounds.ELDERWOOD_STUN, 1.5F, 0.6F);
 	}
 
 	/** A player its lens can't see, beside it, behind it or behind cover, gets roots from below. */
 	private void tickRoots(ServerLevel level, Player target) {
-		if (this.isWatching(target) || this.distanceToSqr(target) > ROOT_RANGE * ROOT_RANGE) {
+		if (this.lens.sees(target) || this.distanceToSqr(target) > ROOT_RANGE * ROOT_RANGE) {
 			return;
 		}
 		if (--this.rootCooldown <= 0) {
@@ -498,100 +465,44 @@ public class Elderwood extends Monster {
 		level.addFreshEntity(new ElderwoodRoots(level, this, spot.x, pos.getY(), spot.z));
 	}
 
-	// With nobody near for a while it settles and mends, so walking away resets the fight.
-	private void tickDormancy() {
-		this.idleTicks = this.getTarget() != null ? 0 : this.idleTicks + 1;
-		this.entityData.set(DORMANT, this.idleTicks >= DORMANT_AFTER_TICKS);
-		if (this.isDormant() && (this.idleTicks - DORMANT_AFTER_TICKS) % HEAL_INTERVAL_TICKS == 0) {
-			for (ElderwoodHeart heart : ElderwoodHeart.values()) {
-				if (this.getCracks(heart) > 0) {
-					this.setCracks(heart, this.getCracks(heart) - 1);
-					this.playSound(ModSounds.ELDERWOOD_MEND, 1.5F, 0.6F);
-					break;
-				}
-			}
-		}
-	}
-
 	public boolean isDormant() {
 		return this.entityData.get(DORMANT);
 	}
 
-	// Nothing else shows where the lens looks before the stone starts to creep in: a thin trail of
-	// motes from the lens towards whoever it holds, stopping short of their face.
-	private void showGaze(ServerLevel level, Player player) {
-		if (this.tickCount % GAZE_TRAIL_INTERVAL_TICKS != 0) {
+	// With nobody near for a while it settles and mends, so walking away resets the fight.
+	private void tickDormancy() {
+		this.idleTicks = this.getTarget() != null ? 0 : this.idleTicks + 1;
+		this.entityData.set(DORMANT, this.idleTicks >= DORMANT_AFTER_TICKS);
+		if (!this.isDormant() || (this.idleTicks - DORMANT_AFTER_TICKS) % HEAL_INTERVAL_TICKS != 0) {
 			return;
 		}
-		Vec3 from = this.getEyePosition().add(Vec3.directionFromRotation(0.0F, this.yBodyRot).scale(1.6));
-		Vec3 line = player.getEyePosition().subtract(from);
-		Vec3 step = line.normalize();
-		for (double along = this.random.nextDouble() * GAZE_TRAIL_SPACING; along < line.length() - GAZE_TRAIL_SPACING;
-				along += GAZE_TRAIL_SPACING) {
-			Vec3 mote = from.add(step.scale(along));
-			level.sendParticles(GAZE_TRAIL, mote.x, mote.y, mote.z, 1, 0.05, 0.05, 0.05, 0.0);
-		}
-	}
-
-	/** At range, with the player in sight, it throws burning resin every few seconds. */
-	private void tickResin(ServerLevel level, Player target) {
-		if (this.resinCooldown > 0) {
-			this.resinCooldown--;
-		}
-		if (this.resinCooldown > 0 || this.getSlamPhase() != SlamPhase.NONE
-				|| this.distanceToSqr(target) < RESIN_MIN_RANGE * RESIN_MIN_RANGE) {
-			return;
-		}
-		this.resinCooldown = RESIN_INTERVAL_TICKS;
-		Vec3 from = this.getEyePosition();
-		Vec3 direction = target.getEyePosition().subtract(from).normalize();
-		BurningResin resin = new BurningResin(level, this, direction);
-		resin.setPos(from.add(direction.scale(2.0)));
-		level.addFreshEntity(resin);
-		this.playSound(ModSounds.ELDERWOOD_THROW, 1.5F, 0.6F);
-	}
-
-	private void strike(ServerLevel level) {
-		Vec3 facing = Vec3.directionFromRotation(0.0F, this.yBodyRot);
-		Vec3 point = this.position().add(0.0, this.slamHeight, 0.0).add(facing.scale(this.getSlamForward()))
-				.add(new Vec3(-facing.z, 0.0, facing.x).scale(this.getSlamRight()));
-		this.smashSoftCover(level, point);
-		this.playSound(ModSounds.ELDERWOOD_SLAM, 2.0F, 0.7F);
-		BlockPos ground = BlockPos.containing(point).below();
-		level.levelEvent(LevelEvent.PARTICLES_AND_SOUND_DESTROY_BLOCK, ground, Block.getId(level.getBlockState(ground)));
-		AABB area = AABB.ofSize(point.add(0.0, 1.0, 0.0), SLAM_RADIUS * 2.0, 3.0, SLAM_RADIUS * 2.0);
-		for (Player player : level.getEntitiesOfClass(Player.class, area, p -> !p.isCreative() && !p.isSpectator())) {
-			// Petrified players are brittle, so the hit lands harder; then the stone shell breaks.
-			DamageSource source = this.damageSources().mobAttack(this);
-			if (player.hurtServer(level, source, SLAM_DAMAGE)) {
-				Petrification.shatter(player);
-				player.knockback(1.5, this.getX() - player.getX(), this.getZ() - player.getZ(), source, SLAM_DAMAGE);
+		for (ElderwoodHeart heart : ElderwoodHeart.ALL) {
+			if (this.getCracks(heart) > 0) {
+				this.setCracks(heart, this.getCracks(heart) - 1);
+				this.playSound(ModSounds.ELDERWOOD_MEND, 1.5F, 0.6F);
+				return;
 			}
 		}
 	}
 
-	// Wood, leaves and dirt don't stop a branch that size; stone does. The ground it lands on stays.
-	private void smashSoftCover(ServerLevel level, Vec3 point) {
-		if (!level.getGameRules().get(GameRules.MOB_GRIEFING)) {
-			return;
-		}
-		BlockPos center = BlockPos.containing(point);
-		int reach = Mth.ceil(SMASH_RADIUS);
-		for (BlockPos pos : BlockPos.betweenClosed(center.offset(-reach, 0, -reach), center.offset(reach, SMASH_HEIGHT - 1, reach))) {
-			double dx = pos.getX() + 0.5 - point.x;
-			double dz = pos.getZ() + 0.5 - point.z;
-			if (dx * dx + dz * dz <= SMASH_RADIUS * SMASH_RADIUS && level.getBlockState(pos).is(BREAKABLE)) {
-				level.destroyBlock(pos, true, this);
-			}
+	/** How far it has fallen apart while dying (see {@link ElderwoodDecay#stage}). */
+	public int getDecayStage() {
+		return ElderwoodDecay.stage(this.deathTime);
+	}
+
+	@Override
+	protected void tickDeath() {
+		this.deathTime++;
+		if (this.level() instanceof ServerLevel level && !this.isRemoved() && ElderwoodDecay.tick(this, level)) {
+			// What it drops is left where the trunk stood, once the last of it is gone.
+			super.dropAllDeathLoot(level, this.killedBy != null ? this.killedBy : this.damageSources().generic());
+			this.remove(RemovalReason.KILLED);
 		}
 	}
 
 	@Override
-	public void onSyncedDataUpdated(EntityDataAccessor<?> accessor) {
-		super.onSyncedDataUpdated(accessor);
-		if (SLAM_PHASE.equals(accessor)) {
-			this.slamPhaseAge = 0;
-		}
+	protected void dropAllDeathLoot(ServerLevel level, DamageSource source) {
+		this.killedBy = source;
 	}
 
 	@Override
@@ -609,20 +520,11 @@ public class Elderwood extends Monster {
 		}
 	}
 
-	// The branch hearts hang outside its own box, so each has an entity of its own to be hit through.
-	private void carryBranchHearts(ServerLevel level) {
-		for (int i = 0; i < BRANCH_HEARTS.length; i++) {
-			ElderwoodBranchHeart part = this.branchHearts[i];
-			boolean missing = part == null || part.isRemoved();
-			if (missing) {
-				part = new ElderwoodBranchHeart(level, this, BRANCH_HEARTS[i]);
-				this.branchHearts[i] = part;
-			}
-			Vec3 spot = BRANCH_HEARTS[i].box(this).getCenter();
-			part.setPos(spot.x, spot.y - part.getBbHeight() / 2.0, spot.z);
-			if (missing) {
-				level.addFreshEntity(part);
-			}
+	@Override
+	public void onSyncedDataUpdated(EntityDataAccessor<?> accessor) {
+		super.onSyncedDataUpdated(accessor);
+		if (SLAM_PHASE.equals(accessor)) {
+			this.slamPhaseAge = 0;
 		}
 	}
 
@@ -634,70 +536,6 @@ public class Elderwood extends Monster {
 				part.discard();
 			}
 		}
-	}
-
-	/** A hit that landed on one heart for certain, passed on by a branch heart's own entity. */
-	public boolean hurtHeart(ServerLevel level, ElderwoodHeart heart, DamageSource source) {
-		return this.isVulnerable(heart) && HeartHit.of(source, false).isPresent() && this.crackCooldown == 0
-				&& this.crack(level, source, heart);
-	}
-
-	/** Ticks since the slam phase last changed, for the client's pose. */
-	public int getSlamPhaseAge() {
-		return this.slamPhaseAge;
-	}
-
-	public boolean isWatching(Player player) {
-		return this.distanceToSqr(player) <= GAZE_RANGE * GAZE_RANGE
-				&& Math.abs(Mth.degreesDifference(this.yBodyRot, this.yawTo(player))) <= GAZE_ARC_DEGREES
-				&& this.getSensing().hasLineOfSight(player);
-	}
-
-	@Override
-	public boolean hurtServer(ServerLevel level, DamageSource source, float damage) {
-		if (source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
-			return super.hurtServer(level, source, damage);
-		}
-		if (this.isGrowing()) {
-			return false;
-		}
-		// Only players can hurt it, and only through a heart that's open to them.
-		ElderwoodHeart heart = HeartHit.of(source, false).map(this::intoTheTrunk).map(this::openHeartOn).orElse(null);
-		return heart != null && this.crackCooldown == 0 && this.crack(level, source, heart);
-	}
-
-	// Its box doesn't turn with it: turned, a trunk heart sits up to this deep inside the box's corner,
-	// and a swing at the very end of a player's reach would stop at the box's face, short of it.
-	private HeartHit intoTheTrunk(HeartHit hit) {
-		return hit.carriedOn(HEART_DEPTH);
-	}
-
-	private ElderwoodHeart openHeartOn(HeartHit hit) {
-		for (ElderwoodHeart heart : ElderwoodHeart.values()) {
-			if (this.isVulnerable(heart) && heart.isHitBy(this, hit)) {
-				return heart;
-			}
-		}
-		return null;
-	}
-
-	private boolean crack(ServerLevel level, DamageSource source, ElderwoodHeart heart) {
-		this.crackCooldown = CRACK_COOLDOWN_TICKS;
-		this.setCracks(heart, this.getCracks(heart) + 1);
-		// Every crack shows on the heart that took it: resin chips, and the heart's own shards when it breaks.
-		Vec3 at = heart.box(this).getCenter();
-		boolean destroyed = this.isDestroyed(heart);
-		level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK,
-				(destroyed ? Blocks.CREAKING_HEART : Blocks.RESIN_BLOCK).defaultBlockState()),
-				at.x, at.y, at.z, destroyed ? 40 : 12, 0.2, 0.2, 0.2, 0.1);
-		if (destroyed) {
-			this.playSound(ModSounds.ELDERWOOD_HEART_BREAK, 2.0F, 0.8F);
-			if (heart == ElderwoodHeart.CORE) {
-				return super.hurtServer(level, source, Float.MAX_VALUE);
-			}
-		}
-		level.broadcastDamageEvent(this, source);
-		return true;
 	}
 
 	// Rooted: nothing moves it sideways, not even a piston. It still settles onto the ground.
@@ -748,6 +586,11 @@ public class Elderwood extends Monster {
 	}
 
 	@Override
+	public boolean canAttack(LivingEntity target) {
+		return target instanceof Player && super.canAttack(target);
+	}
+
+	@Override
 	public void startSeenByPlayer(ServerPlayer player) {
 		super.startSeenByPlayer(player);
 		this.bossEvent.addPlayer(player);
@@ -757,6 +600,12 @@ public class Elderwood extends Monster {
 	public void stopSeenByPlayer(ServerPlayer player) {
 		super.stopSeenByPlayer(player);
 		this.bossEvent.removePlayer(player);
+	}
+
+	@Override
+	public void setCustomName(Component name) {
+		super.setCustomName(name);
+		this.bossEvent.setName(this.getDisplayName());
 	}
 
 	@Override
@@ -790,21 +639,11 @@ public class Elderwood extends Monster {
 	protected void readAdditionalSaveData(ValueInput input) {
 		super.readAdditionalSaveData(input);
 		int stage = input.getIntOr("copper_stage", WeatheringCopper.WeatherState.WEATHERED.ordinal());
-		this.setCopperStage(WeatheringCopper.WeatherState.values()[Mth.clamp(stage, 0, 3)]);
+		this.setCopperStage(COPPER_STAGES[Mth.clamp(stage, 0, COPPER_STAGES.length - 1)]);
 		this.entityData.set(HEART_CRACKS, input.getIntOr("heart_cracks", 0));
+		this.showCracksOnTheBossBar();
 		if (this.hasCustomName()) {
 			this.bossEvent.setName(this.getDisplayName());
 		}
-	}
-
-	@Override
-	public void setCustomName(Component name) {
-		super.setCustomName(name);
-		this.bossEvent.setName(this.getDisplayName());
-	}
-
-	@Override
-	public boolean canAttack(LivingEntity target) {
-		return target instanceof Player && super.canAttack(target);
 	}
 }

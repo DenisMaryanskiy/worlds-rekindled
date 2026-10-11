@@ -1,5 +1,7 @@
 package com.dmaryanskiy.vanillareforged.elderwood;
 
+import java.util.List;
+
 import com.dmaryanskiy.vanillareforged.heart.HeartHit;
 
 import net.minecraft.world.phys.AABB;
@@ -27,6 +29,8 @@ public enum ElderwoodHeart {
 	CORE(5, 0.0, 2.94, 1.28, 0.9);
 
 	public static final int TOTAL_CRACKS = 23;
+	// values() copies the array on every call, and the hearts are walked every tick and every frame.
+	public static final List<ElderwoodHeart> ALL = List.of(values());
 	private static final int BITS = 3;
 	// A branch heart sits this far along its branch from the pivot (the branch hearts' spot above),
 	// in the direction (right, up, forward) the right branch points; the left one mirrors it. These

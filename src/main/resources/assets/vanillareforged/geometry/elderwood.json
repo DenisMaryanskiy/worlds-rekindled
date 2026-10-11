@@ -1,0 +1,106 @@
+{
+  "texture": [512, 512],
+  "parts": [
+    {"name": "tree", "parent": null, "pivot": [0, 24, 0], "rotation": [0, 0, 0], "boxes": [
+        {"what": "bark", "uv": [80, 0], "from": [-24, -32, -24], "size": [48, 32, 48]},
+        {"what": "bark", "uv": [0, 102], "from": [-20, -56, -20], "size": [40, 24, 40]},
+        {"what": "bark", "uv": [66, 213], "from": [-7, -12, -44], "size": [14, 12, 20]},
+        {"what": "bark", "uv": [134, 213], "from": [-7, -12, 24], "size": [14, 12, 20]},
+        {"what": "bark", "uv": [374, 213], "from": [-44, -12, -7], "size": [20, 12, 14]},
+        {"what": "bark", "uv": [442, 213], "from": [24, -12, -7], "size": [20, 12, 14]},
+        {"what": "bark", "uv": [116, 249], "from": [-36, -8, -36], "size": [13, 8, 13]},
+        {"what": "bark", "uv": [168, 249], "from": [23, -8, -36], "size": [13, 8, 13]},
+        {"what": "bark", "uv": [220, 249], "from": [-36, -8, 23], "size": [13, 8, 13]},
+        {"what": "bark", "uv": [272, 249], "from": [23, -8, 23], "size": [13, 8, 13]},
+        {"what": "copper", "uv": [0, 166], "from": [-21, -40, -21], "size": [42, 5, 42]},
+        {"what": "core heart", "uv": [280, 275], "from": [-7, -54, -21], "size": [14, 14, 1]},
+        {"what": "trunk_front heart", "uv": [348, 275], "from": [-5, -30, -25], "size": [10, 10, 1]},
+        {"what": "trunk_back heart", "uv": [370, 275], "from": [-5, -30, 24], "size": [10, 10, 1]},
+        {"what": "trunk_right heart", "uv": [456, 249], "from": [-25, -30, -5], "size": [1, 10, 10]},
+        {"what": "trunk_left heart", "uv": [478, 249], "from": [24, -30, -5], "size": [1, 10, 10]}
+      ]},
+    {"name": "upper", "parent": "tree", "pivot": [0, 0, 0], "rotation": [0, 0, 0], "boxes": [
+        {"what": "bark", "uv": [272, 0], "from": [-20, -96, -20], "size": [40, 40, 40]},
+        {"what": "bark", "uv": [160, 102], "from": [-16, -124, -16], "size": [32, 28, 32]},
+        {"what": "bark", "uv": [202, 213], "from": [-10, -134, -10], "size": [20, 10, 20]},
+        {"what": "copper", "uv": [168, 166], "from": [-21, -88, -21], "size": [42, 5, 42]},
+        {"what": "copper", "uv": [360, 166], "from": [-17, -112, -17], "size": [34, 4, 34]},
+        {"what": "copper", "uv": [0, 213], "from": [-21, -78, -8], "size": [1, 20, 16]},
+        {"what": "copper", "uv": [0, 249], "from": [20, -72, -2], "size": [1, 14, 12]},
+        {"what": "copper", "uv": [58, 249], "from": [-8, -80, 20], "size": [16, 22, 1]},
+        {"what": "copper", "uv": [0, 275], "from": [-9, -73, -22], "size": [18, 18, 2]},
+        {"what": "lens", "uv": [322, 275], "from": [-6, -70, -23], "size": [12, 12, 1]}
+      ]},
+    {"name": "crown", "parent": "upper", "pivot": [0, 0, 0], "rotation": [0, 0, 0], "boxes": [
+        {"what": "moss", "uv": [34, 213], "from": [-40, -150, 6], "size": [16, 34, 0]},
+        {"what": "moss", "uv": [282, 213], "from": [22, -146, -4], "size": [16, 30, 0]},
+        {"what": "moss", "uv": [346, 213], "from": [-6, -140, 34], "size": [14, 28, 0]}
+      ]},
+    {"name": "right_branch", "parent": "crown", "pivot": [-20, -72, 0], "rotation": [0, 0, 0], "boxes": [
+        {"what": "bark", "uv": [0, 0], "from": [-5, -92, -5], "size": [10, 92, 10]},
+        {"what": "copper", "uv": [76, 275], "from": [-6, -30, -6], "size": [12, 6, 12]},
+        {"what": "copper", "uv": [172, 275], "from": [-6, -54, -6], "size": [12, 5, 12]},
+        {"what": "right_branch heart", "uv": [324, 249], "from": [-6, -69, -6], "size": [12, 9, 12]}
+      ]},
+    {"name": "right_branch_twig_low", "parent": "right_branch", "pivot": [0, -44, 0], "rotation": [0.3, 0, -0.8], "boxes": [
+        {"what": "bark", "uv": [314, 213], "from": [-2, -26, -2], "size": [4, 26, 4]}
+      ]},
+    {"name": "right_branch_twig_mid", "parent": "right_branch", "pivot": [0, -78, 0], "rotation": [-0.5, 0, 0.6], "boxes": [
+        {"what": "bark", "uv": [26, 249], "from": [-2, -22, -2], "size": [4, 22, 4]}
+      ]},
+    {"name": "right_branch_twig_tip", "parent": "right_branch", "pivot": [0, -90, 0], "rotation": [0.2, 0, -0.5], "boxes": [
+        {"what": "bark", "uv": [92, 249], "from": [-1.5, -20, -1.5], "size": [3, 20, 3]}
+      ]},
+    {"name": "left_branch", "parent": "crown", "pivot": [20, -72, 0], "rotation": [0, 0, 0], "boxes": [
+        {"what": "bark", "uv": [40, 0], "from": [-5, -92, -5], "size": [10, 92, 10]},
+        {"what": "copper", "uv": [124, 275], "from": [-6, -30, -6], "size": [12, 6, 12]},
+        {"what": "copper", "uv": [220, 275], "from": [-6, -54, -6], "size": [12, 5, 12]},
+        {"what": "left_branch heart", "uv": [372, 249], "from": [-6, -69, -6], "size": [12, 9, 12]}
+      ]},
+    {"name": "left_branch_twig_low", "parent": "left_branch", "pivot": [0, -44, 0], "rotation": [0.3, 0, 0.8], "boxes": [
+        {"what": "bark", "uv": [330, 213], "from": [-2, -26, -2], "size": [4, 26, 4]}
+      ]},
+    {"name": "left_branch_twig_mid", "parent": "left_branch", "pivot": [0, -78, 0], "rotation": [-0.5, 0, -0.6], "boxes": [
+        {"what": "bark", "uv": [42, 249], "from": [-2, -22, -2], "size": [4, 22, 4]}
+      ]},
+    {"name": "left_branch_twig_tip", "parent": "left_branch", "pivot": [0, -90, 0], "rotation": [0.2, 0, 0.5], "boxes": [
+        {"what": "bark", "uv": [104, 249], "from": [-1.5, -20, -1.5], "size": [3, 20, 3]}
+      ]},
+    {"name": "crown_back", "parent": "crown", "pivot": [0, -116, 10], "rotation": [-0.7, 0, 0], "boxes": [
+        {"what": "bark", "uv": [288, 102], "from": [-4, -46, -4], "size": [8, 46, 8]}
+      ]},
+    {"name": "crown_back_twig_0", "parent": "crown_back", "pivot": [0, -26, 0], "rotation": [0, 0, 0.7], "boxes": [
+        {"what": "bark", "uv": [420, 249], "from": [-1.5, -18, -1.5], "size": [3, 18, 3]}
+      ]},
+    {"name": "crown_back_twig_1", "parent": "crown_back", "pivot": [0, -40, 0], "rotation": [0.5, 0, -0.6], "boxes": [
+        {"what": "bark", "uv": [40, 275], "from": [-1.5, -16, -1.5], "size": [3, 16, 3]}
+      ]},
+    {"name": "crown_right", "parent": "crown", "pivot": [-10, -120, 0], "rotation": [0.15, 0, -0.65], "boxes": [
+        {"what": "bark", "uv": [320, 102], "from": [-4, -44, -4], "size": [8, 44, 8]}
+      ]},
+    {"name": "crown_right_twig_0", "parent": "crown_right", "pivot": [0, -24, 0], "rotation": [-0.6, 0, 0.3], "boxes": [
+        {"what": "bark", "uv": [432, 249], "from": [-1.5, -18, -1.5], "size": [3, 18, 3]}
+      ]},
+    {"name": "crown_right_twig_1", "parent": "crown_right", "pivot": [0, -38, 0], "rotation": [0.4, 0, -0.5], "boxes": [
+        {"what": "bark", "uv": [52, 275], "from": [-1.5, -16, -1.5], "size": [3, 16, 3]}
+      ]},
+    {"name": "crown_left", "parent": "crown", "pivot": [10, -120, 0], "rotation": [0.15, 0, 0.65], "boxes": [
+        {"what": "bark", "uv": [352, 102], "from": [-4, -44, -4], "size": [8, 44, 8]}
+      ]},
+    {"name": "crown_left_twig_0", "parent": "crown_left", "pivot": [0, -24, 0], "rotation": [-0.6, 0, -0.3], "boxes": [
+        {"what": "bark", "uv": [444, 249], "from": [-1.5, -18, -1.5], "size": [3, 18, 3]}
+      ]},
+    {"name": "crown_left_twig_1", "parent": "crown_left", "pivot": [0, -38, 0], "rotation": [0.4, 0, 0.5], "boxes": [
+        {"what": "bark", "uv": [64, 275], "from": [-1.5, -16, -1.5], "size": [3, 16, 3]}
+      ]},
+    {"name": "crown_front", "parent": "crown", "pivot": [0, -124, -8], "rotation": [0.4, 0, 0.1], "boxes": [
+        {"what": "bark", "uv": [336, 166], "from": [-3, -36, -3], "size": [6, 36, 6]}
+      ]},
+    {"name": "crown_front_twig_0", "parent": "crown_front", "pivot": [0, -20, 0], "rotation": [0, 0, -0.7], "boxes": [
+        {"what": "bark", "uv": [268, 275], "from": [-1.5, -14, -1.5], "size": [3, 14, 3]}
+      ]},
+    {"name": "crown_front_twig_1", "parent": "crown_front", "pivot": [0, -32, 0], "rotation": [0.3, 0, 0.6], "boxes": [
+        {"what": "bark", "uv": [310, 275], "from": [-1.5, -12, -1.5], "size": [3, 12, 3]}
+      ]}
+  ]
+}

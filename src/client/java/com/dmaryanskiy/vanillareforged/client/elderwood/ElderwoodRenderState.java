@@ -8,8 +8,8 @@ import net.minecraft.world.level.block.WeatheringCopper;
 
 public class ElderwoodRenderState extends LivingEntityRenderState {
 	public WeatheringCopper.WeatherState copperStage = WeatheringCopper.WeatherState.WEATHERED;
-	public final int[] heartCracks = new int[ElderwoodHeart.values().length];
-	public final boolean[] heartVulnerable = new boolean[ElderwoodHeart.values().length];
+	public final int[] heartCracks = new int[ElderwoodHeart.ALL.size()];
+	public final boolean[] heartVulnerable = new boolean[ElderwoodHeart.ALL.size()];
 	public boolean coreOpen;
 	public Elderwood.SlamPhase slamPhase = Elderwood.SlamPhase.NONE;
 	public boolean slamRightBranch;
