@@ -25,6 +25,15 @@ always agree. After changing the spec, regenerate both (plain Python 3, no depen
 python3 tools/elderwood_model.py
 ```
 
+The Pale Ruin's structure templates and worldgen files are generated too, from
+`tools/pale_ruin.py`. After changing it, regenerate them and let the GameTests check that the Ruin
+still assembles:
+
+```bash
+python3 tools/pale_ruin.py
+./gradlew runGameTest
+```
+
 ## License
 
 All rights reserved until a license is chosen.
