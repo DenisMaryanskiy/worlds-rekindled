@@ -1,6 +1,7 @@
 package com.dmaryanskiy.vanillareforged;
 
 import com.dmaryanskiy.vanillareforged.petrification.Petrification;
+import com.dmaryanskiy.vanillareforged.ruin.ModStructureTypes;
 
 import net.fabricmc.api.ModInitializer;
 
@@ -27,6 +28,7 @@ public class VanillaReforged implements ModInitializer {
 		ModEntities.initialize();
 		ModItems.initialize();
 		ModCriteria.initialize();
+		ModStructureTypes.initialize();
 		ElderwoodGaze.initialize();
 		Petrification.initialize();
 

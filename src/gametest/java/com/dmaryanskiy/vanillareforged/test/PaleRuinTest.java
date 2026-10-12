@@ -7,12 +7,14 @@ import java.util.stream.Collectors;
 
 import com.dmaryanskiy.vanillareforged.ModEntities;
 import com.dmaryanskiy.vanillareforged.VanillaReforged;
+import com.dmaryanskiy.vanillareforged.ruin.PaleRuinStructure;
 import com.dmaryanskiy.vanillareforged.sentry.HeartwoodSentry;
 import com.dmaryanskiy.vanillareforged.sentry.RuinSentry;
 
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.core.Vec3i;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestHelper;
@@ -39,6 +41,7 @@ import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.levelgen.structure.pools.SinglePoolElement;
+import net.minecraft.world.level.levelgen.structure.structures.JigsawStructure;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraft.world.phys.AABB;
@@ -221,6 +224,34 @@ public class PaleRuinTest {
 		});
 	}
 
+	// Jigsaw only looks at the ground under the entrance. On a hillside the rooms, a fixed depth
+	// below it and up to a hundred blocks off, came out of the slope with their roofs in the open.
+	@GameTest
+	public void aSiteIsRefusedWhereTheRuinWouldNotStayBuried(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerChunkCache chunks = level.getChunkSource();
+		Holder<Structure> ruin = ruin(level);
+		helper.assertTrue(ruin.value() instanceof PaleRuinStructure, "The Ruin should be the structure that checks its site");
+		StructureStart start = ruin.value().generate(ruin, level.dimension(), level.registryAccess(), chunks.getGenerator(),
+				chunks.getGenerator().getBiomeSource(), chunks.randomState().createClimateSampler(SamplerContext.EMPTY_UNCACHED), chunks.randomState(),
+				level.getStructureTemplateManager(), 1L, new ChunkPos(3500, 3500), 0, level, biome -> true);
+		helper.assertTrue(start.isValid(), "On level ground the Ruin should generate");
+		List<BoundingBox> underground = PaleRuinStructure.underground(start.getPieces());
+		BoundingBox entrance = start.getPieces().getFirst().getBoundingBox();
+		BoundingBox hall = box(start, "pale_ruin/hall");
+		int surface = entrance.maxY();
+		int roofs = underground.stream().mapToInt(BoundingBox::maxY).max().orElseThrow();
+
+		helper.assertTrue(PaleRuinStructure.staysBuried(underground, (x, z) -> surface), "Level ground should cover it");
+		helper.assertTrue(PaleRuinStructure.staysBuried(underground, (x, z) -> roofs + PaleRuinStructure.COVER), "Just enough ground should do");
+		helper.assertFalse(PaleRuinStructure.staysBuried(underground, (x, z) -> roofs + PaleRuinStructure.COVER - 1),
+				"Ground a block short of covering its roofs should refuse it");
+		// A slope: the ground is fine everywhere but over the hall, the far end of the line.
+		helper.assertFalse(PaleRuinStructure.staysBuried(underground, (x, z) -> hall.isInside(x, hall.minY(), z) ? hall.maxY() : surface),
+				"A slope that bares only the hall should refuse it");
+		helper.succeed();
+	}
+
 	// Lays the Ruin out many times without building it: wherever its rooms turn, none may be squeezed out.
 	@GameTest
 	public void everyLayoutHasAllItsRoomsAndEndsInTheHall(GameTestHelper helper) {
@@ -228,10 +259,34 @@ public class PaleRuinTest {
 		ServerChunkCache chunks = level.getChunkSource();
 		Holder<Structure> ruin = ruin(level);
 
+		Set<String> entrances = new HashSet<>();
+		// At every depth the Ruin comes in: a deeper stairway is a different start piece.
+		List<JigsawStructure> depths = ((PaleRuinStructure) ruin.value()).depths();
+		helper.assertValueEqual(depths.size(), 3, "depths the Ruin comes in");
+		// The deepest doesn't fit between this flat world's ground and its bottom. Nothing in a layout
+		// depends on the stairway's depth but the entrance, and every entrance has the same footprint
+		// and the same way on: that is checked on the templates, and the layouts at the depths that fit.
+		Vec3i footprint = null;
+		for (String entrance : List.of("entrance", "entrance_40", "entrance_60")) {
+			Vec3i size = level.getStructureTemplateManager().get(VanillaReforged.id("pale_ruin/" + entrance)).orElseThrow().getSize();
+			helper.assertTrue(footprint == null || footprint.getX() == size.getX() && footprint.getZ() == size.getZ(),
+					entrance + " should have the footprint of the others, not " + size);
+			footprint = size;
+		}
+		int fitted = 0;
+		for (JigsawStructure atDepth : depths) {
+			StructureStart probe = atDepth.generate(ruin, level.dimension(), level.registryAccess(), chunks.getGenerator(),
+					chunks.getGenerator().getBiomeSource(), chunks.randomState().createClimateSampler(SamplerContext.EMPTY_UNCACHED), chunks.randomState(),
+					level.getStructureTemplateManager(), 0L, new ChunkPos(0, 0), 0, level, biome -> true);
+			if (!PaleRuinStructure.endsInTheHall(probe.getPieces())) {
+				continue;
+			}
+			fitted++;
 		boolean sawTheLongest = false;
 		Set<String> windings = new HashSet<>();
+		String entrance = null;
 		for (int layout = 0; layout < LAYOUTS; layout++) {
-			StructureStart start = ruin.value().generate(ruin, level.dimension(), level.registryAccess(), chunks.getGenerator(),
+			StructureStart start = atDepth.generate(ruin, level.dimension(), level.registryAccess(), chunks.getGenerator(),
 					chunks.getGenerator().getBiomeSource(), chunks.randomState().createClimateSampler(SamplerContext.EMPTY_UNCACHED), chunks.randomState(),
 					level.getStructureTemplateManager(), layout * 7919L, new ChunkPos(layout * 40, 0), 0, level, biome -> true);
 			List<String> pieces = start.getPieces().stream().map(PaleRuinTest::template).toList();
@@ -243,7 +298,9 @@ public class PaleRuinTest {
 					.toList();
 
 			helper.assertValueEqual(pieces.size(), 3 * ROOMS + 3, "pieces in layout " + layout + " " + pieces);
-			helper.assertValueEqual(pieces.getFirst(), "pale_ruin/entrance", "first piece of layout " + layout);
+			helper.assertTrue(pieces.getFirst().startsWith("pale_ruin/entrance"), "The first piece of layout " + layout + " should be the entrance " + pieces);
+			helper.assertTrue(entrance == null || entrance.equals(pieces.getFirst()), "One depth should have one entrance");
+			entrance = pieces.getFirst();
 			helper.assertTrue(pieces.contains("pale_ruin/descent"), "Layout " + layout + " should have its way down " + pieces);
 			helper.assertTrue(pieces.contains("pale_ruin/hall"), "Layout " + layout + " should end in the hall " + pieces);
 			helper.assertValueEqual(rooms.size(), ROOMS, "rooms in layout " + layout + " " + pieces);
@@ -268,8 +325,12 @@ public class PaleRuinTest {
 		}
 		// A chamber is placed before the rooms two on and must never be in their way, however the line winds.
 		helper.assertValueEqual(windings.size(), WINDINGS, "ways the line wound in the layouts tried");
+		entrances.add(entrance);
 		// With every exit straight the line is at its longest, which is the one that could outgrow jigsaw's reach.
 		helper.assertTrue(sawTheLongest, "The layouts tried should include the straight line");
+		}
+		helper.assertTrue(fitted >= 2, "At least two depths should fit in the test world, not " + fitted);
+		helper.assertValueEqual(entrances.size(), fitted, "different entrances " + entrances);
 		helper.succeed();
 	}
 

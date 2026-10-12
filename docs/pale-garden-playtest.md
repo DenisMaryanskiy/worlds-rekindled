@@ -28,6 +28,12 @@ what to write down. Tick what's fine, note what isn't.
 - [ ] Anything broken: water, lava or a cave cutting through, a wall open to the outside, a
       doorway blocked by furniture, a dark corner with vanilla monsters in it.
 - [ ] Is it too dark or too bright to read the rooms?
+- [ ] From outside: does anything of the Ruin but the pavilion show, on a hillside, in a ravine,
+      under a river or a lake? Fly around it.
+- [ ] The stairway is 20, 40 or 60 down depending on the ground. Is the longest too long a way
+      back after a death?
+- [ ] The new rooms (shrine, foundry, collapsed room): can you get through the collapsed one from
+      every door, and do the Sentries find their way?
 - [ ] Every room has a side door to a dead end with no guards in it. Did you go in? Did you use
       one to heal or to get out of a gaze, and did it work? Does any door open on bare rock?
 

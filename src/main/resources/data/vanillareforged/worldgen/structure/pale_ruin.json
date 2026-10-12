@@ -1,22 +1,68 @@
 {
-  "type": "minecraft:jigsaw",
-  "biomes": "#vanillareforged:has_structure/pale_ruin",
-  "liquid_settings": "ignore_waterlogging",
-  "max_distance_from_center": 128,
-  "project_start_to_heightmap": "WORLD_SURFACE_WG",
-  "size": 9,
-  "spawn_overrides": {
-    "monster": {
-      "bounding_box": "piece",
-      "spawns": []
+  "type": "vanillareforged:pale_ruin",
+  "depths": [
+    {
+      "biomes": "#vanillareforged:has_structure/pale_ruin",
+      "liquid_settings": "ignore_waterlogging",
+      "max_distance_from_center": 128,
+      "project_start_to_heightmap": "WORLD_SURFACE_WG",
+      "size": 9,
+      "spawn_overrides": {
+        "monster": {
+          "bounding_box": "piece",
+          "spawns": []
+        }
+      },
+      "start_height": {
+        "absolute": -20
+      },
+      "start_jigsaw_name": "vanillareforged:pale_ruin/anchor",
+      "start_pool": "vanillareforged:pale_ruin/entrance",
+      "step": "underground_decoration",
+      "terrain_adaptation": "none",
+      "use_expansion_hack": false
+    },
+    {
+      "biomes": "#vanillareforged:has_structure/pale_ruin",
+      "liquid_settings": "ignore_waterlogging",
+      "max_distance_from_center": 128,
+      "project_start_to_heightmap": "WORLD_SURFACE_WG",
+      "size": 9,
+      "spawn_overrides": {
+        "monster": {
+          "bounding_box": "piece",
+          "spawns": []
+        }
+      },
+      "start_height": {
+        "absolute": -40
+      },
+      "start_jigsaw_name": "vanillareforged:pale_ruin/anchor",
+      "start_pool": "vanillareforged:pale_ruin/entrance_40",
+      "step": "underground_decoration",
+      "terrain_adaptation": "none",
+      "use_expansion_hack": false
+    },
+    {
+      "biomes": "#vanillareforged:has_structure/pale_ruin",
+      "liquid_settings": "ignore_waterlogging",
+      "max_distance_from_center": 128,
+      "project_start_to_heightmap": "WORLD_SURFACE_WG",
+      "size": 9,
+      "spawn_overrides": {
+        "monster": {
+          "bounding_box": "piece",
+          "spawns": []
+        }
+      },
+      "start_height": {
+        "absolute": -60
+      },
+      "start_jigsaw_name": "vanillareforged:pale_ruin/anchor",
+      "start_pool": "vanillareforged:pale_ruin/entrance_60",
+      "step": "underground_decoration",
+      "terrain_adaptation": "none",
+      "use_expansion_hack": false
     }
-  },
-  "start_height": {
-    "absolute": -20
-  },
-  "start_jigsaw_name": "vanillareforged:pale_ruin/anchor",
-  "start_pool": "vanillareforged:pale_ruin/entrance",
-  "step": "underground_decoration",
-  "terrain_adaptation": "none",
-  "use_expansion_hack": false
+  ]
 }

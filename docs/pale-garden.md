@@ -221,9 +221,10 @@ Built so far (`tools/pale_ruin.py` writes the templates and the worldgen files):
   **calcite** for the columns and a pale band along the walls, oxidized copper for the columns'
   bands in the hall, the lanterns and their chains, resin only in the stump. Under lantern light
   calcite reads as cream rather than white.
-- **The line**: a pavilion on the surface with a stairway 20 down, four guard rooms, a
-  second stairway 16 down and the hall, so the hall's floor lies about 37 below the surface. Each
-  room's exit is straight ahead, left or right, which makes the line wind.
+- **The line**: a pavilion on the surface with a stairway 20, 40 or 60 down (see "It stays
+  underground" below), four guard rooms, a second stairway 16 down and the hall, so the hall's
+  floor lies about 37 below the surface at the least. Each room's exit is straight ahead, left
+  or right, which makes the line wind.
 - Jigsaw placement doesn't backtrack: a piece that doesn't fit is dropped with everything after
   it. Two rules keep the line whole. A room only gets exits that keep the line within one turn of
   the stairway's direction, so it never curls back on itself; that takes one copy of each room
@@ -238,7 +239,7 @@ Built so far (`tools/pale_ruin.py` writes the templates and the worldgen files):
   buried or on stilts. Doubled back, the middle lies under the pavilion.
 - **Rooms** are 19 x 13 inside and 7 high, lit by lanterns hanging from the ceiling. The first
   ones were 13 x 11 and felt cramped with two Sentries between the columns; the line didn't get
-  longer for it, the passages between rooms got shorter. Each of the four is one of eight kinds,
+  longer for it, the passages between rooms got shorter. Each of the four is one of eleven kinds,
   picked at random. Three are the temple's own:
   - **guard room**: four 2 x 2 columns set wide apart, a root down one corner, moss;
   - **overgrown room**: the woods have it. A great root comes through the ceiling, slants down
@@ -264,7 +265,7 @@ Built so far (`tools/pale_ruin.py` writes the templates and the worldgen files):
   and what stands in it another, set into the room through a jigsaw in its floor. Without that
   every kind needed a copy for each of the 24 ways a room can lie in the line; now a kind is
   three templates, one per variant (two Sentries; one Sentry, a heart and the tool chest; two
-  Sentries, a heart and a chest), and the Ruin is 56 templates in all with its five chambers.
+  Sentries, a heart and a chest), and with its five chambers and three entrances the Ruin is 67 templates in all.
 - **7 Sentries**: 2, 1, 2 and 2 in the four rooms, whatever their kind. The second and the
   fourth room have a Creaking Heart, in the root down their corner; in the overgrown room it
   lies in plain sight in the root on the floor, and in the cells it's the captive.
@@ -282,12 +283,28 @@ Built so far (`tools/pale_ruin.py` writes the templates and the worldgen files):
   garden is small, so many have none; to be tuned once it's been looked for in play.
 - A GameTest lays the Ruin out 300 times without building it and checks every layout has all
   its pieces, the straight line (the longest) among them.
-- Not yet: the hall's mural. On steep ground a deep piece can still come out of a hillside.
+- **It stays underground.** Jigsaw sets the whole Ruin's height by the ground at its entrance
+  and never looks at the ground over its rooms, which lie up to a hundred blocks away at a
+  fixed depth below that entrance. On a hillside they came out of the slope, roofs and all.
+  - The Ruin is its own structure type (`vanillareforged:pale_ruin`, `PaleRuinStructure`) that
+    lays the Ruin out first and only takes a site where at least 3 blocks of ground lie over
+    every piece but the entrance, by the sea floor's height at the piece's corners and middle
+    (water over a room is no roof), and where the Ruin comes out whole.
+  - Refusing alone would have left almost no Ruins: measured on real terrain, the ground around
+    a Pale Garden falls about 15 blocks below the rooms' roofs somewhere along a typical Ruin,
+    and 40 at the worst, and only 1 site in 20 passed.
+  - So the Ruin comes **at three depths**, each with its own entrance: a stairway 20, 40 or 60
+    down. A site gets the shallowest that stays buried. A deeper stairway is more flights
+    doubling back under one another, ten steps each, not longer ones: the entrance keeps its
+    footprint, and its middle stays under the pavilion.
+  - Measured on one seed's real terrain, of 169 Pale Garden sites 59 took the stairway of 20,
+    58 that of 40, 31 that of 60, and 21 were refused: 88% kept. Other seeds will differ.
+  - It doesn't look for caves: a room can still open into one.
 
 #### Side chambers and more rooms
 
-> Built: the side doors, four plain chambers and the Sentry workshop. Planned: three more kinds
-> of room, the hall's mural and the loot pass. Both playthroughs said the same thing: the Ruin
+> Built: the side doors, four plain chambers, the Sentry workshop, three more kinds of room and
+> the hall's mural. Planned: the loot pass. Both playthroughs said the same thing: the Ruin
 > is one corridor that is walked from end to end, with nowhere to step aside.
 
 **Side chambers**
@@ -364,18 +381,26 @@ stump shows the Elderwood's.
 
 Three more for the four rooms of the line, eleven in all:
 
-- **shrine**: this was a temple. Rows of benches face a relief of the tree on the far wall,
-  with candles before it; the benches are low cover, the aisle is open;
+- **shrine**: this was a temple. In the middle stands what they prayed to, the tree in small:
+  a trunk of pale oak on a stepped base with a heart of resin in it and lit candles at its
+  foot. Benches face it from both sides; they are low cover, the aisles are open. (A relief on
+  the far wall, as first planned, would have stood in whichever wall the way on needs.);
 - **foundry**: where the copper for the bands, cages and lens frames was worked. Furnaces along
-  one wall, anvils, stacks of copper in every stage of weathering, a half-cast band on the floor;
-- **collapsed room**: part of the ceiling is down. Rubble splits the room in two with a gap to
-  get through, so the way across isn't straight and the Sentries' gaze is broken up.
+  one wall, anvils, stacks of copper in every stage of weathering, two columns, and a band left
+  half cast on the floor: three sides of a square, the fourth never poured;
+- **collapsed room**: part of the ceiling is down. Two ridges of fallen stone cross the room
+  from opposite walls, each with a gap at its far end, so the way across winds and nothing
+  looks from one end to the other. All four doors stay reachable.
 
-**The hall's mural** comes with these: the tree and its seven hearts on the wall behind the stump.
+Built, as first versions.
+
+**The hall's mural**: on the wall behind the stump, the tree on a calcite panel with its lens,
+which glows, and its seven hearts: four in the trunk, one on each branch, the core under the
+lens. The hearts are resin blocks: seven real ones in a wall would be seven to carry off. Built.
 
 **Build order**: (1) the side doors and the four plain chambers, with the layout test, done;
-(2) the Sentry workshop and the Guardian sherd, done; (3) the three kinds of room and the hall's mural; (4) the
-loot pass (see Rewards). A playthrough after all four.
+(2) the Sentry workshop and the Guardian sherd, done; (3) the three kinds of room and the hall's
+mural, done; (4) the loot pass (see Rewards). A playthrough after all four.
 
 #### Ruin Sentries
 
@@ -824,8 +849,8 @@ Six are in (feature 6). Left:
 - **Left as it is after the second playthrough**, to look at again if it still hurts: the
   Elderwood's resin burns for 5 s and comes every 3 s, so in its gaze the fire never goes out;
   its gaze covers 60 degrees to each side.
-- **Next for the Ruin**: three more kinds of room, the hall's mural and the loot pass, planned
-  in feature 4; its side chambers and the Sentry workshop are in. They answer what both playthroughs
+- **Next for the Ruin**: the loot pass, planned in feature 4; its side chambers, the Sentry
+  workshop, three more kinds of room and the hall's mural are in. They answer what both playthroughs
   found: one long corridor with nowhere to step aside, too many pale oak logs in the chests,
   pots that all look alike, amethyst that doesn't explain itself.
 - **Left as vanilla has it**, by decision: at night the rooms' Creakings come on top of the
@@ -857,8 +882,8 @@ first:
 - **The felled stump** stands in the Ruin's hall, whole but for its heart (feature 4): it shows
   the pattern and is the first place to summon.
 - **The sherds and the Ruin tell it**: the Creaking sherd already shows a tree with a heart. The
-  Sentry's pattern has a chamber of its own, the Sentry workshop (feature 4); the tree with its
-  seven hearts gets a mural in the hall, still planned.
+  Sentry's pattern has a chamber of its own, the Sentry workshop, and the tree with its seven
+  hearts a mural in the hall (feature 4).
 - **In-fight hints**: a hit on bark or copper that does nothing gives a dull thud and no chips, so
   the contrast with a heart is heard at once (to check what a bark hit does today).
 - A written book in Ruin loot from the builders, if the rest isn't enough. Least vanilla-like.
