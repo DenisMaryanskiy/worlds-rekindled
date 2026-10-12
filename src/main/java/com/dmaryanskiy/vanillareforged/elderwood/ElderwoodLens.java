@@ -40,6 +40,12 @@ public final class ElderwoodLens {
 				&& this.tree.getSensing().hasLineOfSight(player);
 	}
 
+	// Its next glob waits a full interval: coming straight out of the stun, it punished the player
+	// who had just earned the stun by hitting the last one back.
+	void restAfterStun() {
+		this.resinCooldown = RESIN_INTERVAL_TICKS;
+	}
+
 	/** One tick of holding a player it sees. */
 	void watch(ServerLevel level, Player player) {
 		Petrification.expose(player, this.tree.isCoreOpen() ? CORE_GAZE_RATE : GAZE_RATE, this.tree.getEyePosition());

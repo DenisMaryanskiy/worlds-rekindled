@@ -25,6 +25,7 @@ import net.minecraft.gametest.framework.GameTestSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -401,6 +402,8 @@ public class ElderwoodTest {
 		Elderwood elderwood = stillElderwood(helper);
 		Player caught = plainPlayer(helper, ELDERWOOD.add(-2.5, 0.0, 1.0));
 		Player away = plainPlayer(helper, ELDERWOOD.add(-2.5, 0.0, 4.5));
+		Player armored = plainPlayer(helper, ELDERWOOD.add(-2.5, 0.0, 1.0));
+		armored.setItemSlot(EquipmentSlot.CHEST, new ItemStack(Items.IRON_CHESTPLATE));
 		elderwood.raiseRoots(helper.getLevel(), caught.position());
 
 		helper.runAfterDelay(ElderwoodRoots.WARNING_TICKS - 2,
@@ -410,6 +413,8 @@ public class ElderwoodTest {
 				.thenExecute(() -> {
 					helper.assertValueEqual(caught.getHealth(), caught.getMaxHealth() - ElderwoodRoots.DAMAGE, "health after the roots");
 					helper.assertValueEqual(away.getHealth(), away.getMaxHealth(), "health away from the roots");
+					helper.assertTrue(armored.getHealth() < armored.getMaxHealth() && armored.getHealth() > caught.getHealth(),
+							"Armor should take its share of the roots: " + armored.getHealth());
 				})
 				.thenSucceed();
 	}
@@ -632,6 +637,29 @@ public class ElderwoodTest {
 		elderwood.setTarget(plainPlayer(helper, new Vec3(6.5, 1.0, 6.5)));
 
 		helper.succeedWhen(() -> helper.assertEntityPresent(ModEntities.BURNING_RESIN));
+	}
+
+	@GameTest(environment = MIDNIGHT, maxTicks = Elderwood.STUN_TICKS + 2 * ElderwoodLens.RESIN_INTERVAL_TICKS + 60)
+	public void afterAStunItsNextResinWaitsAFullInterval(GameTestHelper helper) {
+		for (int x = 0; x < 8; x++) {
+			for (int z = 0; z < 8; z++) {
+				helper.setBlock(new BlockPos(x, 0, z), Blocks.STONE);
+			}
+		}
+		Elderwood elderwood = helper.spawn(ModEntities.ELDERWOOD, new Vec3(1.5, 1.0, 1.5));
+		elderwood.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(0.0);
+		elderwood.setTarget(plainPlayer(helper, new Vec3(6.5, 1.0, 6.5)));
+
+		helper.startSequence()
+				.thenWaitUntil(() -> helper.assertEntityPresent(ModEntities.BURNING_RESIN))
+				.thenExecute(() -> {
+					helper.getEntities(ModEntities.BURNING_RESIN).forEach(Entity::discard);
+					elderwood.stun();
+					helper.assertTrue(elderwood.isStunned(), "It should be stunned");
+				})
+				.thenWaitUntil(() -> helper.assertFalse(elderwood.isStunned(), "The stun should wear off"))
+				.thenExecuteFor(ElderwoodLens.RESIN_INTERVAL_TICKS - 10, () -> helper.assertEntityNotPresent(ModEntities.BURNING_RESIN))
+				.thenSucceed();
 	}
 
 	// A plain mock player in the level: unlike a mock ServerPlayer it can take damage (no connection needed).

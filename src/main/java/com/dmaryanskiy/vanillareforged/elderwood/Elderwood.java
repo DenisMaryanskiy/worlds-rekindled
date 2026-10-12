@@ -62,10 +62,11 @@ public class Elderwood extends Monster {
 	public static final int STUN_TICKS = 60;
 	public static final int STUN_IMMUNITY_TICKS = 100;
 	public static final double ROOT_RANGE = 12.0;
-	public static final int ROOT_INTERVAL_TICKS = 50;
+	public static final int ROOT_INTERVAL_TICKS = 80;
 	private static final int ROOT_FIRST_TICKS = 20;
 	private static final int ROOT_GROUND_SEARCH = 4;
-	public static final int DORMANT_AFTER_TICKS = 600;
+	// Long enough to die, come back from a respawn point at the Ruin's entrance and find it as it was left.
+	public static final int DORMANT_AFTER_TICKS = 1800;
 	public static final int HEAL_INTERVAL_TICKS = 100;
 	private static final int CRACK_COOLDOWN_TICKS = 10;
 	private static final double HEART_DEPTH = 0.75;
@@ -368,6 +369,7 @@ public class Elderwood extends Monster {
 			if (--this.stunTicks <= 0) {
 				this.entityData.set(STUNNED, false);
 				this.stunImmunity = STUN_IMMUNITY_TICKS;
+				this.lens.restAfterStun();
 			}
 		} else {
 			this.slam.tick(level);
