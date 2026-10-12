@@ -1,7 +1,8 @@
 # Pale Garden: design
 
 Status: features 1, 2, 3, 5 and 6 are implemented with placeholder art and sound; the Pale Ruin (4)
-generates with its guards and its loot. Everything still to do is collected under [What's left](#whats-left).
+generates with its guards and its loot. Everything still to do is collected under [What's left](#whats-left); what to
+judge in a first playthrough is in [the playtest checklist](pale-garden-playtest.md).
 
 ## Problem
 
@@ -198,8 +199,11 @@ woods have grown over it and their roots through it.
 - **Pale roots** run through the walls and rooms: thick pale oak wood, with moss and hanging moss,
   as the sign of the woods taking the temple back. Some carry a **natural Creaking Heart**, so
   vanilla Creakings walk the corridors. They're the dungeon's filler instead of new mobs: they
-  already drop resin when hit, and a heart can be taken home. To check when building: what makes
-  a heart active underground (vanilla drives it with the `creaking_active` environment attribute).
+  already drop resin when hit, and a heart can be taken home. Vanilla wakes a heart by the time
+  of day alone (its `creaking_active` attribute follows the day's timeline, dusk to dawn), so
+  underground too they're awake at night and dormant by day. A heart in a template has to be
+  written as dormant, not uprooted: vanilla doesn't tick an uprooted heart, and only works its
+  state out when one is placed by hand, so an uprooted one would never wake.
 - **Lit throughout** by the builders' lights (oxidized copper lanterns): in Java Edition
   hostile mobs only spawn at block light 0, so with no dark floor left nothing but the Ruin's own
   guards is down there.
