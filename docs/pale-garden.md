@@ -264,7 +264,7 @@ Built so far (`tools/pale_ruin.py` writes the templates and the worldgen files):
   and what stands in it another, set into the room through a jigsaw in its floor. Without that
   every kind needed a copy for each of the 24 ways a room can lie in the line; now a kind is
   three templates, one per variant (two Sentries; one Sentry, a heart and the tool chest; two
-  Sentries, a heart and a chest), and the Ruin is 51 templates in all.
+  Sentries, a heart and a chest), and the Ruin is 55 templates in all with its four chambers.
 - **7 Sentries**: 2, 1, 2 and 2 in the four rooms, whatever their kind. The second and the
   fourth room have a Creaking Heart, in the root down their corner; in the overgrown room it
   lies in plain sight in the root on the floor, and in the cells it's the captive.
@@ -284,10 +284,11 @@ Built so far (`tools/pale_ruin.py` writes the templates and the worldgen files):
   its pieces, the straight line (the longest) among them.
 - Not yet: the hall's mural. On steep ground a deep piece can still come out of a hillside.
 
-#### Side chambers and more rooms (planned)
+#### Side chambers and more rooms
 
-> Not built yet. Both playthroughs said the same thing: the Ruin is one corridor that is walked
-> from end to end, with nowhere to step aside.
+> Built: the side doors and four plain chambers. Planned: the Sentry workshop, three more kinds
+> of room, the hall's mural and the loot pass. Both playthroughs said the same thing: the Ruin
+> is one corridor that is walked from end to end, with nowhere to step aside.
 
 **Side chambers**
 
@@ -314,11 +315,20 @@ Built so far (`tools/pale_ruin.py` writes the templates and the worldgen files):
     room's chest sometimes holds moves here;
   - **tomb**: the builders' own. Pots in niches and most of the Ruin's suspicious gravel, so
     archaeology has a place of its own instead of two heaps in every room.
-- **How it's built**: the chamber is one more jigsaw piece on the room. Jigsaw doesn't
-  backtrack, but a dead end that doesn't fit is only left out and takes nothing with it. Two
-  things to make sure of, both in the GameTest that lays the Ruin out 300 times: the line is
-  placed before the chambers and is never squeezed out by one, and the Sentry workshop is there
-  in every layout (if it can't be guaranteed off room 3, it moves to where it can).
+- **How it's built**: the chamber is one more jigsaw piece on the room, 9 x 9 inside and 5 high
+  behind a passage three blocks long (the collapsed passage is only the passage, nine long).
+  A room's way on is tried before its side door, but its chamber still goes up before the rooms
+  two on, and a chamber in their way would cut the line short. So which wall the door is in
+  depends on the room's place in the line, the line's bearing there and the room's way on.
+  There are 41 ways four rooms can wind without the line curling back; the walls were found by
+  trying them all, and with them **every room gets its chamber and none is ever in the line's
+  way**. Rooms 1 and 2 take the wall away from where the line still has to go. For rooms 3 and
+  4 that rule let a few chambers collide with earlier ones, so theirs are set case by case.
+- The GameTest that lays the Ruin out 300 times checks it with the game's own placement: all 41
+  windings come up, the line is whole in each, and four chambers hang off it.
+- **Until the Sentry workshop is built**, room 3's door leads to the study or the tomb.
+- The chambers are furnished as first versions; their loot is the rooms' own until the loot
+  pass.
 
 **The Sentry workshop**
 
@@ -356,8 +366,8 @@ Three more for the four rooms of the line, eleven in all:
 
 **The hall's mural** comes with these: the tree and its seven hearts on the wall behind the stump.
 
-**Build order**: (1) the side doors and the four plain chambers, with the layout test; (2) the
-Sentry workshop and the Guardian sherd; (3) the three kinds of room and the hall's mural; (4) the
+**Build order**: (1) the side doors and the four plain chambers, with the layout test, done;
+(2) the Sentry workshop and the Guardian sherd; (3) the three kinds of room and the hall's mural; (4) the
 loot pass (see Rewards). A playthrough after all four.
 
 #### Ruin Sentries
@@ -806,8 +816,8 @@ Six are in (feature 6). Left:
 - **Left as it is after the second playthrough**, to look at again if it still hurts: the
   Elderwood's resin burns for 5 s and comes every 3 s, so in its gaze the fire never goes out;
   its gaze covers 60 degrees to each side.
-- **Next for the Ruin**: side chambers, the Sentry workshop, three more kinds of room, the
-  hall's mural and the loot pass, planned in feature 4. They answer what both playthroughs
+- **Next for the Ruin**: the Sentry workshop, three more kinds of room, the hall's mural and
+  the loot pass, planned in feature 4; its side chambers are in. They answer what both playthroughs
   found: one long corridor with nowhere to step aside, too many pale oak logs in the chests,
   pots that all look alike, amethyst that doesn't explain itself.
 - **Left as vanilla has it**, by decision: at night the rooms' Creakings come on top of the

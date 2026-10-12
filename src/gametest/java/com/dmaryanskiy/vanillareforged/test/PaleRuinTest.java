@@ -1,6 +1,9 @@
 package com.dmaryanskiy.vanillareforged.test;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.dmaryanskiy.vanillareforged.ModEntities;
 import com.dmaryanskiy.vanillareforged.VanillaReforged;
@@ -39,6 +42,8 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemp
 
 public class PaleRuinTest {
 	private static final int LAYOUTS = 300;
+	// Every way four rooms can turn without the line curling back on itself.
+	private static final int WINDINGS = 41;
 	private static final int ROOMS = 4;
 
 	// Underground the Ruin cuts through water pockets. Vanilla waterlogs what a structure places in
@@ -185,6 +190,7 @@ public class PaleRuinTest {
 		Holder<Structure> ruin = ruin(level);
 
 		boolean sawTheLongest = false;
+		Set<String> windings = new HashSet<>();
 		for (int layout = 0; layout < LAYOUTS; layout++) {
 			StructureStart start = ruin.value().generate(ruin, level.dimension(), level.registryAccess(), chunks.getGenerator(),
 					chunks.getGenerator().getBiomeSource(), chunks.randomState().createClimateSampler(SamplerContext.EMPTY_UNCACHED), chunks.randomState(),
@@ -194,7 +200,10 @@ public class PaleRuinTest {
 			List<StructurePiece> interiors = start.getPieces().stream().filter(piece -> template(piece).startsWith("pale_ruin/interior/"))
 					.toList();
 
-			helper.assertValueEqual(pieces.size(), 2 * ROOMS + 3, "pieces in layout " + layout + " " + pieces);
+			List<StructurePiece> chambers = start.getPieces().stream().filter(piece -> template(piece).startsWith("pale_ruin/chamber/"))
+					.toList();
+
+			helper.assertValueEqual(pieces.size(), 3 * ROOMS + 3, "pieces in layout " + layout + " " + pieces);
 			helper.assertValueEqual(pieces.getFirst(), "pale_ruin/entrance", "first piece of layout " + layout);
 			helper.assertTrue(pieces.contains("pale_ruin/descent"), "Layout " + layout + " should have its way down " + pieces);
 			helper.assertTrue(pieces.contains("pale_ruin/hall"), "Layout " + layout + " should end in the hall " + pieces);
@@ -211,8 +220,13 @@ public class PaleRuinTest {
 			}
 			helper.assertValueEqual(interiors.stream().filter(interior -> template(interior).endsWith("_tools")).count(), 1L,
 					"rooms with the tool chest in layout " + layout);
+			// A side chamber hangs off every room: a door that opened on bare rock would be worse than none.
+			helper.assertValueEqual(chambers.size(), ROOMS, "side chambers in layout " + layout + " " + pieces);
 			sawTheLongest |= rooms.stream().allMatch(room -> template(room).endsWith("_straight"));
+			windings.add(rooms.stream().map(PaleRuinTest::template).collect(Collectors.joining(" ")));
 		}
+		// A chamber is placed before the rooms two on and must never be in their way, however the line winds.
+		helper.assertValueEqual(windings.size(), WINDINGS, "ways the line wound in the layouts tried");
 		// With every exit straight the line is at its longest, which is the one that could outgrow jigsaw's reach.
 		helper.assertTrue(sawTheLongest, "The layouts tried should include the straight line");
 		helper.succeed();
