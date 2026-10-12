@@ -173,6 +173,13 @@ public class Elderwood extends Monster {
 		this.yHeadRot = yaw;
 	}
 
+	// Vanilla lets a standing mob's body trail its head by up to a quarter turn before it follows. On
+	// the client that drew the trunk, with its hearts and lens, far from where the server had them.
+	@Override
+	protected void tickHeadTurn(float yBodyRotT) {
+		this.yBodyRot = this.getYRot();
+	}
+
 	public int getCracks(ElderwoodHeart heart) {
 		return heart.cracksIn(this.entityData.get(HEART_CRACKS));
 	}
