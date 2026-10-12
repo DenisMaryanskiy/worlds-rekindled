@@ -32,8 +32,8 @@ ROOM_SLOTS = len(SENTRIES_PER_ROOM)
 # Rooms whose root carries a natural Creaking Heart.
 HEART_ROOMS = {2, 4}
 STAIR_DEPTH = 20
-# How far below the surface the pavilion's floor lies.
-SUNK = 3
+# How far below the first free block above the ground the pavilion's floor lies: 1 is level with it.
+SUNK = 1
 # The hall's ceiling stays below the rooms' floors, whichever way the line turned.
 DESCENT_DEPTH = 16
 # For each bearing of the line so far, the exits a room may have and the bearing each leaves it on.
@@ -247,57 +247,84 @@ def root(piece, x, z, top, heart, reach=(-1, 1)):
         piece.set(mx, 0, mz, MOSS)
 
 
-def stairway(piece, x, z, depth, open_above=None):
-    """Stairs three wide running south from z: step i lies i blocks south and i blocks down, with four blocks of headroom."""
-    for i in range(depth):
-        y = depth - i
+def stairway(piece, x, z, top, steps, direction=1, open_above=None):
+    """
+    Stairs three wide down from floor level {@code top}, running south (or north for direction -1):
+    step i lies i blocks on and i blocks down, with four blocks of headroom.
+    """
+    for i in range(steps):
+        y, sz = top - i, z + direction * i
         for sx in range(x - 2, x + 3):
             inside = abs(sx - x) <= 1
-            piece.set(sx, y - 1, z + i, piece.pick(DARK_WALLS))
+            piece.set(sx, y - 1, sz, piece.pick(DARK_WALLS))
             for dy in range(0, 6):
                 if open_above is not None and y + dy > open_above and (not inside or dy == 5):
                     continue  # above ground the stairwell is open to the sky
                 if dy == 5 or not inside:
-                    piece.set(sx, y + dy, z + i, piece.pick(WALLS))
+                    piece.set(sx, y + dy, sz, piece.pick(WALLS))
                 elif dy == 0:
-                    piece.set(sx, y, z + i, "minecraft:tuff_brick_stairs", facing="north", half="bottom", shape="straight",
-                              waterlogged="false")
+                    piece.set(sx, y, sz, "minecraft:tuff_brick_stairs", facing="north" if direction > 0 else "south",
+                              half="bottom", shape="straight", waterlogged="false")
                 else:
-                    piece.set(sx, y + dy, z + i, AIR)
+                    piece.set(sx, y + dy, sz, AIR)
         if i % 6 == 5 and (open_above is None or y + 5 <= open_above):
-            piece.lantern(x, y + 4, z + i, hanging=True)
+            piece.lantern(x, y + 4, sz, hanging=True)
 
 
 def entrance():
-    """A ruined pavilion, sunk into the ground it was built on, and the stairway down from it, running south."""
+    """
+    A ruined pavilion level with the ground, and the stairway down from it. The stairs double back:
+    one flight north out from under the pavilion, a landing, and a second flight south beneath it.
+
+    Jigsaw sets the start piece's height by the ground at the middle of its bounding box, so that
+    middle has to be under the pavilion: with one straight flight it was 12 blocks down the
+    stairs, and on a slope the pavilion ended up buried or on stilts.
+    """
     depth = STAIR_DEPTH
-    piece = Piece("entrance", (9, depth + 6, depth + 5))
-    # The pavilion: a floor on a footing, and what's left of its four columns. On a slope the footing
-    # shows, so it reaches well down and ends raggedly, like rubble.
+    flight = depth // 2
+    north = 8  # how far the first flight and its landing reach north of the pavilion
+    end = north + 12
+    piece = Piece("entrance", (9, depth + 6, end + 1))
+    assert north <= (end // 2) <= north + 8, "the piece's middle should lie under the pavilion"
+
+    # The pavilion: a floor on a footing, and what's left of its columns. On a slope the footing
+    # shows on the downhill side, so it reaches well down and ends raggedly, like rubble.
     for x in range(9):
-        for z in range(9):
+        for z in range(north, north + 9):
             piece.set(x, depth, z, piece.pick(WALLS if piece.random.random() < 0.8 else [(MOSS, 1)]))
             for down in range(1, piece.random.randint(4, 8)):
                 piece.set(x, depth - down, z, piece.pick(DARK_WALLS if down < 3 else RUBBLE))
-    # The Ruin starts SUNK blocks below the surface: open air above the floor keeps the pavilion a
-    # pit to climb into on level ground, not a room buried under it.
-    piece.fill(0, depth + 1, 0, 8, depth + 5, 8, AIR)
-    for (x, z), height in zip(((1, 1), (7, 1), (1, 7), (7, 7)), (5, 3, 4, 2)):
+    # Open air above the floor, so the uphill side of a slope is cut back instead of burying it.
+    piece.fill(0, depth + 1, north, 8, depth + 5, north + 8, AIR)
+    for (x, z), height in zip(((7, north + 1), (1, north + 7), (7, north + 7)), (5, 4, 2)):
         piece.set(x, depth + 1, z, CHISELED_TUFF)
         for y in range(depth + 2, depth + 1 + height):
             piece.set(x, y, z, CALCITE)
-    for x, z in ((2, 1), (6, 7), (7, 2), (1, 5), (4, 0)):
+    for x, z in ((6, north + 6), (7, north + 2), (5, north + 4), (2, north + 8), (4, north)):
         piece.set(x, depth + 1, z, MOSS_CARPET)
-    piece.set(6, depth + 1, 1, CALCITE)
-    piece.jigsaw(4, depth, 1, "north", ANCHOR, EMPTY, EMPTY, TUFF_BRICKS)
+    piece.set(5, depth + 1, north + 1, CALCITE)
+    piece.jigsaw(4, depth, north + 7, "north", ANCHOR, EMPTY, EMPTY, TUFF_BRICKS)
 
-    stairway(piece, 4, 3, depth, open_above=depth)
+    # The first flight, down the west side and out to the north.
+    stairway(piece, 2, north + 5, depth, flight, direction=-1, open_above=depth)
+    # The landing where the stairs turn, across both flights.
+    level = depth - flight
+    for z in range(0, north - 4):
+        for x in range(9):
+            wall = x in (0, 8) or z == 0
+            piece.set(x, level - 1, z, piece.pick(DARK_WALLS))
+            piece.set(x, level, z, piece.pick(WALLS if wall else FLOOR))
+            piece.set(x, level + 5, z, piece.pick(WALLS))
+            for y in range(level + 1, level + 5):
+                piece.set(x, y, z, piece.pick(WALLS) if wall else AIR)
+    piece.lantern(4, level + 4, 2, hanging=True)
+    # The second flight, back south down the east side and beneath the pavilion.
+    stairway(piece, 6, north - 4, level, flight)
 
-    # The landing at the foot of the stairs, and the way on.
-    end = depth + 4
-    corridor(piece, 4, depth + 3, end, top=5)
-    piece.lantern(4, 4, depth + 3, hanging=True)
-    piece.exit(4, end, "south", pool(1, "ahead"))
+    # The passage at the foot of the stairs, and the way on.
+    corridor(piece, 6, north + 6, end, top=5)
+    piece.lantern(6, 4, north + 8, hanging=True)
+    piece.exit(6, end, "south", pool(1, "ahead"))
     return piece
 
 
@@ -426,7 +453,7 @@ def descent():
                 piece.set(x, y, z, piece.pick(WALLS) if x in (0, 4) else AIR)
     piece.lantern(2, depth + 4, 0, hanging=True)
     piece.entry(2, 0, y=depth)
-    stairway(piece, 2, 2, depth)
+    stairway(piece, 2, 2, depth, depth)
     corridor(piece, 2, depth + 2, depth + 3, top=5)
     piece.lantern(2, 4, depth + 2, hanging=True)
     piece.exit(2, depth + 3, "south", pool("hall"))

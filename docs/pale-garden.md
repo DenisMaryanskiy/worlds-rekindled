@@ -217,17 +217,21 @@ Built so far (`tools/pale_ruin.py` writes the templates and the worldgen files):
   **calcite** for the columns and a pale band along the walls, oxidized copper for the columns'
   bands in the hall, the lanterns and their chains, resin only in the stump. Under lantern light
   calcite reads as cream rather than white.
-- **The line**: a sunk pavilion on the surface with a stairway 20 down, four guard rooms, a
-  second stairway 16 down and the hall, so the hall's floor lies about 39 below the surface. Each
+- **The line**: a pavilion on the surface with a stairway 20 down, four guard rooms, a
+  second stairway 16 down and the hall, so the hall's floor lies about 37 below the surface. Each
   room's exit is straight ahead, left or right, which makes the line wind.
 - Jigsaw placement doesn't backtrack: a piece that doesn't fit is dropped with everything after
   it. Two rules keep the line whole. A room only gets exits that keep the line within one turn of
   the stairway's direction, so it never curls back on itself; that takes one copy of each room
   per bearing and kind, 75 templates in all. And the hall, twice as wide as a room, lies **a level below**
   the rooms, where nothing of the Ruin is in its way.
-- **The pavilion** is sunk 3 blocks into the ground it stands on, with the air above its floor
-  cleared, so on level ground it's a pit with broken columns and on a slope a terrace on a rubble
-  footing. Pale oaks grow over and into it.
+- **The pavilion**'s floor is level with the ground: on a slope the uphill side is cut back (the
+  air above the floor is cleared) and the downhill side stands on a rubble footing. Pale oaks
+  grow over and into it. Its stairway doubles back: one flight north out from under the
+  pavilion, a landing, a second flight south beneath it. That isn't for looks. Jigsaw sets the
+  start piece's height by the ground at the middle of its bounding box; with one straight
+  flight that middle was 12 blocks down the stairs, so on sloping ground the pavilion came out
+  buried or on stilts. Doubled back, the middle lies under the pavilion.
 - **Rooms** are 19 x 13 inside and 7 high, lit by lanterns hanging from the ceiling. The first
   ones were 13 x 11 and felt cramped with two Sentries between the columns; the line didn't get
   longer for it, the passages between rooms got shorter. Each of the four is one of three kinds,
