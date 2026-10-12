@@ -5,6 +5,9 @@
 	"name": "Vanilla Reforged Tests",
 	"environment": "*",
 	"entrypoints": {
+		"main": [
+			"com.dmaryanskiy.vanillareforged.test.SettledLight"
+		],
 		"fabric-gametest": [
 			"com.dmaryanskiy.vanillareforged.test.StickyPistonRecipeTest",
 			"com.dmaryanskiy.vanillareforged.test.ElderwoodArmorTrimTest",
