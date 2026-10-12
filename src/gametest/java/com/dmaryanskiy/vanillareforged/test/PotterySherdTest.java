@@ -33,6 +33,12 @@ public class PotterySherdTest {
 	}
 
 	@GameTest
+	public void guardianSherdProvidesGuardianPattern(GameTestHelper helper) {
+		assertProvidesPattern(helper, ModItems.GUARDIAN_POTTERY_SHERD, ModPotPatterns.GUARDIAN);
+		helper.succeed();
+	}
+
+	@GameTest
 	public void sherdDecoratesCraftedPot(GameTestHelper helper) {
 		ItemStack brick = new ItemStack(Items.BRICK);
 		CraftingInput input = CraftingInput.of(3, 3, List.of(

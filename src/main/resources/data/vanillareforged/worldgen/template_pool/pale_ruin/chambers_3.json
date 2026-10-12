@@ -3,16 +3,7 @@
     {
       "element": {
         "element_type": "minecraft:single_pool_element",
-        "location": "vanillareforged:pale_ruin/chamber/study",
-        "processors": "minecraft:empty",
-        "projection": "rigid"
-      },
-      "weight": 1
-    },
-    {
-      "element": {
-        "element_type": "minecraft:single_pool_element",
-        "location": "vanillareforged:pale_ruin/chamber/tomb",
+        "location": "vanillareforged:pale_ruin/chamber/sentry_workshop",
         "processors": "minecraft:empty",
         "projection": "rigid"
       },

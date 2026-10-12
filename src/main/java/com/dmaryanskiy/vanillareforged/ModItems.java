@@ -22,6 +22,8 @@ public final class ModItems {
 			Item::new, new Item.Properties().rarity(Rarity.UNCOMMON).potPattern(ModPotPatterns.GAZE));
 	public static final Item CREAKING_POTTERY_SHERD = register("creaking_pottery_sherd",
 			Item::new, new Item.Properties().rarity(Rarity.UNCOMMON).potPattern(ModPotPatterns.CREAKING));
+	public static final Item GUARDIAN_POTTERY_SHERD = register("guardian_pottery_sherd",
+			Item::new, new Item.Properties().rarity(Rarity.UNCOMMON).potPattern(ModPotPatterns.GUARDIAN));
 	public static final Item ELDERWOOD_LENS_SHARD = register("elderwood_lens_shard",
 			Item::new, new Item.Properties().rarity(Rarity.UNCOMMON));
 	public static final Item ELDERWOOD_LENS = register("elderwood_lens",
@@ -43,7 +45,7 @@ public final class ModItems {
 
 	public static void initialize() {
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.INGREDIENTS).register(output -> {
-			output.insertAfter(Items.SNORT_POTTERY_SHERD, GAZE_POTTERY_SHERD, CREAKING_POTTERY_SHERD);
+			output.insertAfter(Items.SNORT_POTTERY_SHERD, GAZE_POTTERY_SHERD, CREAKING_POTTERY_SHERD, GUARDIAN_POTTERY_SHERD);
 			output.insertAfter(Items.BOLT_ARMOR_TRIM_SMITHING_TEMPLATE, ELDERWOOD_ARMOR_TRIM_SMITHING_TEMPLATE);
 			output.insertAfter(Items.RESIN_BRICK, ELDERWOOD_LENS_SHARD, ELDERWOOD_LENS, CREAKING_EYE);
 		});

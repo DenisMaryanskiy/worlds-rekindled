@@ -64,7 +64,7 @@ def side_door(slot, bearing, exit_side):
 
 
 # Which chambers a room's side door may lead to, by the room's slot.
-CHAMBERS = {1: ["store_room", "collapsed_passage"], 2: ["study", "tomb"], 3: ["study", "tomb"],
+CHAMBERS = {1: ["store_room", "collapsed_passage"], 2: ["study", "tomb"], 3: ["sentry_workshop"],
             4: ["store_room", "tomb", "collapsed_passage"]}
 
 AIR = "minecraft:air"
@@ -96,7 +96,8 @@ LIGHT = {LANTERN: 15}
 # Blocks light passes through; everything else a piece places stops it.
 BARS = "minecraft:waxed_oxidized_copper_bars"
 CUT_COPPER = "minecraft:waxed_oxidized_cut_copper"
-CLEAR = {AIR, LANTERN, CHAIN, MOSS_CARPET, HANGING_MOSS, "minecraft:candle", "minecraft:tuff_brick_wall", "minecraft:tuff_brick_slab",
+CLEAR = {AIR, LANTERN, CHAIN, MOSS_CARPET, HANGING_MOSS, "minecraft:candle", "minecraft:pumpkin_stem",
+         "minecraft:attached_pumpkin_stem", "minecraft:tuff_brick_wall", "minecraft:tuff_brick_slab",
          "minecraft:tuff_brick_stairs", "minecraft:closed_eyeblossom", "minecraft:decorated_pot", "minecraft:chest",
          BARS, "minecraft:cobweb", "minecraft:orange_stained_glass", "minecraft:grindstone", "minecraft:amethyst_cluster",
          "minecraft:resin_clump", "minecraft:cauldron", "minecraft:pale_oak_sapling", "minecraft:skeleton_skull",
@@ -772,7 +773,54 @@ def collapsed_passage():
     return piece
 
 
-CHAMBER_KINDS = {"store_room": store_room, "study": study, "tomb": tomb, "collapsed_passage": collapsed_passage}
+def sentry_workshop():
+    """
+    How a Sentry of one's own is built, which nothing else in the game says: a pale oak log, a
+    Creaking Heart on it, a carved pumpkin on top. Three plinths show it in order, the last with the
+    builders' own Sentry still on its log; the pumpkin, the one part the Ruin hasn't shown, lies on
+    the bench and grows along the wall.
+    """
+    piece = bare_chamber("sentry_workshop")
+    for x in (3, 5, 7):
+        piece.set(x, 1, 9, CHISELED_TUFF)
+        piece.set(x, 2, 9, "minecraft:pale_oak_log", axis="y")
+    # Uprooted, as a heart with no tree around it is: it never wakes, it only shows.
+    piece.set(5, 3, 9, "minecraft:creaking_heart", axis="y", creaking_heart_state="uprooted", natural="false")
+    # Read from the door, which looks south, the first plinth is the eastern one.
+    piece.entity(3, 3, 9, f"{NAMESPACE}:heartwood_sentry")
+
+    # The same three on the wall behind them. Its heart is resin brick: a real one under a real
+    # pumpkin is the pattern itself, and the wall would build a Sentry.
+    for x in (4, 5, 6):
+        for y in (1, 2, 3, 4, 5):
+            piece.set(x, y, 13, CALCITE)
+    piece.set(5, 2, 13, "minecraft:pale_oak_log", axis="y")
+    piece.set(5, 3, 13, "minecraft:chiseled_resin_bricks")
+    piece.set(5, 4, 13, "minecraft:carved_pumpkin", facing="north")
+
+    # The pumpkin: one carved on the bench with the shears in the chest beside it, more on the vine.
+    for z in (6, 7):
+        piece.set(9, 1, z, "minecraft:tuff_brick_slab", type="top", waterlogged="false")
+    piece.set(9, 2, 6, "minecraft:carved_pumpkin", facing="west")
+    piece.chest(9, 5, "west", "sentry_workshop")
+    for z in range(5, 12):
+        piece.set(1, 0, z, "minecraft:farmland", moisture="0")
+    for z in (5, 10):
+        piece.set(1, 0, z, "minecraft:coarse_dirt")
+        piece.set(1, 1, z, "minecraft:pumpkin")
+    piece.set(1, 1, 6, "minecraft:attached_pumpkin_stem", facing="north")
+    piece.set(1, 1, 9, "minecraft:attached_pumpkin_stem", facing="south")
+    piece.set(1, 1, 8, "minecraft:pumpkin_stem", age="7")
+    piece.set(1, 1, 11, "minecraft:pumpkin_stem", age="4")
+
+    # A pot's front is the side away from where it faces: these show theirs to the door.
+    for x in (2, 8):
+        piece.pot(x, 1, 12, "south", front=f"{NAMESPACE}:guardian_pottery_sherd")
+    return piece
+
+
+CHAMBER_KINDS = {"store_room": store_room, "study": study, "tomb": tomb, "collapsed_passage": collapsed_passage,
+                 "sentry_workshop": sentry_workshop}
 
 
 def descent():

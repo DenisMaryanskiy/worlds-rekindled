@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import com.dmaryanskiy.vanillareforged.ModEntities;
 import com.dmaryanskiy.vanillareforged.VanillaReforged;
+import com.dmaryanskiy.vanillareforged.sentry.HeartwoodSentry;
 import com.dmaryanskiy.vanillareforged.sentry.RuinSentry;
 
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
@@ -18,6 +19,7 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Block;
@@ -39,6 +41,7 @@ import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.levelgen.structure.pools.SinglePoolElement;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
+import net.minecraft.world.phys.AABB;
 
 public class PaleRuinTest {
 	private static final int LAYOUTS = 300;
@@ -182,6 +185,42 @@ public class PaleRuinTest {
 		return start.getPieces().stream().filter(piece -> template(piece).startsWith(template)).findFirst().orElseThrow().getBoundingBox();
 	}
 
+	// The workshop shows a Sentry being built, and must not build one itself: its mural is the
+	// pattern in blocks, and a real heart under its pumpkin would be the pattern in earnest.
+	@GameTest(maxTicks = 100)
+	public void theSentryWorkshopHoldsOneSentryOnItsLog(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		// Far from the tests: the chamber is bigger than a test's plot. It fits in one chunk, which
+		// has to tick for the Sentry to.
+		BlockPos origin = new BlockPos(3400 * 16, 100, 3400 * 16);
+		level.setChunkForced(3400, 3400, true);
+		StructureTemplate template = level.getStructureTemplateManager().get(VanillaReforged.id("pale_ruin/chamber/sentry_workshop")).orElseThrow();
+		AABB chamber = AABB.encapsulatingFullBlocks(origin, origin.offset(template.getSize()));
+
+		// Not at once: the test world is kept between runs, and what an earlier run left in the
+		// chunk only shows once it has loaded.
+		helper.runAfterDelay(20, () -> {
+			level.getEntities(ModEntities.HEARTWOOD_SENTRY, chamber, sentry -> true).forEach(Entity::discard);
+			for (BlockPos pos : BlockPos.betweenClosed(origin, origin.offset(template.getSize()))) {
+				level.setBlock(pos, Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
+			}
+			template.placeInWorld(level, origin, origin, new StructurePlaceSettings(), level.getRandom(), Block.UPDATE_CLIENTS);
+		});
+		helper.runAfterDelay(40, () -> {
+			List<HeartwoodSentry> sentries = level.getEntities(ModEntities.HEARTWOOD_SENTRY, chamber, sentry -> true);
+			helper.assertValueEqual(sentries.size(), 1, "Sentries in the workshop");
+			BlockPos pedestal = sentries.getFirst().getPedestal();
+			helper.assertTrue(level.getBlockState(pedestal).is(Blocks.PALE_OAK_LOG), "Its pedestal should be the log it stands on, not " + pedestal);
+			// The plinth beside it is one pumpkin short of a Sentry, for whoever takes the hint.
+			helper.assertTrue(level.getBlockState(pedestal.east(2)).is(Blocks.PALE_OAK_LOG)
+					&& level.getBlockState(pedestal.east(2).above()).is(Blocks.CREAKING_HEART), "The second plinth should hold a log and a heart");
+			helper.assertTrue(level.getBlockState(pedestal.east(2).above(2)).isAir(), "Nothing should be on that heart yet");
+			sentries.forEach(Entity::discard);
+			level.setChunkForced(3400, 3400, false);
+			helper.succeed();
+		});
+	}
+
 	// Lays the Ruin out many times without building it: wherever its rooms turn, none may be squeezed out.
 	@GameTest
 	public void everyLayoutHasAllItsRoomsAndEndsInTheHall(GameTestHelper helper) {
@@ -222,6 +261,8 @@ public class PaleRuinTest {
 					"rooms with the tool chest in layout " + layout);
 			// A side chamber hangs off every room: a door that opened on bare rock would be worse than none.
 			helper.assertValueEqual(chambers.size(), ROOMS, "side chambers in layout " + layout + " " + pieces);
+			// The one chamber that teaches something is in every Ruin.
+			helper.assertTrue(pieces.contains("pale_ruin/chamber/sentry_workshop"), "Layout " + layout + " should have the Sentry workshop " + pieces);
 			sawTheLongest |= rooms.stream().allMatch(room -> template(room).endsWith("_straight"));
 			windings.add(rooms.stream().map(PaleRuinTest::template).collect(Collectors.joining(" ")));
 		}

@@ -264,7 +264,7 @@ Built so far (`tools/pale_ruin.py` writes the templates and the worldgen files):
   and what stands in it another, set into the room through a jigsaw in its floor. Without that
   every kind needed a copy for each of the 24 ways a room can lie in the line; now a kind is
   three templates, one per variant (two Sentries; one Sentry, a heart and the tool chest; two
-  Sentries, a heart and a chest), and the Ruin is 55 templates in all with its four chambers.
+  Sentries, a heart and a chest), and the Ruin is 56 templates in all with its five chambers.
 - **7 Sentries**: 2, 1, 2 and 2 in the four rooms, whatever their kind. The second and the
   fourth room have a Creaking Heart, in the root down their corner; in the overgrown room it
   lies in plain sight in the root on the floor, and in the cells it's the captive.
@@ -286,7 +286,7 @@ Built so far (`tools/pale_ruin.py` writes the templates and the worldgen files):
 
 #### Side chambers and more rooms
 
-> Built: the side doors and four plain chambers. Planned: the Sentry workshop, three more kinds
+> Built: the side doors, four plain chambers and the Sentry workshop. Planned: three more kinds
 > of room, the hall's mural and the loot pass. Both playthroughs said the same thing: the Ruin
 > is one corridor that is walked from end to end, with nowhere to step aside.
 
@@ -326,7 +326,6 @@ Built so far (`tools/pale_ruin.py` writes the templates and the worldgen files):
   4 that rule let a few chambers collide with earlier ones, so theirs are set case by case.
 - The GameTest that lays the Ruin out 300 times checks it with the game's own placement: all 41
   windings come up, the line is whole in each, and four chambers hang off it.
-- **Until the Sentry workshop is built**, room 3's door leads to the study or the tomb.
 - The chambers are furnished as first versions; their loot is the rooms' own until the loot
   pass.
 
@@ -340,18 +339,26 @@ stump shows the Elderwood's.
   1. a pale oak log;
   2. a pale oak log with a Creaking Heart on it;
   3. a finished **Heartwood Sentry** standing on its log, pumpkin head and all: the builders'
-     own, still at its post. It's a player's kind of Sentry, so it leaves the player alone.
-- **A carved pumpkin** lies on the bench by the third plinth, with shears, and a few pumpkins
-  grow on in a bed of earth along one wall: the one part of the recipe the Ruin hasn't shown
-  yet, and where to get it.
-- **A mural** on the wall behind the plinths, in blocks: the log, the heart on it, the pumpkin
-  on top.
+     own, still at its post. It's a player's kind of Sentry, so it leaves the player alone, and
+     it goes for the Creakings that walk the Ruin at night.
+- **A carved pumpkin** lies on the bench, beside a chest that always holds **shears and a carved
+  pumpkin** (with seeds, resin and a log or two), and pumpkins grow on along the other wall:
+  the one part of the recipe the Ruin hasn't shown yet, and where to get it.
+- **The second plinth is one pumpkin short of a Sentry**: putting the bench's pumpkin on its
+  heart builds one, there and then.
+- **A mural** on the wall behind the plinths, in blocks on a calcite panel: a log, the heart on
+  it, a carved pumpkin on top. Its heart is chiseled resin brick. A real heart under a real
+  pumpkin is the pattern itself, and the wall would build a Sentry.
 - **The Guardian sherd**, a third pottery sherd: a figure with a pumpkin head and a heart in its
-  chest. Guaranteed in this chamber's pots, with a placeholder texture like the other two.
+  chest. The chamber's two pots show it and give it when broken; placeholder texture like the
+  other two. It isn't among the finds in the gravel.
 - The Sentry can be taken apart with sneak and an axe like any player's, which gives back its
   heart and pumpkin: a second heart for whoever understood the room.
-- To check when building it: that a Sentry placed by a structure takes its log as its pedestal,
-  and that the log, heart and pumpkin are never stacked in a template in a way that builds one.
+- Built. A Sentry that a structure or a command sets down takes the log under it for its
+  pedestal on its first tick; before, only one built by hand or from an egg had one. A GameTest
+  places the chamber and checks there is exactly one Sentry in it, on its log.
+- Awake underground, the Sentry doesn't stay on its plinth: it strolls the chamber and comes
+  back to its log. To see in play whether that reads as "the third step" or needs it kept still.
 
 **More kinds of room**
 
@@ -367,7 +374,7 @@ Three more for the four rooms of the line, eleven in all:
 **The hall's mural** comes with these: the tree and its seven hearts on the wall behind the stump.
 
 **Build order**: (1) the side doors and the four plain chambers, with the layout test, done;
-(2) the Sentry workshop and the Guardian sherd; (3) the three kinds of room and the hall's mural; (4) the
+(2) the Sentry workshop and the Guardian sherd, done; (3) the three kinds of room and the hall's mural; (4) the
 loot pass (see Rewards). A playthrough after all four.
 
 #### Ruin Sentries
@@ -459,7 +466,8 @@ loot pass (see Rewards). A playthrough after all four.
   - **Elderwood armor trim** smithing template (rare; duplicated with 7 diamonds + a block of resin).
     Its textures are placeholders to be replaced with final art;
   - pottery sherds: **Gaze** (eye) and **Creaking** (tree figure with a heart). Implemented with
-    placeholder textures; vanilla already has a "heart" sherd, hence the names.
+    placeholder textures; vanilla already has a "heart" sherd, hence the names. A third, the
+    **Guardian** (a pumpkin-headed figure with a heart), is on the pots of the Sentry workshop.
 - The **Buried Garden** advancement for entering it.
 
 Placed so (loot tables under `chests/pale_ruin/`, `pots/` and `archaeology/`):
@@ -816,8 +824,8 @@ Six are in (feature 6). Left:
 - **Left as it is after the second playthrough**, to look at again if it still hurts: the
   Elderwood's resin burns for 5 s and comes every 3 s, so in its gaze the fire never goes out;
   its gaze covers 60 degrees to each side.
-- **Next for the Ruin**: the Sentry workshop, three more kinds of room, the hall's mural and
-  the loot pass, planned in feature 4; its side chambers are in. They answer what both playthroughs
+- **Next for the Ruin**: three more kinds of room, the hall's mural and the loot pass, planned
+  in feature 4; its side chambers and the Sentry workshop are in. They answer what both playthroughs
   found: one long corridor with nowhere to step aside, too many pale oak logs in the chests,
   pots that all look alike, amethyst that doesn't explain itself.
 - **Left as vanilla has it**, by decision: at night the rooms' Creakings come on top of the
@@ -849,8 +857,8 @@ first:
 - **The felled stump** stands in the Ruin's hall, whole but for its heart (feature 4): it shows
   the pattern and is the first place to summon.
 - **The sherds and the Ruin tell it**: the Creaking sherd already shows a tree with a heart. The
-  Sentry's pattern gets a chamber of its own, the Sentry workshop, and the tree with its seven
-  hearts a mural in the hall; both are planned in feature 4.
+  Sentry's pattern has a chamber of its own, the Sentry workshop (feature 4); the tree with its
+  seven hearts gets a mural in the hall, still planned.
 - **In-fight hints**: a hit on bark or copper that does nothing gives a dull thud and no chips, so
   the contrast with a heart is heard at once (to check what a bark hit does today).
 - A written book in Ruin loot from the builders, if the rest isn't enough. Least vanilla-like.
