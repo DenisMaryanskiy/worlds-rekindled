@@ -180,7 +180,7 @@ slowing it, done.
 
 ### 4. Pale Ruin (structure)
 
-> The Ruin Sentry is implemented and the structure generates: the entrance, one kind of room and
+> The Ruin Sentry is implemented and the structure generates: the entrance, three kinds of room and
 > the hall. Its loot (the trim, the sherds, the given heart, the Silk Touch axe) isn't placed yet.
 
 The ancient builders' temple, where they bound Creakings to guard and woke the Elderwood. The
@@ -217,32 +217,50 @@ Built so far (`tools/pale_ruin.py` writes the templates and the worldgen files):
   **calcite** for the columns and a pale band along the walls, oxidized copper for the columns'
   bands in the hall, the lanterns and their chains, resin only in the stump. Under lantern light
   calcite reads as cream rather than white.
-- **The line**: a sunk pavilion on the surface with a stairway 20 down, four guard rooms, a
-  second stairway 16 down and the hall, so the hall's floor lies about 39 below the surface. Each
+- **The line**: a pavilion on the surface with a stairway 20 down, four guard rooms, a
+  second stairway 16 down and the hall, so the hall's floor lies about 37 below the surface. Each
   room's exit is straight ahead, left or right, which makes the line wind.
 - Jigsaw placement doesn't backtrack: a piece that doesn't fit is dropped with everything after
   it. Two rules keep the line whole. A room only gets exits that keep the line within one turn of
   the stairway's direction, so it never curls back on itself; that takes one copy of each room
-  per bearing, 26 templates in all. And the hall, twice as wide as a room, lies **a level below**
+  per bearing and kind, 75 templates in all. And the hall, twice as wide as a room, lies **a level below**
   the rooms, where nothing of the Ruin is in its way.
-- **The pavilion** is sunk 3 blocks into the ground it stands on, with the air above its floor
-  cleared, so on level ground it's a pit with broken columns and on a slope a terrace on a rubble
-  footing. Pale oaks grow over and into it.
-- **Guard rooms** are 13 x 11 inside and 6 high, with four 2 x 2 columns set wide apart (a nave
-  five wide, an aisle along each wall), lanterns hanging from the ceiling, a root down one corner
-  and moss. **7 Sentries**: 2, 1, 2 and 2 in the four rooms. The roots of the second and fourth
-  room carry a Creaking Heart.
+- **The pavilion**'s floor is level with the ground: on a slope the uphill side is cut back (the
+  air above the floor is cleared) and the downhill side stands on a rubble footing. Pale oaks
+  grow over and into it. Its stairway doubles back: one flight north out from under the
+  pavilion, a landing, a second flight south beneath it. That isn't for looks. Jigsaw sets the
+  start piece's height by the ground at the middle of its bounding box; with one straight
+  flight that middle was 12 blocks down the stairs, so on sloping ground the pavilion came out
+  buried or on stilts. Doubled back, the middle lies under the pavilion.
+- **Rooms** are 19 x 13 inside and 7 high, lit by lanterns hanging from the ceiling. The first
+  ones were 13 x 11 and felt cramped with two Sentries between the columns; the line didn't get
+  longer for it, the passages between rooms got shorter. Each of the four is one of three kinds,
+  picked at random:
+  - **guard room**: four 2 x 2 columns set wide apart, a root down one corner, moss;
+  - **overgrown room**: the woods have it. A great root comes through the ceiling, slants down
+    across the room and runs out along the floor; two of the columns are down, with moss,
+    eyeblossoms and rubble where the floor was;
+  - **workshop**: benches and pots along the walls, two columns, and a stump the builders never
+    finished: the log and two of its four resin roots on a plinth, the copper for its cap
+    standing beside it. It's the hint at what the hall's stump is.
+- **7 Sentries**: 2, 1, 2 and 2 in the four rooms, whatever their kind. The root of the second
+  and of the fourth room carries a Creaking Heart; in the overgrown room it lies in plain sight
+  in the root on the floor.
 - **The hall** is 25 x 25 inside and 13 high: two colonnades of four columns, the stump on a
   stepped dais between them with a pale square in the floor around it, lanterns on posts along
   the walls and on chains over the nave, roots in two corners.
 - **Light**: the generator checks that no spot a mob could stand on, in any piece, is left at
   block light 0. On top of that the structure overrides monster spawns to none inside its pieces,
   so nothing but its own guards lives there even if a lantern is broken.
+- **Water**: underground the Ruin cuts through water pockets. Vanilla waterlogs whatever a
+  structure places in water, and a waterlogged lantern floods the room around it, so the
+  structure is set to ignore waterlogging, like the Trial Chambers. A GameTest builds the hall
+  into water to check.
 - **Where**: only in Pale Gardens, on a grid of 12 chunks with at least 6 between two Ruins. A
   garden is small, so many have none; to be tuned once it's been looked for in play.
 - A GameTest lays the Ruin out 300 times without building it and checks every layout has all
   its pieces, the straight line (the longest) among them.
-- Not yet: the loot and archaeology, Buried Garden, more kinds of rooms, the mural, and the
+- Not yet: the loot and archaeology, Buried Garden, the mural, and the
   Sentries' leash tied to the structure's bounds. On steep ground a deep piece can still come out
   of a hillside.
 
@@ -616,7 +634,7 @@ Five are in (feature 6). Left:
 ### B. Finish what's on hold
 
 - **The Pale Ruin** (feature 4): it generates, with its Sentries. Left, in order: the loot (the
-  given heart, the Silk Touch axe), the archaeology and Buried Garden; more kinds of rooms and
+  given heart, the Silk Touch axe), the archaeology and Buried Garden;
   the hall's mural; the Sentries' leash tied to the structure's bounds; how often it generates.
 - **Second playtest of the Elderwood** after the easing in PRs #27 to #30 (breather after
   petrification, shield blocking the gaze, any sword swing, staged death). The demo video

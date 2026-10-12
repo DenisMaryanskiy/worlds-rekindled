@@ -3,7 +3,7 @@
     {
       "element": {
         "element_type": "minecraft:single_pool_element",
-        "location": "vanillareforged:pale_ruin/room_4_left_straight",
+        "location": "vanillareforged:pale_ruin/room_4_guard_left_straight",
         "processors": "minecraft:empty",
         "projection": "rigid"
       },
@@ -12,7 +12,43 @@
     {
       "element": {
         "element_type": "minecraft:single_pool_element",
-        "location": "vanillareforged:pale_ruin/room_4_left_right",
+        "location": "vanillareforged:pale_ruin/room_4_guard_left_right",
+        "processors": "minecraft:empty",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "vanillareforged:pale_ruin/room_4_overgrown_left_straight",
+        "processors": "minecraft:empty",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "vanillareforged:pale_ruin/room_4_overgrown_left_right",
+        "processors": "minecraft:empty",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "vanillareforged:pale_ruin/room_4_workshop_left_straight",
+        "processors": "minecraft:empty",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "vanillareforged:pale_ruin/room_4_workshop_left_right",
         "processors": "minecraft:empty",
         "projection": "rigid"
       },
