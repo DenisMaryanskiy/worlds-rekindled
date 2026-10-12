@@ -317,12 +317,20 @@ Built so far (`tools/pale_ruin.py` writes the templates and the worldgen files):
     kill it while it stood and watched;
   - **a hit from beyond its leash bounces off** its heart, as one from sunlight does: either it
     comes for whoever hits it, or the hit does nothing;
+  - **it only notices a player in its own room**. Once it hunts, it follows through the whole
+    Ruin, and it comes for whoever hits it from anywhere in it. With the whole Ruin as its
+    leash it first noticed players there too, and the Sentries of several rooms came down one
+    corridor as a pack of three;
   - **with nobody to hunt it walks back to its post**, wherever in the Ruin the hunt took it;
   - **its blow** deals **4 damage** (the player's Sentry: 6), about a heart through iron armor.
     A blow that lands on a **petrified** player **breaks the stone**: it hurts 50% more, and
     then the player is free, with the 3 s in which no gaze takes hold. Before, three blows
-    landed in the 3 s of being stuck;
-  - **cracks**: 4 on Easy and Peaceful, 5 on Normal, 6 on Hard, as in the table above;
+    landed in the 3 s of being stuck. It **doesn't throw the player up** as the player's own
+    Sentry throws a mob: thrown, they took the next blow in the air, from it or from the Sentry
+    beside it;
+  - **cracks**: 4 on Easy and Peaceful, 5 on Normal, 6 on Hard, as in the table above. A
+    **critical hit** (a sword swung while falling) **cracks it twice**, on the player's own
+    Sentry too. The Elderwood's hearts take one crack a hit either way;
   - **drops**: 1-3 resin clumps, 1-2 Elderwood Lens Shards and 10 XP;
   - it isn't a monster by vanilla's rules (a golem, like the player's Sentry), so it stays on
     Peaceful, where it stands guard without attacking, and a player's Sentry or an iron golem
@@ -486,7 +494,8 @@ iron/diamond gear: a huge, rooted tree fought by moving around it.
 - It **fills while the lens has line of sight** to the player and drains once sight is broken.
   The player slows down more and more, and when it's full they're **petrified**: stuck in place.
 - **Brittle**: damage taken rises with the meter, up to about **+50%** when petrified (you're
-  slowly turning into a statue).
+  slowly turning into a statue). Not fire: stone burns no better, and burning already goes
+  through armor on a player who can't move to put it out.
 - A grey, cracked stone overlay creeps in from the screen edges as it fills, like powder snow's
   frost overlay.
 - Implemented (players only; creative and spectators are immune):
@@ -698,10 +707,18 @@ Six are in (feature 6). Left:
   Elderwood; the Sentries were eased after it (gazes that don't add up, a blow that breaks the
   stone, 4 damage, the leash to the whole Ruin), and so was the Elderwood (its drawn trunk no
   longer trails the real one, roots that armor reduces and that come every 4 s, 90 s before it
-  mends, a pause before its next resin after a stun).
+  mends, a pause before its next resin after a stun). The second, with the same gear, took
+  two deaths to the Sentries and three to the Elderwood, in half the time at the boss; after it
+  the Sentries stopped throwing the player up and noticing them from other rooms, a critical
+  hit came to crack a Sentry's heart twice, and fire lost its bonus on a petrified player.
+- **Left as it is after the second playthrough**, to look at again if it still hurts: the
+  Elderwood's resin burns for 5 s and comes every 3 s, so in its gaze the fire never goes out;
+  its gaze covers 60 degrees to each side.
 - **Open after the first playthrough**: the Ruin reads as one long corridor (its rooms lie in a
   single line); at night the rooms' Creakings come on top of the Elderwood, which made the
-  player set the time to day; the amethyst in the loot doesn't explain itself.
+  player set the time to day; the amethyst in the loot doesn't explain itself. From the second:
+  dead ends and side rooms to step into; fewer pale oak logs in the chests; pots with different
+  sherds; dying deep in the Ruin leaves the gear under its Sentries.
 - **Second playtest of the Elderwood** after all of the easing. The demo video predates it and
   should be re-recorded once the numbers settle.
 - **Elderwood numbers**: cracks per heart, turn speed, root damage, stun length, gaze fill rate,

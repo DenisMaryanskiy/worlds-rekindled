@@ -48,6 +48,17 @@ public class PetrificationTest {
 	}
 
 	@GameTest
+	public void petrifiedPlayerBurnsNoWorse(GameTestHelper helper) {
+		Player player = helper.makeMockPlayer(GameType.SURVIVAL);
+		Petrification.expose(player, Petrification.FULL);
+
+		player.hurtServer(helper.getLevel(), helper.getLevel().damageSources().onFire(), 4.0F);
+
+		helper.assertValueEqual(player.getHealth(), player.getMaxHealth() - 4.0F, "health");
+		helper.succeed();
+	}
+
+	@GameTest
 	public void petrifiedPlayerIsBrittle(GameTestHelper helper) {
 		// A plain mock player: a mock ServerPlayer has no connection, which hurtServer needs.
 		Player player = helper.makeMockPlayer(GameType.SURVIVAL);

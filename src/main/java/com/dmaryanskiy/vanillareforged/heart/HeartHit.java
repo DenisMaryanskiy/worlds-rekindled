@@ -48,6 +48,16 @@ public record HeartHit(Vec3 from, Vec3 to) {
 		return Optional.empty();
 	}
 
+	/**
+	 * Whether the hit is a player's falling swing, vanilla's critical hit. How hard they swung isn't
+	 * asked, as for the hit itself: by now the swing has already spent its charge.
+	 */
+	public static boolean isCritical(DamageSource source) {
+		return source.getDirectEntity() instanceof Player player && source.getEntity() == player
+				&& player.fallDistance > 0.0 && !player.onGround() && !player.onClimbable() && !player.isInWater()
+				&& !player.isMobilityRestricted() && !player.isPassenger() && !player.isSprinting();
+	}
+
 	private static HeartHit swingOf(Player player) {
 		Vec3 eyes = player.getEyePosition();
 		return new HeartHit(eyes, eyes.add(player.getViewVector(1.0F).scale(player.entityInteractionRange())));

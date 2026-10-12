@@ -147,6 +147,7 @@ public class RuinSentryTest {
 
 		helper.assertTrue(sentry.doHurtTarget(helper.getLevel(), player), "The blow should land");
 		helper.assertTrue(player.getHealth() < health, "The blow should hurt");
+		helper.assertTrue(player.getDeltaMovement().y <= 0.0, "The blow shouldn't throw the player up: " + player.getDeltaMovement().y);
 		helper.assertValueEqual(Petrification.getMeter(player), 0, "meter");
 		helper.assertTrue(Petrification.isImmune(player), "Cracked free, no gaze should take hold for a moment");
 		helper.succeed();
@@ -173,6 +174,32 @@ public class RuinSentryTest {
 		helper.assertTrue(hurt, "A sword hit on the heart should land");
 		helper.assertValueEqual(sentry.getCracks(), 1, "cracks");
 		helper.assertTrue(sentry.getTarget() == player, "It should turn on its attacker");
+		helper.succeed();
+	}
+
+	@GameTest(environment = MIDNIGHT)
+	public void aCriticalHitCracksItsHeartTwice(GameTestHelper helper) {
+		RuinSentry sentry = sentry(helper);
+		Player player = swordsman(helper, IN_FRONT, 180.0F);
+		player.setOnGround(false);
+		player.fallDistance = 1.0;
+
+		helper.assertTrue(hit(helper, sentry, player), "A falling sword hit on the heart should land");
+		helper.assertValueEqual(sentry.getCracks(), 2, "cracks");
+		helper.succeed();
+	}
+
+	@GameTest(environment = MIDNIGHT)
+	public void aCriticalHitOnItsLastCrackKillsIt(GameTestHelper helper) {
+		RuinSentry sentry = sentry(helper);
+		sentry.setCracks(sentry.getMaxCracks() - 1);
+		Player player = swordsman(helper, IN_FRONT, 180.0F);
+		player.setOnGround(false);
+		player.fallDistance = 1.0;
+
+		hit(helper, sentry, player);
+
+		helper.assertFalse(sentry.isAlive(), "It should be dead");
 		helper.succeed();
 	}
 

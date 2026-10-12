@@ -1,5 +1,7 @@
 package com.dmaryanskiy.vanillareforged.sentry;
 
+import com.dmaryanskiy.vanillareforged.heart.HeartHit;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -118,7 +120,8 @@ public abstract class AbstractSentry extends AbstractGolem {
 		}
 		this.crackCooldown = CRACK_COOLDOWN_TICKS;
 		this.healTicks = 0;
-		this.setCracks(this.getCracks() + 1);
+		// A critical hit cracks it twice: its one crack per hit otherwise leaves a well-timed jump no better than a tap.
+		this.setCracks(Math.min(this.getCracks() + (HeartHit.isCritical(source) ? 2 : 1), this.getMaxCracks()));
 		if (this.getCracks() < this.getMaxCracks()) {
 			level.broadcastDamageEvent(this, source);
 			return true;
@@ -149,12 +152,17 @@ public abstract class AbstractSentry extends AbstractGolem {
 		level.broadcastEntityEvent(this, ATTACK_EVENT);
 		DamageSource damageSource = this.damageSources().mobAttack(this);
 		boolean hurt = target.hurtServer(level, damageSource, (float) this.getAttributeValue(Attributes.ATTACK_DAMAGE));
-		if (hurt) {
+		if (hurt && this.tossesItsTarget()) {
 			double resistance = target instanceof LivingEntity living ? living.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE) : 0.0;
 			target.setDeltaMovement(target.getDeltaMovement().add(0.0, 0.4 * Math.max(0.0, 1.0 - resistance), 0.0));
 		}
 		this.playSound(SoundEvents.CREAKING_ATTACK, 1.0F, 1.0F);
 		return hurt;
+	}
+
+	/** Whether its blow throws its target into the air, as an iron golem's does. */
+	protected boolean tossesItsTarget() {
+		return true;
 	}
 
 	@Override

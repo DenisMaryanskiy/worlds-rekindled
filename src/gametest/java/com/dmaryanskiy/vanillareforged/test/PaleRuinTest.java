@@ -164,6 +164,9 @@ public class PaleRuinTest {
 
 		helper.assertFalse(post.closerThan(inTheHall, RuinSentry.LEASH_RADIUS), "The hall should be farther than its old leash");
 		helper.assertTrue(sentry.guards(inTheHall), "It should guard the hall");
+		helper.assertTrue(sentry.notices(post.north(3)), "It should notice a player in its own room");
+		helper.assertFalse(sentry.notices(inTheHall), "A player in the hall shouldn't draw it out of its room");
+		helper.assertFalse(sentry.notices(box(start, "pale_ruin/room_2").getCenter()), "Nor should a player in the next room");
 		helper.assertTrue(sentry.guards(atTheEntrance), "It should guard the entrance");
 		helper.assertFalse(sentry.guards(post.above(100)), "It shouldn't guard the sky over its room");
 		helper.assertFalse(sentry.guards(inTheHall.east(200)), "It shouldn't guard the rock far from the Ruin");
