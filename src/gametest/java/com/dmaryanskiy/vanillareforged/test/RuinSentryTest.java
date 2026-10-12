@@ -213,13 +213,13 @@ public class RuinSentryTest {
 
 		helper.startSequence()
 				.thenWaitUntil(() -> {
+					helper.assertTrue(sentry.isSunlit(player.blockPosition()), "The player should stand in the sun");
 					helper.assertFalse(sentry.isSunlit(sentry.blockPosition()), "The Sentry should be in the shade");
 					helper.assertFalse(sentry.isStatue(), "In the shade it's awake");
 				})
 				.thenExecute(() -> {
 					// Waking gave it its AI back; pin it again so it keeps facing the player.
 					sentry.setNoAi(true);
-					helper.assertTrue(sentry.isSunlit(player.blockPosition()), "The player should stand in the sun");
 					helper.assertFalse(hit(helper, sentry, player), "A hit from the sun shouldn't land");
 					helper.assertValueEqual(sentry.getCracks(), 0, "cracks");
 				})
@@ -233,10 +233,14 @@ public class RuinSentryTest {
 		roof(helper, 3);
 		RuinSentry sentry = helper.spawn(ModEntities.RUIN_SENTRY, new Vec3(3.5, 1.0, 1.5));
 		sentry.setPost(helper.absolutePos(SENTRY_POS));
-		Player player = player(helper, new Vec3(3.5, 1.0, 6.5), 180.0F);
+		// A plain mock player: if the Sentry did reach it, a hit on a mock ServerPlayer (which has no
+		// connection) would bring the whole test server down instead of failing this test.
+		Player player = helper.makeMockPlayer(GameType.SURVIVAL);
+		player.snapTo(helper.absoluteVec(new Vec3(3.5, 1.0, 6.5)), 180.0F, 0.0F);
 
 		helper.startSequence()
 				.thenWaitUntil(() -> {
+					helper.assertTrue(sentry.isSunlit(player.blockPosition()), "The player should stand in the sun");
 					helper.assertFalse(sentry.isSunlit(sentry.blockPosition()), "The Sentry should be in the shade");
 					helper.assertFalse(sentry.isStatue(), "In the shade it's awake");
 				})

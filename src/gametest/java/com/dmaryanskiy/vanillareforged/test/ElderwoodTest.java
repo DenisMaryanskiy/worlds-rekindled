@@ -107,14 +107,22 @@ public class ElderwoodTest {
 		helper.succeed();
 	}
 
-	@GameTest(environment = NOON, skyAccess = true)
+	// The daylight has to be there first: right after a night batch, or with light still being
+	// worked out, the stump stands in the dark for a moment and the tree would rightly wake.
+	@GameTest(environment = NOON, skyAccess = true, maxTicks = 200)
 	public void itDoesNotWakeInDaylight(GameTestHelper helper) {
 		buildStump(helper, Blocks.COPPER_BLOCK.weathering().unaffected());
-		helper.setBlock(HEART, Blocks.CREAKING_HEART);
 
-		helper.assertEntityNotPresent(ModEntities.ELDERWOOD);
-		helper.assertBlockPresent(Blocks.CREAKING_HEART, HEART);
-		helper.succeed();
+		helper.startSequence()
+				.thenWaitUntil(() -> helper.assertTrue(
+						helper.getLevel().isBrightOutside() && helper.getLevel().canSeeSky(helper.absolutePos(HEART.above())),
+						"The stump should stand in daylight"))
+				.thenExecute(() -> {
+					helper.setBlock(HEART, Blocks.CREAKING_HEART);
+					helper.assertEntityNotPresent(ModEntities.ELDERWOOD);
+					helper.assertBlockPresent(Blocks.CREAKING_HEART, HEART);
+				})
+				.thenSucceed();
 	}
 
 	@GameTest(environment = MIDNIGHT, skyAccess = true)

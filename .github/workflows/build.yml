@@ -23,6 +23,16 @@ jobs:
         run: chmod +x ./gradlew
       - name: build
         run: ./gradlew build
+      # The GameTest server's own log and any crash report say more than the build output does.
+      - name: capture test logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: Test logs
+          path: |
+            build/run/gameTest/logs/
+            build/run/gameTest/crash-reports/
+          if-no-files-found: ignore
       - name: capture build artifacts
         uses: actions/upload-artifact@v7
         with:
