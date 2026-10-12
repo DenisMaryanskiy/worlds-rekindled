@@ -35,10 +35,12 @@ public class PaleRuinLootTest {
 	}
 
 	@GameTest
-	public void theToolChestAlwaysHoldsAWornSilkTouchAxe(GameTestHelper helper) {
+	public void theToolChestAlwaysHoldsAWornSilkTouchAxeAndABrush(GameTestHelper helper) {
 		var silkTouch = helper.getLevel().registryAccess().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(Enchantments.SILK_TOUCH);
 		for (int seed = 0; seed < CHESTS; seed++) {
-			List<ItemStack> axes = roll(helper, "chests/pale_ruin/tool_chest", seed).stream().filter(stack -> stack.is(Items.IRON_AXE)).toList();
+			List<ItemStack> loot = roll(helper, "chests/pale_ruin/tool_chest", seed);
+			List<ItemStack> axes = loot.stream().filter(stack -> stack.is(Items.IRON_AXE)).toList();
+			helper.assertValueEqual(count(loot, Items.BRUSH), 1, "brushes in chest " + seed);
 
 			helper.assertValueEqual(axes.size(), 1, "axes in chest " + seed);
 			ItemStack axe = axes.getFirst();
@@ -49,8 +51,29 @@ public class PaleRuinLootTest {
 	}
 
 	@GameTest
+	public void theStudysChestAlwaysHoldsAnEnchantedBook(GameTestHelper helper) {
+		for (int seed = 0; seed < CHESTS; seed++) {
+			helper.assertValueEqual(count(roll(helper, "chests/pale_ruin/study", seed), Items.ENCHANTED_BOOK), 1, "enchanted books in chest " + seed);
+		}
+		helper.succeed();
+	}
+
+	@GameTest
+	public void theTrimsHeapAlwaysHoldsTheTrimAndNoOtherHeapDoes(GameTestHelper helper) {
+		for (int seed = 0; seed < CHESTS; seed++) {
+			helper.assertValueEqual(count(roll(helper, "archaeology/pale_ruin_hall_trim", seed), ModItems.ELDERWOOD_ARMOR_TRIM_SMITHING_TEMPLATE), 1,
+					"trims in heap " + seed);
+			for (String table : List.of("archaeology/pale_ruin", "archaeology/pale_ruin_tomb", "archaeology/pale_ruin_hall")) {
+				helper.assertValueEqual(count(roll(helper, table, seed), ModItems.ELDERWOOD_ARMOR_TRIM_SMITHING_TEMPLATE), 0, "trims from " + table);
+			}
+		}
+		helper.succeed();
+	}
+
+	@GameTest
 	public void everyOtherTableOfTheRuinGivesSomething(GameTestHelper helper) {
-		for (String table : List.of("chests/pale_ruin/room", "pots/pale_ruin", "archaeology/pale_ruin", "archaeology/pale_ruin_hall")) {
+		for (String table : List.of("chests/pale_ruin/store_room", "chests/pale_ruin/sentry_workshop", "pots/pale_ruin", "archaeology/pale_ruin",
+				"archaeology/pale_ruin_tomb", "archaeology/pale_ruin_hall")) {
 			helper.assertFalse(roll(helper, table, 0).isEmpty(), table + " should give something");
 		}
 		helper.succeed();

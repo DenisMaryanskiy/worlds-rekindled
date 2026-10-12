@@ -5,16 +5,42 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "minecraft:resin_clump",
+          "name": "minecraft:bread",
           "modifier": {
             "type": "minecraft:set_count",
             "count": {
               "type": "minecraft:uniform",
-              "max": 6,
+              "max": 5,
               "min": 2
             }
           },
-          "weight": 6
+          "weight": 5
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:arrow",
+          "modifier": {
+            "type": "minecraft:set_count",
+            "count": {
+              "type": "minecraft:uniform",
+              "max": 12,
+              "min": 4
+            }
+          },
+          "weight": 5
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:candle",
+          "modifier": {
+            "type": "minecraft:set_count",
+            "count": {
+              "type": "minecraft:uniform",
+              "max": 4,
+              "min": 1
+            }
+          },
+          "weight": 4
         },
         {
           "type": "minecraft:item",
@@ -24,19 +50,6 @@
             "count": {
               "type": "minecraft:uniform",
               "max": 6,
-              "min": 2
-            }
-          },
-          "weight": 5
-        },
-        {
-          "type": "minecraft:item",
-          "name": "minecraft:pale_oak_log",
-          "modifier": {
-            "type": "minecraft:set_count",
-            "count": {
-              "type": "minecraft:uniform",
-              "max": 5,
               "min": 2
             }
           },
@@ -57,58 +70,36 @@
         },
         {
           "type": "minecraft:item",
-          "name": "minecraft:candle",
+          "name": "minecraft:resin_clump",
           "modifier": {
             "type": "minecraft:set_count",
             "count": {
               "type": "minecraft:uniform",
-              "max": 3,
-              "min": 1
+              "max": 6,
+              "min": 2
             }
           },
           "weight": 3
         },
         {
           "type": "minecraft:item",
-          "name": "minecraft:bread",
+          "name": "minecraft:pale_oak_log",
           "modifier": {
             "type": "minecraft:set_count",
             "count": {
               "type": "minecraft:uniform",
-              "max": 3,
-              "min": 1
+              "max": 4,
+              "min": 2
             }
-          },
-          "weight": 3
-        },
-        {
-          "type": "minecraft:item",
-          "name": "minecraft:emerald",
-          "modifier": {
-            "type": "minecraft:set_count",
-            "count": {
-              "type": "minecraft:uniform",
-              "max": 3,
-              "min": 1
-            }
-          },
-          "weight": 2
-        },
-        {
-          "type": "minecraft:item",
-          "name": "minecraft:book",
-          "modifier": {
-            "type": "minecraft:enchant_randomly",
-            "options": "#minecraft:on_random_loot"
           }
         }
       ],
       "rolls": {
         "type": "minecraft:uniform",
-        "max": 5,
-        "min": 3
+        "max": 6,
+        "min": 4
       }
     }
   ],
-  "random_sequence": "vanillareforged:chests/pale_ruin/room"
+  "random_sequence": "vanillareforged:chests/pale_ruin/store_room"
 }

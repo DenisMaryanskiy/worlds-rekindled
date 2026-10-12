@@ -36,7 +36,7 @@
               "min": 4
             }
           },
-          "weight": 6
+          "weight": 7
         },
         {
           "type": "minecraft:item",
@@ -62,20 +62,7 @@
               "min": 1
             }
           },
-          "weight": 4
-        },
-        {
-          "type": "minecraft:item",
-          "name": "minecraft:amethyst_shard",
-          "modifier": {
-            "type": "minecraft:set_count",
-            "count": {
-              "type": "minecraft:uniform",
-              "max": 6,
-              "min": 2
-            }
-          },
-          "weight": 3
+          "weight": 6
         },
         {
           "type": "minecraft:item",

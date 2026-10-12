@@ -75,6 +75,7 @@ public class PaleRuinTest {
 		int chests = 0;
 		int pots = 0;
 		int heaps = 0;
+		int withTheTrim = 0;
 		for (BlockPos pos : buildTheHall(level, new ChunkPos(3100, 3100), false)) {
 			BlockEntity blockEntity = level.getBlockEntity(pos);
 			if (blockEntity instanceof ChestBlockEntity chest) {
@@ -85,13 +86,18 @@ public class PaleRuinTest {
 				helper.assertValueEqual(pot.getLootTable().identifier(), VanillaReforged.id("pots/pale_ruin"), "a pot's loot table");
 			} else if (blockEntity instanceof BrushableBlockEntity heap) {
 				heaps++;
-				helper.assertValueEqual(heap.saveWithoutMetadata(level.registryAccess()).getStringOr("LootTable", ""),
-						"vanillareforged:archaeology/pale_ruin_hall", "a heap's loot table");
+				String table = heap.saveWithoutMetadata(level.registryAccess()).getStringOr("LootTable", "");
+				if (table.equals("vanillareforged:archaeology/pale_ruin_hall_trim")) {
+					withTheTrim++;
+				} else {
+					helper.assertValueEqual(table, "vanillareforged:archaeology/pale_ruin_hall", "a heap's loot table");
+				}
 			}
 		}
 		helper.assertValueEqual(chests, 1, "chests in the hall");
 		helper.assertValueEqual(pots, 2, "pots in the hall");
 		helper.assertValueEqual(heaps, 4, "heaps to brush in the hall");
+		helper.assertValueEqual(withTheTrim, 1, "heaps that hold the trim");
 		helper.succeed();
 	}
 
