@@ -3,6 +3,33 @@
     {
       "element": {
         "element_type": "minecraft:single_pool_element",
+        "location": "vanillareforged:pale_ruin/interior/shrine_plain",
+        "processors": "minecraft:empty",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "vanillareforged:pale_ruin/interior/foundry_plain",
+        "processors": "minecraft:empty",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "vanillareforged:pale_ruin/interior/collapsed_plain",
+        "processors": "minecraft:empty",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:single_pool_element",
         "location": "vanillareforged:pale_ruin/interior/guard_plain",
         "processors": "minecraft:empty",
         "projection": "rigid"

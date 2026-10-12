@@ -34,7 +34,10 @@ VARIANTS = {"plain": (2, False, None), "tools": (1, True, "tool_chest"), "heart"
 # The four rooms in order: 7 Sentries in all.
 ROOM_VARIANTS = ["plain", "tools", "plain", "heart"]
 ROOM_SLOTS = len(ROOM_VARIANTS)
-STAIR_DEPTH = 20
+# The stairway comes at these depths: a site gets the shallowest that keeps the Ruin under the
+# ground, and around a Pale Garden the ground often falls a long way (see PaleRuinStructure).
+STAIR_DEPTHS = [20, 40, 60]
+FLIGHT = 10
 # How far below the first free block above the ground the pavilion's floor lies: 1 is level with it.
 SUNK = 1
 # The hall's ceiling stays below the rooms' floors, whichever way the line turned.
@@ -96,12 +99,16 @@ LIGHT = {LANTERN: 15}
 # Blocks light passes through; everything else a piece places stops it.
 BARS = "minecraft:waxed_oxidized_copper_bars"
 CUT_COPPER = "minecraft:waxed_oxidized_cut_copper"
-CLEAR = {AIR, LANTERN, CHAIN, MOSS_CARPET, HANGING_MOSS, "minecraft:candle", "minecraft:pumpkin_stem",
+CLEAR = {AIR, LANTERN, CHAIN, MOSS_CARPET, HANGING_MOSS, "minecraft:candle", "minecraft:damaged_anvil",
+         "minecraft:chipped_anvil", "minecraft:pumpkin_stem",
          "minecraft:attached_pumpkin_stem", "minecraft:tuff_brick_wall", "minecraft:tuff_brick_slab",
          "minecraft:tuff_brick_stairs", "minecraft:closed_eyeblossom", "minecraft:decorated_pot", "minecraft:chest",
          BARS, "minecraft:cobweb", "minecraft:orange_stained_glass", "minecraft:grindstone", "minecraft:amethyst_cluster",
          "minecraft:resin_clump", "minecraft:cauldron", "minecraft:pale_oak_sapling", "minecraft:skeleton_skull",
          "minecraft:lectern", "minecraft:jigsaw"}
+# What can't be set on air or on a half slab.
+NEEDS_A_FLOOR = {"minecraft:candle", MOSS_CARPET, "minecraft:pale_oak_sapling", "minecraft:closed_eyeblossom",
+                 "minecraft:pumpkin_stem", "minecraft:attached_pumpkin_stem", "minecraft:decorated_pot", "minecraft:skeleton_skull"}
 # What loot may be put down on: nothing that holds anything up.
 SOFT = {AIR, MOSS_CARPET, HANGING_MOSS, "minecraft:closed_eyeblossom"}
 # Blocks a mob can't stand on although they're in the way of light too little to matter.
@@ -206,6 +213,17 @@ class Piece:
             if block in CLEAR and below is not None and below not in NOT_A_FLOOR:
                 darkest = min(darkest, light.get((x, y, z), 0))
         return darkest
+
+    def unsupported(self):
+        """Things that need a block under them and have air or a half slab there: in the game they'd hang."""
+        hanging = []
+        for (x, y, z), (block, _, _) in self.blocks.items():
+            if block not in NEEDS_A_FLOOR:
+                continue
+            below = self.blocks.get((x, y - 1, z))
+            if below is None or (below[0] in CLEAR and dict(below[1]).get("type") != "top"):
+                hanging.append((block, x, y, z))
+        return hanging
 
     def save(self):
         palette = {}
@@ -334,20 +352,25 @@ def stairway(piece, x, z, top, steps, direction=1, open_above=None):
             piece.lantern(x, y + 4, sz, hanging=True)
 
 
-def entrance():
+def entrance_name(depth):
+    return "entrance" if depth == STAIR_DEPTHS[0] else f"entrance_{depth}"
+
+
+def entrance(depth):
     """
-    A ruined pavilion level with the ground, and the stairway down from it. The stairs double back:
-    one flight north out from under the pavilion, a landing, and a second flight south beneath it.
+    A ruined pavilion level with the ground, and the stairway {@code depth} down from it. The stairs
+    double back flight under flight: north out from under the pavilion, a landing, south beneath
+    it, a landing, and so on down.
 
     Jigsaw sets the start piece's height by the ground at the middle of its bounding box, so that
     middle has to be under the pavilion: with one straight flight it was 12 blocks down the
-    stairs, and on a slope the pavilion ended up buried or on stilts.
+    stairs, and on a slope the pavilion ended up buried or on stilts. That's also why a deeper
+    stairway is more flights and not longer ones.
     """
-    depth = STAIR_DEPTH
-    flight = depth // 2
-    north = 8  # how far the first flight and its landing reach north of the pavilion
+    assert depth % (2 * FLIGHT) == 0, "the stairs have to come out at the foot facing south"
+    north = FLIGHT - 2  # how far a flight and its landing reach north of the pavilion
     end = north + 12
-    piece = Piece("entrance", (9, depth + 6, end + 1))
+    piece = Piece(entrance_name(depth), (9, depth + 6, end + 1))
     assert north <= (end // 2) <= north + 8, "the piece's middle should lie under the pavilion"
 
     # The pavilion: a floor on a footing, and what's left of its columns. On a slope the footing
@@ -368,21 +391,29 @@ def entrance():
     piece.set(5, depth + 1, north + 1, CALCITE)
     piece.jigsaw(4, depth, north + 7, "north_up", ANCHOR, EMPTY, EMPTY, TUFF_BRICKS)
 
-    # The first flight, down the west side and out to the north.
-    stairway(piece, 2, north + 5, depth, flight, direction=-1, open_above=depth)
-    # The landing where the stairs turn, across both flights.
-    level = depth - flight
-    for z in range(0, north - 4):
-        for x in range(9):
-            wall = x in (0, 8) or z == 0
-            piece.set(x, level - 1, z, piece.pick(DARK_WALLS))
-            piece.set(x, level, z, piece.pick(WALLS if wall else FLOOR))
-            piece.set(x, level + 5, z, piece.pick(WALLS))
-            for y in range(level + 1, level + 5):
-                piece.set(x, y, z, piece.pick(WALLS) if wall else AIR)
-    piece.lantern(4, level + 4, 2, hanging=True)
-    # The second flight, back south down the east side and beneath the pavilion.
-    stairway(piece, 6, north - 4, level, flight)
+    def landing(level, rows, closed):
+        """Where the stairs turn, across both flights; {@code closed} is the row of its end wall."""
+        for z in rows:
+            for x in range(9):
+                wall = x in (0, 8) or z == closed
+                piece.set(x, level - 1, z, piece.pick(DARK_WALLS))
+                piece.set(x, level, z, piece.pick(WALLS if wall else FLOOR))
+                piece.set(x, level + 5, z, piece.pick(WALLS))
+                for y in range(level + 1, level + 5):
+                    piece.set(x, y, z, piece.pick(WALLS) if wall else AIR)
+        piece.lantern(4, level + 4, rows[len(rows) // 2], hanging=True)
+
+    for flight in range(depth // FLIGHT):
+        top = depth - flight * FLIGHT
+        if flight % 2 == 0:
+            # Down the west side and out to the north.
+            stairway(piece, 2, north + 5, top, FLIGHT, direction=-1, open_above=depth if flight == 0 else None)
+            landing(top - FLIGHT, range(0, north - 4), closed=0)
+        else:
+            # Back south down the east side, beneath the pavilion.
+            stairway(piece, 6, north - 4, top, FLIGHT)
+            if top - FLIGHT > 0:
+                landing(top - FLIGHT, range(north + 6, north + 10), closed=north + 9)
 
     # The passage at the foot of the stairs, and the way on.
     corridor(piece, 6, north + 6, end, top=5)
@@ -584,7 +615,93 @@ def nursery(piece, top, heart, sentries):
     return {1: [(10, 9)], 2: [(8, 9), (12, 9)]}[sentries]
 
 
-ROOM_KINDS = {"guard": guard_room, "overgrown": overgrown_room, "workshop": workshop, "archive": archive, "cells": cells,
+def shrine(piece, top, heart, sentries):
+    """
+    This was a temple. In the middle stands what they prayed to, the tree in small: a trunk of pale
+    oak on a stepped base with a heart of resin in it, candles at its foot. Benches face it from
+    both sides and are the room's low cover; the aisles between them stay open.
+    """
+    cx, cz = ROOM_CENTER
+    # A cross of half slabs, with the candles on the floor in its corners: on a half slab a candle
+    # has nothing under it and hangs in the air.
+    for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+        piece.set(cx + dx, 1, cz + dz, "minecraft:tuff_brick_slab", type="bottom", waterlogged="false")
+    piece.set(cx, 1, cz, CHISELED_TUFF)
+    piece.set(cx, 2, cz, ROOT, axis="y")
+    piece.set(cx, 3, cz, "minecraft:chiseled_resin_bricks")
+    piece.set(cx, 4, cz, ROOT, axis="y")
+    for (dx, dz), candles in (((-1, -1), 3), ((1, -1), 2), ((-1, 1), 1), ((1, 1), 4)):
+        piece.set(cx + dx, 1, cz + dz, "minecraft:candle", candles=str(candles), lit="true", waterlogged="false")
+    # A bench's back is the way its stairs face: these sit towards the middle.
+    for x, back in ((4, "west"), (6, "west"), (14, "east"), (16, "east")):
+        for z in (4, 5, 6, 10, 11, 12):
+            if piece.random.random() < 0.85:
+                piece.set(x, 1, z, "minecraft:tuff_brick_stairs", facing=back, half="bottom", shape="straight", waterlogged="false")
+    root(piece, 19, 2, top, heart)
+    overgrow(piece, 1, 2, 19, 14, top, carpets=8, strands=10)
+    return {1: [(10, 11)], 2: [(8, 12), (12, 12)]}[sentries]
+
+
+def foundry(piece, top, heart, sentries):
+    """
+    Where the copper was worked for the bands, the cages and the lens frames: furnaces along one wall,
+    anvils, copper stacked in every stage of its weathering, and a band left half cast on the floor.
+    """
+    for z in (4, 5, 6, 10, 11, 12):
+        piece.set(1, 1, z, "minecraft:blast_furnace", facing="east", lit="false")
+        if z in (5, 11):
+            piece.set(1, 2, z, "minecraft:blast_furnace", facing="east", lit="false")
+    piece.set(4, 1, 5, "minecraft:damaged_anvil", facing="north")
+    piece.set(4, 1, 11, "minecraft:chipped_anvil", facing="north")
+    piece.set(3, 1, 12, "minecraft:cauldron")
+    stages = ["minecraft:waxed_copper_block", "minecraft:waxed_exposed_copper", "minecraft:waxed_weathered_copper",
+              "minecraft:waxed_oxidized_copper"]
+    for i, block in enumerate(stages):
+        piece.set(14 + i, 1, 4, block)
+        piece.set(14 + i, 1, 5, block)
+        if i % 2 == 0:
+            piece.set(14 + i, 2, 4, block)
+    # The band: three sides of a square of the columns' copper, the fourth never poured.
+    cx, cz = ROOM_CENTER
+    for dx in range(-1, 2):
+        for dz in range(-1, 2):
+            if (dx, dz) != (0, 0) and not (dz == 1 and dx >= 0):
+                piece.set(cx + dx, 1, cz + dz, COPPER_BAND)
+    column(piece, 13, 9, top)
+    column(piece, 6, 9, top)
+    root(piece, 19, 2, top, heart)
+    overgrow(piece, 1, 2, 19, 14, top, carpets=6, strands=8)
+    return {1: [(10, 11)], 2: [(8, 12), (12, 12)]}[sentries]
+
+
+def collapsed_room(piece, top, heart, sentries):
+    """
+    Part of the ceiling is down. Two ridges of fallen stone cross the room from opposite walls, each
+    with a gap at its far end, so the way across winds and nothing looks from one end to the other.
+    """
+    for z, xs in ((6, range(1, 13)), (10, range(8, 20))):
+        for x in xs:
+            height = piece.random.choice((2, 2, 3, 3, 4))
+            for y in range(1, height + 1):
+                piece.set(x, y, z, piece.pick(RUBBLE))
+            # Stone that rolled off the ridge.
+            for side in (-1, 1):
+                # Not by the walls: the side doors open there.
+                if 1 < x < 19 and piece.random.random() < 0.35 and piece.block(x, 1, z + side) == AIR:
+                    piece.set(x, 1, z + side, piece.pick(RUBBLE))
+    # What's left of a column, and the root that brought it down.
+    for x, y, z in ((15, 1, 4), (16, 1, 4), (15, 2, 4), (4, 1, 12), (5, 1, 12), (4, 1, 13)):
+        piece.set(x, y, z, CALCITE)
+    for x in range(3, 9):
+        piece.set(x, top - 1, 6, ROOT, axis="x")
+    piece.set(8, top - 2, 6, ROOT, axis="y")
+    piece.set(8, top - 3, 6, ROOT, axis="y")
+    root(piece, 19, 2, top, heart)
+    overgrow(piece, 1, 2, 19, 14, top, carpets=14, strands=14)
+    return {1: [(10, 8)], 2: [(4, 8), (16, 12)]}[sentries]
+
+
+ROOM_KINDS = {"shrine": shrine, "foundry": foundry, "collapsed": collapsed_room, "guard": guard_room, "overgrown": overgrown_room, "workshop": workshop, "archive": archive, "cells": cells,
               "lens_room": lens_room, "resin_works": resin_works, "nursery": nursery}
 ROOM_TOP = 8
 ROOM_CENTER = (10, 8)
@@ -671,6 +788,7 @@ def interior(kind, variant):
         piece.entity(x - ox, y - oy, z - oz, entity["nbt"]["id"])
     fx, fz = FURNISHED_FROM
     piece.jigsaw(fx - ox, 1 - oy, fz - oz, "down_north", INTERIOR, EMPTY, EMPTY, AIR)
+    assert not scratch.unsupported(), (kind, variant, scratch.unsupported())
     # Its lanterns hang in the room it goes into.
     piece.lit = scratch.darkest_floor()
     return piece
@@ -892,6 +1010,21 @@ def hall():
             piece.set(x, y, z, CHAIN, axis="y", waterlogged="false")
         piece.lantern(x, 7, z, hanging=True)
 
+    # On the wall behind the stump, what stood on it: the tree with its lens and its seven hearts,
+    # four in the trunk, one on each branch and the core under the lens. The hearts are resin, not
+    # hearts: seven real ones in a wall would be seven to carry off.
+    for x in range(cx - 5, cx + 6):
+        for y in range(1, 13):
+            piece.set(x, y, 29, CALCITE)
+    bark = [(cx, y) for y in range(1, 10)] + [(cx + dx, 1) for dx in (-2, -1, 1, 2)] + [(cx - 3, 1), (cx + 3, 1)]
+    bark += [(cx + side * d, 8 + d // 2) for side in (-1, 1) for d in (1, 2, 3, 4)]
+    bark += [(cx + side * 4, y) for side in (-1, 1) for y in (10, 11)] + [(cx + side, 10) for side in (-1, 1)] + [(cx, 10), (cx, 11)]
+    for x, y in bark:
+        piece.set(x, y, 29, ROOT, axis="y")
+    for x, y in ((cx, 2), (cx - 1, 3), (cx + 1, 3), (cx, 4), (cx - 3, 9), (cx + 3, 9), (cx, 6)):
+        piece.set(x, y, 29, "minecraft:resin_block")
+    piece.set(cx, 7, 29, "minecraft:ochre_froglight", axis="z")
+
     root(piece, 25, 4, top, heart=False, reach=(-1, 1))
     root(piece, 1, 28, top, heart=False, reach=(1, -1))
     overgrow(piece, 1, 4, 25, 28, top, carpets=40, strands=30)
@@ -942,7 +1075,7 @@ def write_pool(name, pieces):
 
 
 def main():
-    pieces = [entrance(), descent(), hall()]
+    pieces = [entrance(depth) for depth in STAIR_DEPTHS] + [descent(), hall()]
     for slot in range(1, ROOM_SLOTS + 1):
         for bearing in (["ahead"] if slot == 1 else TURNS):
             pieces += [room(slot, bearing, side) for side in TURNS[bearing]]
@@ -953,35 +1086,42 @@ def main():
         pieces += [interior(kind, variant) for kind in ROOM_KINDS]
         write_pool(f"interior_{variant}", [(f"interior/{kind}_{variant}", 1) for kind in ROOM_KINDS])
     assert sum(VARIANTS[variant][0] for variant in ROOM_VARIANTS) == 7
-    write_pool("entrance", [("entrance", 1)])
+    for depth in STAIR_DEPTHS:
+        write_pool(entrance_name(depth), [(entrance_name(depth), 1)])
     write_pool("descent", [("descent", 1)])
     write_pool("hall", [("hall", 1)])
     for piece in pieces:
         piece.save()
+        # An interior's floor is the room's, so it was checked with its room around it.
+        assert piece.name.startswith("interior/") or not piece.unsupported(), (piece.name, piece.unsupported())
         darkest = piece.lit if hasattr(piece, "lit") else piece.darkest_floor()
         print(f"{piece.name}: {piece.size}, {len(piece.blocks)} blocks, {len(piece.entities)} entities, darkest floor {darkest}")
         # The pavilion is under the open sky; everywhere else the builders' lanterns reach.
-        assert darkest > 0 or piece.name == "entrance", piece.name
+        assert darkest > 0 or piece.name.startswith("entrance"), piece.name
 
     write_json("worldgen/structure/pale_ruin.json", {
-        "type": "minecraft:jigsaw",
-        "biomes": f"#{NAMESPACE}:has_structure/pale_ruin",
-        # Built into an underground water pocket, its lanterns, chains and slabs would come out
-        # waterlogged and flood the room.
-        "liquid_settings": "ignore_waterlogging",
-        "max_distance_from_center": 128,
-        "project_start_to_heightmap": "WORLD_SURFACE_WG",
-        "size": ROOM_SLOTS + 5,
-        # Nothing but its own guards lives in the Ruin, lit or not.
-        "spawn_overrides": {"monster": {"bounding_box": "piece", "spawns": []}},
-        # Jigsaw puts the start piece's bottom layer one below this height above the surface, wherever its
-        # anchor is: the pavilion's floor is STAIR_DEPTH above that bottom.
-        "start_height": {"absolute": 1 - STAIR_DEPTH - SUNK},
-        "start_jigsaw_name": ANCHOR,
-        "start_pool": pool("entrance"),
-        "step": "underground_decoration",
-        "terrain_adaptation": "none",
-        "use_expansion_hack": False,
+        # Jigsaw structures to choose from, from the shallowest: a site gets the first that stays
+        # under the ground there.
+        "type": f"{NAMESPACE}:pale_ruin",
+        "depths": [{
+            "biomes": f"#{NAMESPACE}:has_structure/pale_ruin",
+            # Built into an underground water pocket, its lanterns, chains and slabs would come out
+            # waterlogged and flood the room.
+            "liquid_settings": "ignore_waterlogging",
+            "max_distance_from_center": 128,
+            "project_start_to_heightmap": "WORLD_SURFACE_WG",
+            "size": ROOM_SLOTS + 5,
+            # Nothing but its own guards lives in the Ruin, lit or not.
+            "spawn_overrides": {"monster": {"bounding_box": "piece", "spawns": []}},
+            # Jigsaw puts the start piece's bottom layer one below this height above the surface, wherever its
+            # anchor is: the pavilion's floor is the stairway's depth above that bottom.
+            "start_height": {"absolute": 1 - depth - SUNK},
+            "start_jigsaw_name": ANCHOR,
+            "start_pool": pool(entrance_name(depth)),
+            "step": "underground_decoration",
+            "terrain_adaptation": "none",
+            "use_expansion_hack": False,
+        } for depth in STAIR_DEPTHS],
     })
     write_json("worldgen/structure_set/pale_ruins.json", {
         "placement": {"type": "minecraft:random_spread", "salt": 734202611, "separation": 6, "spacing": 12},

@@ -3,6 +3,33 @@
     {
       "element": {
         "element_type": "minecraft:single_pool_element",
+        "location": "vanillareforged:pale_ruin/interior/shrine_heart",
+        "processors": "minecraft:empty",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "vanillareforged:pale_ruin/interior/foundry_heart",
+        "processors": "minecraft:empty",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "vanillareforged:pale_ruin/interior/collapsed_heart",
+        "processors": "minecraft:empty",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:single_pool_element",
         "location": "vanillareforged:pale_ruin/interior/guard_heart",
         "processors": "minecraft:empty",
         "projection": "rigid"
