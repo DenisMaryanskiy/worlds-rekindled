@@ -1,0 +1,35 @@
+{
+  "parent": "minecraft:adventure/heart_transplanter",
+  "criteria": {
+    "entered_pale_ruin": {
+      "conditions": {
+        "player": {
+          "type": "minecraft:entity_properties",
+          "entity": "this",
+          "predicate": {
+            "minecraft:location": {
+              "structures": "vanillareforged:pale_ruin"
+            }
+          }
+        }
+      },
+      "trigger": "minecraft:location"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.vanillareforged.buried_garden.description"
+    },
+    "icon": {
+      "id": "minecraft:chiseled_tuff_bricks"
+    },
+    "title": {
+      "translate": "advancements.vanillareforged.buried_garden.title"
+    }
+  },
+  "requirements": [
+    [
+      "entered_pale_ruin"
+    ]
+  ]
+}
