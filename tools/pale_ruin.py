@@ -106,6 +106,9 @@ CLEAR = {AIR, LANTERN, CHAIN, MOSS_CARPET, HANGING_MOSS, "minecraft:candle", "mi
          BARS, "minecraft:cobweb", "minecraft:orange_stained_glass", "minecraft:grindstone", "minecraft:amethyst_cluster",
          "minecraft:resin_clump", "minecraft:cauldron", "minecraft:pale_oak_sapling", "minecraft:skeleton_skull",
          "minecraft:lectern", "minecraft:jigsaw"}
+# What can't be set on air or on a half slab.
+NEEDS_A_FLOOR = {"minecraft:candle", MOSS_CARPET, "minecraft:pale_oak_sapling", "minecraft:closed_eyeblossom",
+                 "minecraft:pumpkin_stem", "minecraft:attached_pumpkin_stem", "minecraft:decorated_pot", "minecraft:skeleton_skull"}
 # What loot may be put down on: nothing that holds anything up.
 SOFT = {AIR, MOSS_CARPET, HANGING_MOSS, "minecraft:closed_eyeblossom"}
 # Blocks a mob can't stand on although they're in the way of light too little to matter.
@@ -210,6 +213,17 @@ class Piece:
             if block in CLEAR and below is not None and below not in NOT_A_FLOOR:
                 darkest = min(darkest, light.get((x, y, z), 0))
         return darkest
+
+    def unsupported(self):
+        """Things that need a block under them and have air or a half slab there: in the game they'd hang."""
+        hanging = []
+        for (x, y, z), (block, _, _) in self.blocks.items():
+            if block not in NEEDS_A_FLOOR:
+                continue
+            below = self.blocks.get((x, y - 1, z))
+            if below is None or (below[0] in CLEAR and dict(below[1]).get("type") != "top"):
+                hanging.append((block, x, y, z))
+        return hanging
 
     def save(self):
         palette = {}
@@ -608,15 +622,16 @@ def shrine(piece, top, heart, sentries):
     both sides and are the room's low cover; the aisles between them stay open.
     """
     cx, cz = ROOM_CENTER
-    for dx in range(-1, 2):
-        for dz in range(-1, 2):
-            piece.set(cx + dx, 1, cz + dz, "minecraft:tuff_brick_slab", type="bottom", waterlogged="false")
+    # A cross of half slabs, with the candles on the floor in its corners: on a half slab a candle
+    # has nothing under it and hangs in the air.
+    for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+        piece.set(cx + dx, 1, cz + dz, "minecraft:tuff_brick_slab", type="bottom", waterlogged="false")
     piece.set(cx, 1, cz, CHISELED_TUFF)
     piece.set(cx, 2, cz, ROOT, axis="y")
     piece.set(cx, 3, cz, "minecraft:chiseled_resin_bricks")
     piece.set(cx, 4, cz, ROOT, axis="y")
     for (dx, dz), candles in (((-1, -1), 3), ((1, -1), 2), ((-1, 1), 1), ((1, 1), 4)):
-        piece.set(cx + dx, 2, cz + dz, "minecraft:candle", candles=str(candles), lit="true", waterlogged="false")
+        piece.set(cx + dx, 1, cz + dz, "minecraft:candle", candles=str(candles), lit="true", waterlogged="false")
     # A bench's back is the way its stairs face: these sit towards the middle.
     for x, back in ((4, "west"), (6, "west"), (14, "east"), (16, "east")):
         for z in (4, 5, 6, 10, 11, 12):
@@ -773,6 +788,7 @@ def interior(kind, variant):
         piece.entity(x - ox, y - oy, z - oz, entity["nbt"]["id"])
     fx, fz = FURNISHED_FROM
     piece.jigsaw(fx - ox, 1 - oy, fz - oz, "down_north", INTERIOR, EMPTY, EMPTY, AIR)
+    assert not scratch.unsupported(), (kind, variant, scratch.unsupported())
     # Its lanterns hang in the room it goes into.
     piece.lit = scratch.darkest_floor()
     return piece
@@ -1076,6 +1092,8 @@ def main():
     write_pool("hall", [("hall", 1)])
     for piece in pieces:
         piece.save()
+        # An interior's floor is the room's, so it was checked with its room around it.
+        assert piece.name.startswith("interior/") or not piece.unsupported(), (piece.name, piece.unsupported())
         darkest = piece.lit if hasattr(piece, "lit") else piece.darkest_floor()
         print(f"{piece.name}: {piece.size}, {len(piece.blocks)} blocks, {len(piece.entities)} entities, darkest floor {darkest}")
         # The pavilion is under the open sky; everywhere else the builders' lanterns reach.
