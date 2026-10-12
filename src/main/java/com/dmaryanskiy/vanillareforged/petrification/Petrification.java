@@ -50,6 +50,7 @@ public final class Petrification {
 
 	private static final Identifier MODIFIER_ID = VanillaReforged.id("petrification");
 	private static final Map<Player, Long> LAST_EXPOSED = new WeakHashMap<>();
+	private static final Map<Player, Integer> EXPOSED_BY = new WeakHashMap<>();
 	private static final Map<Player, Integer> MASK_TICKS = new WeakHashMap<>();
 	private static final Map<Player, Integer> SHIELD_TICKS = new WeakHashMap<>();
 	private static final Map<Player, Long> IMMUNE_UNTIL = new WeakHashMap<>();
@@ -104,12 +105,21 @@ public final class Petrification {
 	/**
 	 * Called every tick a petrifying gaze holds the player. The Pale Mask's wearer looks through the
 	 * same lens, so the gaze doesn't take hold, but blocking it wears the mask down like its own gaze.
+	 * <p>
+	 * Gazes don't add up: of several that hold a player in one tick, only the strongest counts.
 	 */
 	public static void expose(Player player, int amount) {
 		if (player.isCreative() || player.isSpectator() || isImmune(player)) {
 			return;
 		}
-		LAST_EXPOSED.put(player, player.level().getGameTime());
+		long now = player.level().getGameTime();
+		int already = LAST_EXPOSED.getOrDefault(player, -1L) == now ? EXPOSED_BY.getOrDefault(player, 0) : 0;
+		if (amount <= already) {
+			return;
+		}
+		LAST_EXPOSED.put(player, now);
+		EXPOSED_BY.put(player, amount);
+		amount -= already;
 		ItemStack mask = player.getItemBySlot(EquipmentSlot.HEAD);
 		if (mask.is(ModItems.PALE_MASK)) {
 			if (MASK_TICKS.merge(player, 1, Integer::sum) >= ElderwoodGaze.TICKS_PER_DURABILITY) {

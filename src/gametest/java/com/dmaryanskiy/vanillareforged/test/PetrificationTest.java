@@ -26,8 +26,10 @@ public class PetrificationTest {
 		helper.assertValueEqual(Petrification.getProgress(player), 0.5F, "progress");
 		helper.assertValueEqual(player.getAttributeValue(Attributes.MOVEMENT_SPEED), baseSpeed, "movement speed at half");
 
-		Petrification.expose(player, Petrification.FULL / 4);
+		// In the same tick a stronger gaze only adds what it has over the first: gazes don't add up.
+		Petrification.expose(player, Petrification.FULL * 3 / 4);
 
+		helper.assertValueEqual(Petrification.getProgress(player), 0.75F, "progress under the stronger of two gazes");
 		helper.assertValueEqual(player.getAttributeValue(Attributes.MOVEMENT_SPEED),
 				baseSpeed * (1.0 - Petrification.MAX_SLOWDOWN * 0.5F), "movement speed at three quarters");
 		helper.succeed();
@@ -57,19 +59,26 @@ public class PetrificationTest {
 		helper.succeed();
 	}
 
-	@GameTest
+	@GameTest(maxTicks = ElderwoodGaze.TICKS_PER_DURABILITY + 20)
 	public void paleMaskBlocksTheGazeButWearsDown(GameTestHelper helper) {
 		Player player = helper.makeMockServerPlayer(GameType.SURVIVAL);
 		ItemStack mask = new ItemStack(ModItems.PALE_MASK);
 		player.setItemSlot(EquipmentSlot.HEAD, mask);
-
-		for (int i = 0; i < ElderwoodGaze.TICKS_PER_DURABILITY; i++) {
+		// Two gazes at once wear it no faster than one.
+		helper.onEachTick(() -> {
 			Petrification.expose(player, Petrification.FULL / 4);
-		}
+			Petrification.expose(player, Petrification.FULL / 4);
+		});
 
-		helper.assertValueEqual(Petrification.getMeter(player), 0, "meter");
-		helper.assertValueEqual(mask.getDamageValue(), 1, "mask damage after a second of gaze");
-		helper.succeed();
+		helper.runAfterDelay(ElderwoodGaze.TICKS_PER_DURABILITY - 5, () -> {
+			helper.assertValueEqual(Petrification.getMeter(player), 0, "meter");
+			helper.assertValueEqual(mask.getDamageValue(), 0, "mask damage just short of a second of gaze");
+		});
+		helper.runAfterDelay(ElderwoodGaze.TICKS_PER_DURABILITY + 5, () -> {
+			helper.assertValueEqual(Petrification.getMeter(player), 0, "meter");
+			helper.assertValueEqual(mask.getDamageValue(), 1, "mask damage after a second of gaze");
+			helper.succeed();
+		});
 	}
 
 	@GameTest(maxTicks = 100)

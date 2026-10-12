@@ -35,12 +35,13 @@ what to write down. Tick what's fine, note what isn't.
       its eye is what petrifies you?
 - [ ] The gaze: 5 s of being watched petrifies, from up to 12 blocks. Too fast, too slow? Do the
       columns and shelves work as cover? Does a shield raised at it work, and feel fair?
-- [ ] Being petrified (3 s stuck, hits land 50% harder): frightening, or just annoying? Did it
-      kill you?
+- [ ] Being petrified (stuck for 3 s or until a Sentry's blow breaks the stone; that blow lands
+      50% harder): frightening, or just annoying? Did it kill you?
+- [ ] A blow is 4 damage, about a heart through iron armor. Still too much without a shield?
 - [ ] 5 cracks to kill one on Normal, at most one every half second. How long did one take with
       a sword, and with a bow? Two at once in a room: manageable?
-- [ ] Do they give up at 16 blocks from their post? Could you cheese them from a doorway or from
-      beyond that range?
+- [ ] They hunt anywhere in the Ruin, up to the pavilion, and walk back to their post afterwards.
+      Is there still a spot to cheese them from? Does one ever stand and watch you hit it?
 - [ ] At night: do Creakings walk the rooms that have a heart (second and fourth)? Too many?
 
 **Loot**

@@ -282,8 +282,7 @@ Built so far (`tools/pale_ruin.py` writes the templates and the worldgen files):
   garden is small, so many have none; to be tuned once it's been looked for in play.
 - A GameTest lays the Ruin out 300 times without building it and checks every layout has all
   its pieces, the straight line (the longest) among them.
-- Not yet: the hall's mural and the Sentries' leash tied to the structure's bounds. On steep ground a deep piece can still come out
-  of a hillside.
+- Not yet: the hall's mural. On steep ground a deep piece can still come out of a hillside.
 
 #### Ruin Sentries
 
@@ -301,23 +300,35 @@ Built so far (`tools/pale_ruin.py` writes the templates and the worldgen files):
   - aim: bow or trident at the heart;
   - melee: Pale Mask to slow them, then a sword on the heart.
 - **Leashed to the Ruin**: it never chases the player outside the structure, so it can't be
-  lured to the surface.
+  lured away from it.
 - Implemented, as its own entity (`ruin_sentry`, with a spawn egg) sharing the Heartwood Sentry's
   heart, cracks, healing and melee. Notes:
   - **the gaze** fills the meter by **1 a tick** (the Elderwood: 2, or 3 with its core open), so
     5 s of being watched petrifies. It reaches **12 blocks**, 60 degrees to each side of where
-    its head points, and needs a clear line: a column breaks it. It only holds its target;
-  - **the leash** is to its **post**, the spot where it first stands, and **16 blocks** long. It
-    doesn't pick, keep or follow a target beyond that. Tying it to the structure's bounds
-    instead comes with the structure;
+    its head points, and needs a clear line: a column breaks it. It only holds its target.
+    **Gazes don't add up**: of several that hold a player, only the strongest counts, so two
+    Sentries in a room petrify no faster than one;
+  - **the leash** is **its Ruin**: every piece of the structure its post lies in, the stairway
+    and the pavilion included, and 2 blocks into the rock around them, so a niche dug into a
+    wall is no way out. Anywhere in there it picks, keeps and follows a target; outside it
+    doesn't. A Sentry that stands in no Ruin (spawn egg, command) guards **16 blocks** around
+    its **post**, the spot where it first stands. Its first leash was that circle in the Ruin
+    too, which ended a few steps into the corridor of its own room: from there a player could
+    kill it while it stood and watched;
+  - **a hit from beyond its leash bounces off** its heart, as one from sunlight does: either it
+    comes for whoever hits it, or the hit does nothing;
+  - **with nobody to hunt it walks back to its post**, wherever in the Ruin the hunt took it;
+  - **its blow** deals **4 damage** (the player's Sentry: 6), about a heart through iron armor.
+    A blow that lands on a **petrified** player **breaks the stone**: it hurts 50% more, and
+    then the player is free, with the 3 s in which no gaze takes hold. Before, three blows
+    landed in the 3 s of being stuck;
   - **cracks**: 4 on Easy and Peaceful, 5 on Normal, 6 on Hard, as in the table above;
   - **drops**: 1-3 resin clumps, 1-2 Elderwood Lens Shards and 10 XP;
   - it isn't a monster by vanilla's rules (a golem, like the player's Sentry), so it stays on
     Peaceful, where it stands guard without attacking, and a player's Sentry or an iron golem
     doesn't go for it. The Pale Mask's gaze slows it whether or not it's hunting the wearer;
   - **look**: the Heartwood Sentry's model with a bark head and one eye, a lens shard that always
-    glows. Placeholder textures;
-  - not yet: a player shooting it from beyond its leash is left alone.
+    glows. Placeholder textures.
 - **Fear of sunlight** (precedent: undead burning in the sun). Underground it only matters if the
   player digs the roof open, which is allowed but deliberately expensive: the Ruin is deep and
   its stone slow to mine, and it only buys safety during the day.
@@ -482,8 +493,9 @@ iron/diamond gear: a huge, rooted tree fought by moving around it.
   - the meter runs from 0 to 100; each source decides how fast it fills it per tick;
   - movement only slows once the meter is half full, then by up to **60%**; when full the player
     is petrified for **3 s** (no movement, no jumping) even if the gaze breaks;
-  - cracking free (or being shattered by a slam) empties the meter and gives **3 s in which no
-    gaze takes hold**. Before, the player came out half full and still in the gaze, so in the
+  - several gazes at once don't add up: only the strongest fills the meter;
+  - cracking free (or being shattered by a slam or a Ruin Sentry's blow) empties the meter and
+    gives **3 s in which no gaze takes hold**. Before, the player came out half full and still in the gaze, so in the
     open one petrification led straight into the next;
   - a **shield raised towards the gaze blocks it**: the meter drains behind it, at 1 shield
     durability per second. The price is the shield's own: slow walking and no attacking;
@@ -672,8 +684,10 @@ Six are in (feature 6). Left:
 ### B. Finish what's on hold
 
 - **The Pale Ruin** (feature 4): it generates, with its Sentries and its loot. Left: the hall's
-  mural; the Sentries' leash tied to the structure's bounds; how often it generates; a playthrough
-  from the pavilion to the Elderwood to see whether the loot and the difficulty hold up.
+  mural; how often it generates; a second playthrough from the pavilion to the Elderwood. The
+  first, in iron armor without a shield, ended in three deaths to the Sentries and four to the
+  Elderwood; the Sentries were eased after it (gazes that don't add up, a blow that breaks the
+  stone, 4 damage, the leash to the whole Ruin) and the Elderwood is next.
 - **Second playtest of the Elderwood** after the easing in PRs #27 to #30 (breather after
   petrification, shield blocking the gaze, any sword swing, staged death). The demo video
   predates all of it and should be re-recorded once the numbers settle.
