@@ -557,6 +557,27 @@ public class ElderwoodTest {
 		helper.succeed();
 	}
 
+	// Vanilla lets a projectile that was hit back strike anyone at once, the player who hit it
+	// included. Resin passing over a player's head, hit back from behind it, flew forward into
+	// their own head: it burned them as their own and never reached the tree.
+	@GameTest(environment = MIDNIGHT, maxTicks = 100)
+	public void resinHitBackFromBehindTheHeadFliesOnToTheTree(GameTestHelper helper) {
+		Elderwood elderwood = stillElderwood(helper);
+		// Facing the tree, with the resin just past the back of their head.
+		Player player = plainPlayer(helper, ELDERWOOD.add(0.0, 0.0, 3.5));
+		player.setYRot(180.0F);
+		player.setYHeadRot(180.0F);
+		BurningResin resin = throwResin(helper, elderwood, ELDERWOOD.add(0.0, 1.4, 4.6), new Vec3(0.0, 0.0, -1.0));
+		helper.onEachTick(() -> helper.assertFalse(player.isOnFire(), "The resin shouldn't burn the player who hit it back"));
+
+		// Not at once: until it has flown a tick it can't hit anyone, as if it hadn't left the tree.
+		helper.runAfterDelay(2, () -> {
+			player.attack(resin);
+			helper.assertTrue(resin.getOwner() == player, "The resin should be the player's");
+		});
+		helper.succeedWhen(() -> helper.assertTrue(elderwood.isStunned(), "The resin should reach the tree and stun it"));
+	}
+
 	@GameTest(environment = MIDNIGHT, maxTicks = 60)
 	public void stunnedItStopsGazingAndItsBranchHeartsOpen(GameTestHelper helper) {
 		Elderwood elderwood = facingSouth(helper.spawn(ModEntities.ELDERWOOD, ELDERWOOD));

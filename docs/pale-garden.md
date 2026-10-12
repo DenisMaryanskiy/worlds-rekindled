@@ -571,7 +571,9 @@ all around the trunk, so the player has to keep moving between the two.
   fireball. Hit back into the Elderwood it does no damage but **stuns it for 3 s**; only resin a
   player hit back does. For 5 s afterwards it can't be stunned again. Coming out of the stun it
   waits a full 3 s before its next glob: thrown at once, that glob punished the player who had
-  just earned the stun.
+  just earned the stun. Resin a player hit back **never hits that player**: vanilla lets it
+  strike anyone at once, so one hit back as it passed their head flew into it and burned them
+  as their own.
 - **Stunned**: it doesn't turn, gaze, slam, throw or raise roots, its lens goes dark and its
   branches droop, so **both branch hearts open** to arrows and tridents (still too high for a
   sword). This is how a ranged player opens them without baiting a slam.

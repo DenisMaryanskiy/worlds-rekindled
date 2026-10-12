@@ -63,6 +63,13 @@ public class BurningResin extends Fireball {
 		}
 	}
 
+	// Vanilla lets a projectile that was hit back strike anyone at once, the player who hit it
+	// included: resin hit back from beside or behind their head flew into it.
+	@Override
+	protected boolean canHitEntity(Entity entity) {
+		return super.canHitEntity(entity) && !(entity instanceof Player && entity == this.getOwner());
+	}
+
 	@Override
 	protected void onHit(HitResult hitResult) {
 		super.onHit(hitResult);
