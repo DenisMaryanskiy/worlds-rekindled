@@ -34,6 +34,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.Structure;
+import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
@@ -68,6 +69,8 @@ public class RuinSentry extends AbstractSentry {
 
 	// The rooms of the Ruin its post lies in; empty if it stands in none, null until it has looked.
 	private @Nullable List<BoundingBox> ruin;
+	// Its own room among them: the pieces its post lies in.
+	private List<BoundingBox> room = List.of();
 
 	public RuinSentry(EntityType<? extends RuinSentry> type, Level level) {
 		super(type, level);
@@ -95,7 +98,7 @@ public class RuinSentry extends AbstractSentry {
 		this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
 		this.targetSelector.addGoal(1, new HurtByTargetGoal(this));
 		this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, 5, true, false,
-				(target, level) -> this.guards(target.blockPosition())));
+				(target, level) -> this.notices(target.blockPosition())));
 	}
 
 	/** Where it stands guard, and where it walks back to once there's nobody left to hunt. */
@@ -114,23 +117,47 @@ public class RuinSentry extends AbstractSentry {
 	 * it neither hunts nor can be hurt.
 	 */
 	public boolean guards(BlockPos pos) {
-		if (!(this.level() instanceof ServerLevel level) || !this.hasHome()) {
+		if (!this.standsInARuin()) {
 			return super.isWithinHome(pos);
+		}
+		return isIn(this.ruin, pos);
+	}
+
+	/**
+	 * Whether a player at {@code pos} draws it out by being there: only in its own room. It still
+	 * follows a target, or comes for whoever hits it, anywhere it guards. Otherwise every Sentry
+	 * within sight would join a hunt, and the Ruin's seven would be fought as one pack.
+	 */
+	public boolean notices(BlockPos pos) {
+		return this.standsInARuin() ? isIn(this.room, pos) : this.guards(pos);
+	}
+
+	private boolean standsInARuin() {
+		if (!(this.level() instanceof ServerLevel level) || !this.hasHome()) {
+			return false;
 		}
 		if (this.ruin == null) {
-			StructureStart start = level.structureManager().getStructureWithPieceAt(this.getPost(), structure -> structure.is(RUIN));
-			this.ruin = start.isValid()
-					? start.getPieces().stream().map(piece -> piece.getBoundingBox().inflatedBy(RUIN_MARGIN)).toList()
-					: List.of();
+			BlockPos post = this.getPost();
+			StructureStart start = level.structureManager().getStructureWithPieceAt(post, structure -> structure.is(RUIN));
+			List<BoundingBox> pieces = start.isValid() ? start.getPieces().stream().map(StructurePiece::getBoundingBox).toList() : List.of();
+			this.ruin = pieces.stream().map(piece -> piece.inflatedBy(RUIN_MARGIN)).toList();
+			this.room = pieces.stream().filter(piece -> piece.isInside(post)).toList();
 		}
-		if (this.ruin.isEmpty()) {
-			return super.isWithinHome(pos);
-		}
-		for (BoundingBox room : this.ruin) {
-			if (room.isInside(pos)) {
+		return !this.ruin.isEmpty();
+	}
+
+	private static boolean isIn(List<BoundingBox> boxes, BlockPos pos) {
+		for (BoundingBox box : boxes) {
+			if (box.isInside(pos)) {
 				return true;
 			}
 		}
+		return false;
+	}
+
+	// Its blow would throw a player up into the next one, from it or from the Sentry beside it.
+	@Override
+	protected boolean tossesItsTarget() {
 		return false;
 	}
 

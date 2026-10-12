@@ -7,6 +7,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -17,6 +18,9 @@ public abstract class LivingEntityMixin {
 	// Player.hurtServer scales by difficulty first and then calls this, so the bonus applies on top.
 	@ModifyVariable(method = "hurtServer", at = @At("HEAD"), argsOnly = true)
 	private float vanillareforged$brittleWhenPetrified(float damage, ServerLevel level, DamageSource source) {
-		return (Object) this instanceof Player player ? damage * Petrification.damageMultiplier(player) : damage;
+		// Stone doesn't burn any better: fire already goes through armor, and a petrified player can't put it out.
+		return (Object) this instanceof Player player && !source.is(DamageTypeTags.IS_FIRE)
+				? damage * Petrification.damageMultiplier(player)
+				: damage;
 	}
 }
