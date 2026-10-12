@@ -135,6 +135,10 @@ public class HeartwoodSentry extends AbstractSentry {
 	public void tick() {
 		super.tick();
 		if (this.level() instanceof ServerLevel level) {
+			// One set down by a structure or a command may never have been through finalizeSpawn.
+			if (!this.hasHome()) {
+				this.setPedestal(this.blockPosition().below());
+			}
 			this.updateStatue();
 			this.lantern.tick(level, this);
 		}

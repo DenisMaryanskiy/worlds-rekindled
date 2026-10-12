@@ -83,6 +83,9 @@ what to write down. Tick what's fine, note what isn't.
 - [ ] Lens to Creaking Eye to Pale Mask: clear from the recipe book?
 - [ ] The mask: Creakings ignore you (**One of Them**), its gaze slows what you look at, it
       blocks petrification. Worth giving up a real helmet for?
+- [ ] The Sentry workshop, off the third room: three plinths, a mural, a pumpkin on the bench.
+      Did you understand it's a recipe? Did you put the pumpkin on the second plinth's heart?
+      Does the builders' own Sentry wandering the chamber help or confuse?
 - [ ] A Heartwood Sentry of your own from a heart you took home: built without looking it up?
 - [ ] Is there a reason to come back for a second Elderwood, or a second Ruin?
 

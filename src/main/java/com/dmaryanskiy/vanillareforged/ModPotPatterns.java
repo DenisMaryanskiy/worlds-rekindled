@@ -7,6 +7,7 @@ import net.minecraft.world.level.block.entity.DecoratedPotPattern;
 public final class ModPotPatterns {
 	public static final ResourceKey<DecoratedPotPattern> GAZE = create("gaze");
 	public static final ResourceKey<DecoratedPotPattern> CREAKING = create("creaking");
+	public static final ResourceKey<DecoratedPotPattern> GUARDIAN = create("guardian");
 
 	private ModPotPatterns() {
 	}
