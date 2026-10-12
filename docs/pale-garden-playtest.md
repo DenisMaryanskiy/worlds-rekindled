@@ -1,0 +1,97 @@
+# Pale Garden: playthrough checklist
+
+For one sitting from finding a Pale Garden to killing the Elderwood, in survival on Normal. Every
+number in the mod is a first guess (see `pale-garden.md`); this is the list of what to judge and
+what to write down. Tick what's fine, note what isn't.
+
+## Before you start
+
+- `./gradlew runClient`, a new world, survival, Normal. Use only newly generated chunks: Ruins
+  that generated before a fix keep their old shape.
+- To skip the search: `/locate structure vanillareforged:pale_ruin`. To judge how rare it is, don't.
+- Bring what a mid-game player would have: iron or diamond gear, a bow, a shield, food. No
+  elytra, no netherite.
+- F3 for coordinates when something looks wrong, F2 for a screenshot of it.
+
+## 1. Finding it
+
+- [ ] How long did the Pale Garden take to find, and the Ruin inside it? Did the first garden
+      have one at all? (It generates on a 12-chunk grid, so many gardens have none.)
+- [ ] The pavilion: does it sit on the ground, or dug in, or on stilts? Is it noticeable among
+      the pale oaks, or easy to walk past?
+- [ ] **Buried Garden** is granted on the way down.
+
+## 2. The rooms
+
+- [ ] Which kinds did you get (guard room, overgrown, workshop, archive, cells, lens room, resin
+      works, nursery)? Any kind twice? Does the place read as somewhere research was done?
+- [ ] Anything broken: water, lava or a cave cutting through, a wall open to the outside, a
+      doorway blocked by furniture, a dark corner with vanilla monsters in it.
+- [ ] Is it too dark or too bright to read the rooms?
+
+**Ruin Sentries** (7 in all: 2, 1, 2, 2)
+
+- [ ] Do you understand, without knowing, that the heart in the chest is the weak point and that
+      its eye is what petrifies you?
+- [ ] The gaze: 5 s of being watched petrifies, from up to 12 blocks. Too fast, too slow? Do the
+      columns and shelves work as cover? Does a shield raised at it work, and feel fair?
+- [ ] Being petrified (3 s stuck, hits land 50% harder): frightening, or just annoying? Did it
+      kill you?
+- [ ] 5 cracks to kill one on Normal, at most one every half second. How long did one take with
+      a sword, and with a bow? Two at once in a room: manageable?
+- [ ] Do they give up at 16 blocks from their post? Could you cheese them from a doorway or from
+      beyond that range?
+- [ ] At night: do Creakings walk the rooms that have a heart (second and fourth)? Too many?
+
+**Loot**
+
+- [ ] The tool chest in the second room: is the Silk Touch axe there, and is it obvious what
+      it's for? Did you take a heart whole with it?
+- [ ] Pots and heaps: worth stopping for with a brush, or noise? Which sherds and how many?
+- [ ] Lens shards by the end: 9 make a lens. How many did you have?
+
+## 3. The hall
+
+- [ ] First look from the stairs: does it land?
+- [ ] The chest before the stump: did you open it before the fight? Is it obvious that the
+      Creaking Heart in it goes on the stump? If not, what would have told you?
+- [ ] The four heaps in the corners: did you find the Elderwood armor trim?
+
+## 4. The Elderwood
+
+- [ ] Waking it: heart on the copper, in the dark. **Old Growth** granted.
+- [ ] Do you work out the fight without reading the doc: only hearts can be hurt, a planted
+      branch brings its heart down, its own resin hit back stuns it, the core opens last?
+- [ ] The gaze (2 a tick, 3 with the core open, so 2.5 s and under 2 s to petrify), the slam
+      (10 damage, 15 on a petrified player), the roots when you hide (6 damage), the resin.
+      Which of them killed you, and did it feel like your mistake?
+- [ ] Do the hall's columns make the fight, or does it turn into running circles?
+- [ ] How long was the fight, and how many tries? Does walking away (it mends after 30 s) feel
+      right as the way to reset?
+- [ ] Its death: does the staged collapse read, and is the lens where you expect it?
+- [ ] **Deadwood** granted; **Set in Stone** if you were petrified and lived; **Don't Blink** if
+      you never were.
+
+## 5. After
+
+- [ ] Lens to Creaking Eye to Pale Mask: clear from the recipe book?
+- [ ] The mask: Creakings ignore you (**One of Them**), its gaze slows what you look at, it
+      blocks petrification. Worth giving up a real helmet for?
+- [ ] A Heartwood Sentry of your own from a heart you took home: built without looking it up?
+- [ ] Is there a reason to come back for a second Elderwood, or a second Ruin?
+
+## Already checked without a player
+
+These ran in a generated world and on a dedicated server, so they don't need watching for:
+
+- A natural Ruin generates in a Pale Garden with all its pieces and its 7 Sentries.
+- Buried Garden is granted on entering, and not before.
+- Brushing a heap finishes and drops its find.
+- The rooms' Creaking Hearts are awake at night and dormant by day, at any depth: vanilla wakes
+  them by the time of day alone.
+- On a dedicated server with a client connected: petrification reaches the client, the
+  Elderwood's cracks sync, and placing a Ruin doesn't break anything.
+
+Not checked by anything but you: whether Creakings actually come out of those hearts with a
+survival player near (the checks ran as a spectator, whom hearts ignore), how any of it feels,
+and more than one player.
