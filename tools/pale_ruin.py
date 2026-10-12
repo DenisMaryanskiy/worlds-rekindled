@@ -60,6 +60,11 @@ MOSS = "minecraft:pale_moss_block"
 MOSS_CARPET = "minecraft:pale_moss_carpet"
 HANGING_MOSS = "minecraft:pale_hanging_moss"
 
+# Vanilla only ticks a Creaking Heart that isn't "uprooted", and works that out when one is placed
+# by hand. A structure's heart skips that, so it has to start in a state that ticks: from there
+# the game wakes it by night and puts it to sleep by day.
+ASLEEP = "dormant"
+
 WALLS = [(TUFF_BRICKS, 1)]
 DARK_WALLS = [(DEEPSLATE_BRICKS, 5), ("minecraft:cracked_deepslate_bricks", 1)]
 FLOOR = [(DEEPSLATE_TILES, 7), ("minecraft:cracked_deepslate_tiles", 2), ("minecraft:cobbled_deepslate", 1)]
@@ -268,7 +273,7 @@ def root(piece, x, z, top, heart, reach=(-1, 1)):
     for y in range(1, top):
         piece.set(x, y, z, ROOT, axis="y")
     if heart:
-        piece.set(x, 2, z, "minecraft:creaking_heart", axis="y", creaking_heart_state="uprooted", natural="true")
+        piece.set(x, 2, z, "minecraft:creaking_heart", axis="y", creaking_heart_state=ASLEEP, natural="true")
     dx, dz = reach
     piece.set(x + dx, top - 1, z, ROOT, axis="x")
     piece.set(x, top - 1, z + dz, ROOT, axis="z")
@@ -395,7 +400,7 @@ def overgrown_room(piece, top, heart, sentries):
     piece.set(10, 2, 8, ROOT, axis="x")
     piece.set(10, 2, 9, ROOT, axis="x")
     if heart:
-        piece.set(8, 1, 8, "minecraft:creaking_heart", axis="x", creaking_heart_state="uprooted", natural="true")
+        piece.set(8, 1, 8, "minecraft:creaking_heart", axis="x", creaking_heart_state=ASLEEP, natural="true")
 
     for x in range(2, 19):
         for z in range(3, 14):
@@ -475,7 +480,7 @@ def cells(piece, top, heart, sentries):
     for y in (1, 2, 3):
         piece.set(6, y, 13, "minecraft:pale_oak_log", axis="y")
     if heart:
-        piece.set(6, 2, 13, "minecraft:creaking_heart", axis="y", creaking_heart_state="uprooted", natural="true")
+        piece.set(6, 2, 13, "minecraft:creaking_heart", axis="y", creaking_heart_state=ASLEEP, natural="true")
     piece.set(6, 1, 12, "minecraft:resin_clump", south="true", north="false", east="false", west="false", up="false", down="false",
               waterlogged="false")
     for y in range(4, top):

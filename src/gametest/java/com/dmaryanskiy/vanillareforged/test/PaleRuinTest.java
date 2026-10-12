@@ -16,12 +16,14 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.CreakingHeartBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BrushableBlockEntity;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.entity.DecoratedPotBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.CreakingHeartState;
 import net.minecraft.world.level.levelgen.densityfunction.SamplerContext;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.PoolElementStructurePiece;
@@ -29,6 +31,8 @@ import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.levelgen.structure.pools.SinglePoolElement;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 
 public class PaleRuinTest {
 	private static final int LAYOUTS = 300;
@@ -100,6 +104,38 @@ public class PaleRuinTest {
 						new BoundingBox(chunk.getMinBlockX(), level.getMinY(), chunk.getMinBlockZ(), chunk.getMaxBlockX(), level.getMaxY(),
 								chunk.getMaxBlockZ()), chunk));
 		return inTheHall;
+	}
+
+	// Vanilla never ticks an "uprooted" heart, and a structure's heart isn't checked when it's placed:
+	// written as uprooted it would stay so for good, and no Creaking would ever walk the Ruin.
+	@GameTest
+	public void theRoomsHeartsArePlacedInAStateThatTicks(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		// Far from the tests: a room's furnishing is bigger than a test's plot.
+		BlockPos first = new BlockPos(3200 * 16, 100, 3200 * 16);
+		int hearts = 0;
+		List<String> interiors = List.of("guard_tools", "overgrown_heart", "cells_heart");
+		for (String interior : interiors) {
+			BlockPos origin = first.offset(32 * interiors.indexOf(interior), 0, 0);
+			StructureTemplate template = level.getStructureTemplateManager().get(VanillaReforged.id("pale_ruin/interior/" + interior)).orElseThrow();
+			// The test world is kept between runs: start from nothing.
+			for (BlockPos pos : BlockPos.betweenClosed(origin, origin.offset(template.getSize()))) {
+				level.setBlock(pos, Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
+			}
+			template.placeInWorld(level, origin, origin, new StructurePlaceSettings(), level.getRandom(), Block.UPDATE_CLIENTS);
+			for (BlockPos pos : BlockPos.betweenClosed(origin, origin.offset(template.getSize()))) {
+				BlockState state = level.getBlockState(pos);
+				if (state.is(Blocks.CREAKING_HEART)) {
+					hearts++;
+					helper.assertTrue(state.getValue(BlockStateProperties.CREAKING_HEART_STATE) != CreakingHeartState.UPROOTED,
+							"The heart of " + interior + " is uprooted");
+					helper.assertTrue(CreakingHeartBlock.hasRequiredLogs(state, level, pos), "The heart of " + interior + " needs a log on each side");
+					helper.assertTrue(state.getValue(BlockStateProperties.NATURAL), "The heart of " + interior + " should be natural, so its Creaking gives resin");
+				}
+			}
+		}
+		helper.assertValueEqual(hearts, 3, "hearts found");
+		helper.succeed();
 	}
 
 	// Lays the Ruin out many times without building it: wherever its rooms turn, none may be squeezed out.
