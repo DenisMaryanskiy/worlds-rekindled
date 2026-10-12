@@ -64,11 +64,13 @@ what to write down. Tick what's fine, note what isn't.
 - [ ] Do you work out the fight without reading the doc: only hearts can be hurt, a planted
       branch brings its heart down, its own resin hit back stuns it, the core opens last?
 - [ ] The gaze (2 a tick, 3 with the core open, so 2.5 s and under 2 s to petrify), the slam
-      (10 damage, 15 on a petrified player), the roots when you hide (6 damage), the resin.
+      (10 damage, 15 on a petrified player), the roots when you hide (6 damage before armor,
+      every 4 s), the resin.
       Which of them killed you, and did it feel like your mistake?
 - [ ] Do the hall's columns make the fight, or does it turn into running circles?
-- [ ] How long was the fight, and how many tries? Does walking away (it mends after 30 s) feel
-      right as the way to reset?
+- [ ] How long was the fight, and how many tries? Does walking away (it mends after 90 s) feel
+      right as the way to reset? After a death, was it still as you left it when you got back?
+- [ ] Do hits on a heart you can see land every time, also while the trunk turns?
 - [ ] Its death: does the staged collapse read, and is the lens where you expect it?
 - [ ] **Deadwood** granted; **Set in Stone** if you were petrified and lived; **Don't Blink** if
       you never were.

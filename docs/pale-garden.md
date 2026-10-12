@@ -546,22 +546,31 @@ all around the trunk, so the player has to keep moving between the two.
     and drop. Stone and harder cover holds, so a quick wooden hut doesn't trivialize the fight.
     Follows the `mobGriefing` game rule.
 - **Root eruption** (new): against a player it can't see in front of it (behind, to the side or
-  behind cover) within about 12 blocks. The ground under the player cracks for 1 s, then roots
-  burst out: about 6 damage (the brittle bonus applies) and a toss into the air. Moving out of the
-  cracked patch dodges it, like evoker fangs. It keeps circling and camping from being free.
+  behind cover) within about 12 blocks, **every 4 s**. The ground under the player cracks for
+  1 s, then roots burst out: 6 damage (the brittle bonus applies) and a toss into the air. Moving
+  out of the cracked patch dodges it, like evoker fangs. It keeps circling and camping from being
+  free.
+  - **Armor takes its share**: the roots have their own damage type
+    (`vanillareforged:roots`). They were magic at first, which goes straight through armor: 3
+    hearts a strike whatever the player wore, 4.5 on a petrified one, every 2.5 s. Through iron
+    armor it's now about 1.5 and 2.5. A shield doesn't stop them: they come from below.
 - **Burning resin** (kept): at a player in the gaze cone beyond the slam's reach it throws a glob
   of burning resin from the lens, the first after 1 s and then every 3 s. A hit deals **5 damage
   and 5 s of fire**; blocks never catch fire. Its own look: a molten amber glob with a white-hot
   core, without vanilla's fire overlay.
 - **Hitting the resin back** (kept): a melee hit sends it where the player looks, like a ghast's
   fireball. Hit back into the Elderwood it does no damage but **stuns it for 3 s**; only resin a
-  player hit back does. For 5 s afterwards it can't be stunned again.
+  player hit back does. For 5 s afterwards it can't be stunned again. Coming out of the stun it
+  waits a full 3 s before its next glob: thrown at once, that glob punished the player who had
+  just earned the stun.
 - **Stunned**: it doesn't turn, gaze, slam, throw or raise roots, its lens goes dark and its
   branches droop, so **both branch hearts open** to arrows and tridents (still too high for a
   sword). This is how a ranged player opens them without baiting a slam.
-- **Falling dormant**: with no player within 32 blocks for 30 s it stops, and its hearts heal one
-  crack every few seconds, destroyed ones included. Walking away resets the fight; it doesn't let
-  the player whittle it down from safety. Its lens is dark while it's dormant.
+- **Falling dormant**: with no player within 32 blocks for **90 s** it stops, and its hearts heal
+  one crack every few seconds, destroyed ones included. Walking away resets the fight; it doesn't
+  let the player whittle it down from safety. Its lens is dark while it's dormant. At first it
+  was 30 s, which is less than dying and running back from the Ruin's entrance takes: every
+  death undid the fight.
 - **Reading the fight** (polish):
   - **the gaze shows**: a thin trail of amber motes runs from the lens towards whoever it holds,
     so the cone can be seen before the stone creeps in, and by other players;
@@ -687,10 +696,14 @@ Six are in (feature 6). Left:
   mural; how often it generates; a second playthrough from the pavilion to the Elderwood. The
   first, in iron armor without a shield, ended in three deaths to the Sentries and four to the
   Elderwood; the Sentries were eased after it (gazes that don't add up, a blow that breaks the
-  stone, 4 damage, the leash to the whole Ruin) and the Elderwood is next.
-- **Second playtest of the Elderwood** after the easing in PRs #27 to #30 (breather after
-  petrification, shield blocking the gaze, any sword swing, staged death). The demo video
-  predates all of it and should be re-recorded once the numbers settle.
+  stone, 4 damage, the leash to the whole Ruin), and so was the Elderwood (its drawn trunk no
+  longer trails the real one, roots that armor reduces and that come every 4 s, 90 s before it
+  mends, a pause before its next resin after a stun).
+- **Open after the first playthrough**: the Ruin reads as one long corridor (its rooms lie in a
+  single line); at night the rooms' Creakings come on top of the Elderwood, which made the
+  player set the time to day; the amethyst in the loot doesn't explain itself.
+- **Second playtest of the Elderwood** after all of the easing. The demo video predates it and
+  should be re-recorded once the numbers settle.
 - **Elderwood numbers**: cracks per heart, turn speed, root damage, stun length, gaze fill rate,
   resin damage and the summon's resin cost are first guesses.
 - **Difficulty**: the Sentry's cracks scale with difficulty, the Elderwood's nothing does.

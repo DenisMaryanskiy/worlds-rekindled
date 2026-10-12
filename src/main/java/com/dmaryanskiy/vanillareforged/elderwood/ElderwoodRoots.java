@@ -4,14 +4,18 @@ import org.jspecify.annotations.Nullable;
 
 import com.dmaryanskiy.vanillareforged.ModEntities;
 import com.dmaryanskiy.vanillareforged.ModSounds;
+import com.dmaryanskiy.vanillareforged.VanillaReforged;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityReference;
 import net.minecraft.world.entity.EntityType;
@@ -31,6 +35,8 @@ public class ElderwoodRoots extends Entity {
 	public static final int WARNING_TICKS = 20;
 	public static final int LIFE_TICKS = WARNING_TICKS + 20;
 	public static final float DAMAGE = 6.0F;
+	// Their own kind of damage, which armor takes its share of: as magic they went straight through it.
+	public static final ResourceKey<DamageType> DAMAGE_TYPE = ResourceKey.create(Registries.DAMAGE_TYPE, VanillaReforged.id("roots"));
 	private static final float RISE_TICKS = 3.0F;
 	private static final float SINK_TICKS = 6.0F;
 	// Low enough that landing does not hurt on top of the hit.
@@ -75,7 +81,8 @@ public class ElderwoodRoots extends Entity {
 		this.playSound(ModSounds.ELDERWOOD_ROOTS_ERUPT, 1.5F, 0.8F);
 		this.playSound(ModSounds.ELDERWOOD_SPLINTER, 1.5F, 0.7F);
 		LivingEntity owner = EntityReference.getLivingEntity(this.owner, level);
-		DamageSource source = owner == null ? this.damageSources().magic() : this.damageSources().indirectMagic(this, owner);
+		DamageSource source = new DamageSource(level.registryAccess().lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(DAMAGE_TYPE),
+				this, owner);
 		for (Player player : level.getEntitiesOfClass(Player.class, this.getBoundingBox().inflate(0.2, 0.0, 0.2))) {
 			if (player.hurtServer(level, source, DAMAGE)) {
 				player.push(0.0, TOSS, 0.0);
