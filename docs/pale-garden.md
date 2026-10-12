@@ -248,6 +248,10 @@ Built so far (`tools/pale_ruin.py` writes the templates and the worldgen files):
 - **Light**: the generator checks that no spot a mob could stand on, in any piece, is left at
   block light 0. On top of that the structure overrides monster spawns to none inside its pieces,
   so nothing but its own guards lives there even if a lantern is broken.
+- **Water**: underground the Ruin cuts through water pockets. Vanilla waterlogs whatever a
+  structure places in water, and a waterlogged lantern floods the room around it, so the
+  structure is set to ignore waterlogging, like the Trial Chambers. A GameTest builds the hall
+  into water to check.
 - **Where**: only in Pale Gardens, on a grid of 12 chunks with at least 6 between two Ruins. A
   garden is small, so many have none; to be tuned once it's been looked for in play.
 - A GameTest lays the Ruin out 300 times without building it and checks every layout has all

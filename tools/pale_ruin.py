@@ -538,6 +538,9 @@ def main():
     write_json("worldgen/structure/pale_ruin.json", {
         "type": "minecraft:jigsaw",
         "biomes": f"#{NAMESPACE}:has_structure/pale_ruin",
+        # Built into an underground water pocket, its lanterns, chains and slabs would come out
+        # waterlogged and flood the room.
+        "liquid_settings": "ignore_waterlogging",
         "max_distance_from_center": 128,
         "project_start_to_heightmap": "WORLD_SURFACE_WG",
         "size": ROOM_SLOTS + 4,
