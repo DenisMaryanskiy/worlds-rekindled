@@ -16,6 +16,10 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BrushableBlockEntity;
+import net.minecraft.world.level.block.entity.ChestBlockEntity;
+import net.minecraft.world.level.block.entity.DecoratedPotBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.levelgen.densityfunction.SamplerContext;
@@ -34,25 +38,8 @@ public class PaleRuinTest {
 	@GameTest
 	public void itsLanternsStayDryWhenItIsBuiltIntoWater(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
-		ServerChunkCache chunks = level.getChunkSource();
-		Holder<Structure> ruin = ruin(level);
-		// Far from the tests: the hall is bigger than a test's plot.
-		StructureStart start = ruin.value().generate(ruin, level.dimension(), level.registryAccess(), chunks.getGenerator(),
-				chunks.getGenerator().getBiomeSource(), chunks.randomState().createClimateSampler(SamplerContext.EMPTY_UNCACHED), chunks.randomState(),
-				level.getStructureTemplateManager(), 1L, new ChunkPos(3000, 3000), 0, level, biome -> true);
-		BoundingBox hall = start.getPieces().getLast().getBoundingBox();
-		Iterable<BlockPos> inTheHall = BlockPos.betweenClosed(hall.minX(), hall.minY(), hall.minZ(), hall.maxX(), hall.maxY(), hall.maxZ());
-		for (BlockPos pos : inTheHall) {
-			level.setBlock(pos, Blocks.WATER.defaultBlockState(), Block.UPDATE_CLIENTS);
-		}
-
-		ChunkPos.rangeClosed(new ChunkPos(hall.minX() >> 4, hall.minZ() >> 4), new ChunkPos(hall.maxX() >> 4, hall.maxZ() >> 4))
-				.forEach(chunk -> start.placeInChunk(level, level.structureManager(), chunks.getGenerator(), level.getRandom(),
-						new BoundingBox(chunk.getMinBlockX(), level.getMinY(), chunk.getMinBlockZ(), chunk.getMaxBlockX(), level.getMaxY(),
-								chunk.getMaxBlockZ()), chunk));
-
 		int lanterns = 0;
-		for (BlockPos pos : inTheHall) {
+		for (BlockPos pos : buildTheHall(level, new ChunkPos(3000, 3000), true)) {
 			BlockState state = level.getBlockState(pos);
 			if (state.hasProperty(BlockStateProperties.WATERLOGGED)) {
 				lanterns += BuiltInRegistries.BLOCK.getKey(state.getBlock()).getPath().endsWith("lantern") ? 1 : 0;
@@ -61,6 +48,56 @@ public class PaleRuinTest {
 		}
 		helper.assertTrue(lanterns > 0, "The hall should have been built");
 		helper.succeed();
+	}
+
+	@GameTest
+	public void theHallsChestPotsAndHeapsAreFilledFromItsLootTables(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		int chests = 0;
+		int pots = 0;
+		int heaps = 0;
+		for (BlockPos pos : buildTheHall(level, new ChunkPos(3100, 3100), false)) {
+			BlockEntity blockEntity = level.getBlockEntity(pos);
+			if (blockEntity instanceof ChestBlockEntity chest) {
+				chests++;
+				helper.assertValueEqual(chest.getLootTable().identifier(), VanillaReforged.id("chests/pale_ruin/hall"), "the chest's loot table");
+			} else if (blockEntity instanceof DecoratedPotBlockEntity pot) {
+				pots++;
+				helper.assertValueEqual(pot.getLootTable().identifier(), VanillaReforged.id("pots/pale_ruin"), "a pot's loot table");
+			} else if (blockEntity instanceof BrushableBlockEntity heap) {
+				heaps++;
+				helper.assertValueEqual(heap.saveWithoutMetadata(level.registryAccess()).getStringOr("LootTable", ""),
+						"vanillareforged:archaeology/pale_ruin_hall", "a heap's loot table");
+			}
+		}
+		helper.assertValueEqual(chests, 1, "chests in the hall");
+		helper.assertValueEqual(pots, 2, "pots in the hall");
+		helper.assertValueEqual(heaps, 4, "heaps to brush in the hall");
+		helper.succeed();
+	}
+
+	/**
+	 * Builds a Ruin far from the tests (its hall is bigger than a test's plot), into water if asked,
+	 * and returns every position of the hall.
+	 */
+	private static Iterable<BlockPos> buildTheHall(ServerLevel level, ChunkPos where, boolean intoWater) {
+		ServerChunkCache chunks = level.getChunkSource();
+		Holder<Structure> ruin = ruin(level);
+		StructureStart start = ruin.value().generate(ruin, level.dimension(), level.registryAccess(), chunks.getGenerator(),
+				chunks.getGenerator().getBiomeSource(), chunks.randomState().createClimateSampler(SamplerContext.EMPTY_UNCACHED), chunks.randomState(),
+				level.getStructureTemplateManager(), 1L, where, 0, level, biome -> true);
+		BoundingBox hall = start.getPieces().getLast().getBoundingBox();
+		Iterable<BlockPos> inTheHall = BlockPos.betweenClosed(hall.minX(), hall.minY(), hall.minZ(), hall.maxX(), hall.maxY(), hall.maxZ());
+		if (intoWater) {
+			for (BlockPos pos : inTheHall) {
+				level.setBlock(pos, Blocks.WATER.defaultBlockState(), Block.UPDATE_CLIENTS);
+			}
+		}
+		ChunkPos.rangeClosed(new ChunkPos(hall.minX() >> 4, hall.minZ() >> 4), new ChunkPos(hall.maxX() >> 4, hall.maxZ() >> 4))
+				.forEach(chunk -> start.placeInChunk(level, level.structureManager(), chunks.getGenerator(), level.getRandom(),
+						new BoundingBox(chunk.getMinBlockX(), level.getMinY(), chunk.getMinBlockZ(), chunk.getMaxBlockX(), level.getMaxY(),
+								chunk.getMaxBlockZ()), chunk));
+		return inTheHall;
 	}
 
 	// Lays the Ruin out many times without building it: wherever its rooms turn, none may be squeezed out.

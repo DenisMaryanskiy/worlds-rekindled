@@ -1,7 +1,7 @@
 # Pale Garden: design
 
 Status: features 1, 2, 3, 5 and 6 are implemented with placeholder art and sound; the Pale Ruin (4)
-generates, without its loot yet. Everything still to do is collected under [What's left](#whats-left).
+generates with its guards and its loot. Everything still to do is collected under [What's left](#whats-left).
 
 ## Problem
 
@@ -180,8 +180,8 @@ slowing it, done.
 
 ### 4. Pale Ruin (structure)
 
-> The Ruin Sentry is implemented and the structure generates: the entrance, three kinds of room and
-> the hall. Its loot (the trim, the sherds, the given heart, the Silk Touch axe) isn't placed yet.
+> Implemented: the Ruin Sentry, the structure (the entrance, three kinds of room and the hall) and
+> its loot.
 
 The ancient builders' temple, where they bound Creakings to guard and woke the Elderwood. The
 woods have grown over it and their roots through it.
@@ -260,8 +260,7 @@ Built so far (`tools/pale_ruin.py` writes the templates and the worldgen files):
   garden is small, so many have none; to be tuned once it's been looked for in play.
 - A GameTest lays the Ruin out 300 times without building it and checks every layout has all
   its pieces, the straight line (the longest) among them.
-- Not yet: the loot and archaeology, Buried Garden, the mural, and the
-  Sentries' leash tied to the structure's bounds. On steep ground a deep piece can still come out
+- Not yet: the hall's mural and the Sentries' leash tied to the structure's bounds. On steep ground a deep piece can still come out
   of a hillside.
 
 #### Ruin Sentries
@@ -331,11 +330,28 @@ Built so far (`tools/pale_ruin.py` writes the templates and the worldgen files):
   the counter to the boss at its end.
 - **Archaeology**: decorated pots, and suspicious gravel or mud holding:
   - **Elderwood armor trim** smithing template (rare; duplicated with 7 diamonds + a block of resin).
-    Implemented, but only obtainable in creative until the Ruin's loot exists. Its textures are
-    placeholders to be replaced with final art;
+    Its textures are placeholders to be replaced with final art;
   - pottery sherds: **Gaze** (eye) and **Creaking** (tree figure with a heart). Implemented with
     placeholder textures; vanilla already has a "heart" sherd, hence the names.
 - The **Buried Garden** advancement for entering it.
+
+Placed so (loot tables under `chests/pale_ruin/`, `pots/` and `archaeology/`):
+
+- **The hall's chest** stands before the stump, between two pots that show the Creaking sherd
+  (the tree with its heart) to the door. It always holds **one Creaking Heart** and **two lens
+  shards**, with 4-6 stacks of treasure: resin bricks and clumps, copper blocks, amethyst,
+  emeralds, pale oak saplings, rarely diamonds or a golden apple.
+- **The tool chest**, in the second room, whose root carries a heart: always a **worn iron axe
+  with Silk Touch**, and supplies (resin, copper and iron ingots, pale oak logs, candles, bread).
+  The fourth room, the other one with a heart, has a chest of supplies with now and then
+  emeralds or an enchanted book.
+- **Pots**: two in every room and the workshop's own five, each with one stack: resin, copper,
+  or emeralds.
+- **Heaps to brush**: suspicious gravel lying on the floor with rubble beside it (in the floor
+  it could fall through a cave under the Ruin), two in every room and four in the hall's corners.
+  In the rooms 4 of 14 finds are a sherd, the rest resin, copper, emeralds and odds and ends. In
+  the hall 6 of 12 are a sherd, 2 the **Elderwood armor trim**, 1 a lens shard: about half of
+  all Ruins give a trim.
 
 #### The missing heart
 
@@ -354,8 +370,8 @@ On top of that, as decoration: the Creaking sherd (a tree with a heart) guarante
 pots and a mural of the tree with its hearts on the hall's wall, and Old Growth's description,
 which already names the heart and the stump.
 
-Build order: the Ruin Sentry (done), the structure (done), then the loot, the archaeology and the
-advancement.
+Build order: the Ruin Sentry, the structure, then the loot, the archaeology and the advancement.
+All done.
 
 ### 5. The Elderwood (boss)
 
@@ -584,11 +600,12 @@ Ruin Sentries petrify too, more slowly (feature 4).
 
 ### 6. Advancements
 
-Five advancements in vanilla's **Adventure** tab (no tab of our own, like a Mojang update would).
+Six advancements in vanilla's **Adventure** tab (no tab of our own, like a Mojang update would).
 Their descriptions double as the hints the mod otherwise lacks.
 
 | Advancement | Earned by | Frame | Trigger |
 |---|---|---|---|
+| **Buried Garden** | Entering a Pale Ruin | task | vanilla `location`, inside the structure |
 | **Old Growth** | Waking the Elderwood | goal | vanilla `summoned_entity`, which the summon fires for players within 8 blocks |
 | **Set in Stone** | Being fully petrified and living through it | task | `vanillareforged:survived_petrification` |
 | **Deadwood** | Killing the Elderwood | goal | vanilla `player_killed_entity`: the core's last crack is credited to whoever dealt it |
@@ -598,6 +615,7 @@ Their descriptions double as the hints the mod otherwise lacks.
 - **Tree**: Old Growth hangs off vanilla's **Heart Transplanter** (placing a Creaking Heart), so
   its description, which spells out the stump, shows up for anyone who has started the Adventure
   tab. It leads to Set in Stone and Deadwood, and Deadwood to One of Them and Don't Blink.
+  Buried Garden hangs off Heart Transplanter too, beside it.
 - **Triggers**: the three of our own are plain vanilla `PlayerTrigger`s registered under our ids
   (`ModCriteria`), like vanilla's `avoid_vibration`: the code decides when they fire.
 - **Set in Stone** is granted when the stone cracks open, by time or by a hit, if the player is
@@ -623,19 +641,17 @@ roughly in the order they'd pay off.
 
 ### A. Advancements
 
-Five are in (feature 6). Left:
+Six are in (feature 6). Left:
 
-- **Buried Garden** (task): entering a Pale Ruin. Data only (`location` in a structure), but it
-  waits for the Ruin. It hangs off Heart Transplanter or the Adventure root.
 - Vanilla's "Crafting a New Look" and "Smithing with Style" list trim recipes and templates by
   id, so the Elderwood trim doesn't count towards them. Adding it means overriding vanilla's
   advancement files; probably not worth it for the second one, which would become harder.
 
 ### B. Finish what's on hold
 
-- **The Pale Ruin** (feature 4): it generates, with its Sentries. Left, in order: the loot (the
-  given heart, the Silk Touch axe), the archaeology and Buried Garden;
-  the hall's mural; the Sentries' leash tied to the structure's bounds; how often it generates.
+- **The Pale Ruin** (feature 4): it generates, with its Sentries and its loot. Left: the hall's
+  mural; the Sentries' leash tied to the structure's bounds; how often it generates; a playthrough
+  from the pavilion to the Elderwood to see whether the loot and the difficulty hold up.
 - **Second playtest of the Elderwood** after the easing in PRs #27 to #30 (breather after
   petrification, shield blocking the gaze, any sword swing, staged death). The demo video
   predates all of it and should be re-recorded once the numbers settle.

@@ -66,7 +66,9 @@ RUBBLE = [("minecraft:cobbled_deepslate", 3), (DEEPSLATE_BRICKS, 1), ("minecraft
 LIGHT = {LANTERN: 15}
 # Blocks light passes through; everything else a piece places stops it.
 CLEAR = {AIR, LANTERN, CHAIN, MOSS_CARPET, HANGING_MOSS, "minecraft:tuff_brick_wall", "minecraft:tuff_brick_slab",
-         "minecraft:tuff_brick_stairs", "minecraft:closed_eyeblossom", "minecraft:decorated_pot"}
+         "minecraft:tuff_brick_stairs", "minecraft:closed_eyeblossom", "minecraft:decorated_pot", "minecraft:chest"}
+# What loot may be put down on: nothing that holds anything up.
+SOFT = {AIR, MOSS_CARPET, HANGING_MOSS, "minecraft:closed_eyeblossom"}
 # Blocks a mob can't stand on although they're in the way of light too little to matter.
 NOT_A_FLOOR = CLEAR | {"minecraft:jigsaw"}
 
@@ -118,6 +120,27 @@ class Piece:
 
     def entity(self, x, y, z, entity_id):
         self.entities.append({"pos": [x + 0.5, float(y), z + 0.5], "blockPos": [x, y, z], "nbt": {"id": entity_id}})
+
+    def chest(self, x, z, facing, loot):
+        assert self.block(x, 1, z) in SOFT, (self.name, x, z)
+        self.set(x, 1, z, "minecraft:chest", {"id": "minecraft:chest", "LootTable": f"{NAMESPACE}:chests/pale_ruin/{loot}"},
+                 facing=facing, type="single", waterlogged="false")
+
+    def pot(self, x, y, z, facing, front="minecraft:brick"):
+        """A decorated pot with something in it; {@code front} is the sherd on the side it faces."""
+        assert self.block(x, y, z) in SOFT, (self.name, x, z)
+        sherds = {side: {"id": front if side == "front" else "minecraft:brick"} for side in ("back", "front", "left", "right")}
+        self.set(x, y, z, "minecraft:decorated_pot",
+                 {"id": "minecraft:decorated_pot", "LootTable": f"{NAMESPACE}:pots/pale_ruin", "sherds": sherds},
+                 facing=facing, cracked="false", waterlogged="false")
+
+    def heap(self, x, z, beside, loot):
+        """Suspicious gravel to brush, lying on the floor (it would fall through a gap under it) with rubble beside it."""
+        for hx, hz in ((x, z), beside):
+            assert self.block(hx, 1, hz) in SOFT, (self.name, hx, hz)
+        self.set(x, 1, z, "minecraft:suspicious_gravel",
+                 {"id": "minecraft:brushable_block", "LootTable": f"{NAMESPACE}:archaeology/{loot}"}, dusted="0")
+        self.set(beside[0], 1, beside[1], self.pick(RUBBLE))
 
     def lantern(self, x, y, z, hanging):
         self.set(x, y, z, LANTERN, hanging="true" if hanging else "false", waterlogged="false")
@@ -384,7 +407,7 @@ def workshop(piece, top, heart, sentries):
     for z in (3, 4, 5, 6, 9, 10, 11, 12):
         piece.set(1, 1, z, "minecraft:tuff_brick_slab", type="top", waterlogged="false")
     for x, y, z, facing in ((1, 2, 4, "east"), (1, 2, 11, "east"), (18, 1, 13, "north"), (19, 1, 12, "west"), (19, 1, 6, "west")):
-        piece.set(x, y, z, "minecraft:decorated_pot", facing=facing, cracked="false", waterlogged="false")
+        piece.pot(x, y, z, facing)
 
     # The stump as far as they got with it: the log and two of its four roots on a plinth, the
     # copper for its cap still standing beside it.
@@ -420,6 +443,15 @@ def room(kind, slot, bearing, exit_side):
         piece.lantern(x, top - 1, z, hanging=True)
 
     posts = ROOM_KINDS[kind](piece, top, slot in HEART_ROOMS, SENTRIES_PER_ROOM[slot - 1])
+
+    # Every room has two pots and two heaps to brush. The rooms with a heart in their root have a
+    # chest too: the first one holds the builders' Silk Touch axe, for taking such a heart whole.
+    piece.pot(1, 1, 2, "east")
+    piece.pot(2, 1, 14, "north")
+    piece.heap(7, 2, (6, 2), "pale_ruin")
+    piece.heap(13, 14, (14, 14), "pale_ruin")
+    if slot in HEART_ROOMS:
+        piece.chest(18, 14, "north", "tool_chest" if slot == min(HEART_ROOMS) else "room")
 
     next_pool = pool(slot + 1, TURNS[bearing][exit_side]) if slot < ROOM_SLOTS else pool("descent")
     if exit_side == "straight":
@@ -512,6 +544,19 @@ def hall():
     root(piece, 25, 4, top, heart=False, reach=(-1, 1))
     root(piece, 1, 28, top, heart=False, reach=(1, -1))
     overgrow(piece, 1, 4, 25, 28, top, carpets=40, strands=30)
+
+    # Before the stump, what it's missing: a whole Creaking Heart in the chest, between two pots
+    # that show the tree with its heart. Heaps to brush in the corners hold the rarer finds.
+    for x in (cx - 2, cx + 2):
+        piece.set(x, 1, cz - 5, AIR)
+        # A pot's front is the side away from where it faces: these show theirs to the door.
+        piece.pot(x, 1, cz - 5, "south", front=f"{NAMESPACE}:creaking_pottery_sherd")
+    piece.set(cx, 1, cz - 5, AIR)
+    piece.chest(cx, cz - 5, "north", "hall")
+    for (x, z), dx in (((3, 6), 1), ((23, 6), -1), ((3, 26), 1), ((23, 26), -1)):
+        piece.set(x, 1, z, AIR)
+        piece.set(x + dx, 1, z, AIR)
+        piece.heap(x, z, (x + dx, z), "pale_ruin_hall")
     return piece
 
 
