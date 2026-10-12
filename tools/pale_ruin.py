@@ -3,7 +3,8 @@
 The Ruin is a line of jigsaw pieces: the entrance on the surface with its stairway down, ROOM_SLOTS
 rooms, a second stairway down and the hall. Every slot has its own pools, so the hall always ends
 the line. A slot's room is one of several kinds, and its exit is straight ahead, to the left or to
-the right, so every Ruin is furnished and winds differently.
+the right, so every Ruin is furnished and winds differently. Off every room hangs a side chamber,
+a dead end with no guards in it.
 
 Jigsaw placement doesn't backtrack: a piece that doesn't fit is left out, with everything after it.
 So the line must never curl back on itself. Each room is made once per bearing the line can have
@@ -45,6 +46,27 @@ TURNS = {
     "right": {"straight": "right", "left": "ahead"},
 }
 
+# The wall of a room its side chamber hangs off, by the room's slot, the line's bearing there and
+# the room's exit. A room's chamber is placed before the rooms two on, so a chamber in their way
+# would cut the line short. These walls were found by trying every way the line can wind (41):
+# with them every chamber fits and none is ever in the way. Rooms 1 and 2 take the wall away from
+# where the line still has to go; for 3 and 4 that rule let a few chambers collide with earlier ones.
+def side_door(slot, bearing, exit_side):
+    if slot >= 3 and bearing != "ahead":
+        return {(3, "left", "straight"): "west", (3, "left", "right"): "south", (3, "right", "straight"): "east",
+                (3, "right", "left"): "west", (4, "left", "straight"): "west", (4, "left", "right"): "south",
+                (4, "right", "straight"): "east", (4, "right", "left"): "south"}[(slot, bearing, exit_side)]
+    if slot < 3 and bearing != "ahead":
+        return "east" if bearing == "left" else "west"
+    if exit_side == "straight":
+        return "east" if slot != 2 else "west"
+    return "west" if exit_side == "left" else "east"
+
+
+# Which chambers a room's side door may lead to, by the room's slot.
+CHAMBERS = {1: ["store_room", "collapsed_passage"], 2: ["study", "tomb"], 3: ["study", "tomb"],
+            4: ["store_room", "tomb", "collapsed_passage"]}
+
 AIR = "minecraft:air"
 TUFF_BRICKS = "minecraft:tuff_bricks"
 CHISELED_TUFF = "minecraft:chiseled_tuff_bricks"
@@ -74,7 +96,7 @@ LIGHT = {LANTERN: 15}
 # Blocks light passes through; everything else a piece places stops it.
 BARS = "minecraft:waxed_oxidized_copper_bars"
 CUT_COPPER = "minecraft:waxed_oxidized_cut_copper"
-CLEAR = {AIR, LANTERN, CHAIN, MOSS_CARPET, HANGING_MOSS, "minecraft:tuff_brick_wall", "minecraft:tuff_brick_slab",
+CLEAR = {AIR, LANTERN, CHAIN, MOSS_CARPET, HANGING_MOSS, "minecraft:candle", "minecraft:tuff_brick_wall", "minecraft:tuff_brick_slab",
          "minecraft:tuff_brick_stairs", "minecraft:closed_eyeblossom", "minecraft:decorated_pot", "minecraft:chest",
          BARS, "minecraft:cobweb", "minecraft:orange_stained_glass", "minecraft:grindstone", "minecraft:amethyst_cluster",
          "minecraft:resin_clump", "minecraft:cauldron", "minecraft:pale_oak_sapling", "minecraft:skeleton_skull",
@@ -117,10 +139,11 @@ class Piece:
         entry = self.blocks.get((x, y, z))
         return entry[0] if entry else None
 
-    def jigsaw(self, x, y, z, orientation, name, target, pool, final_state):
+    def jigsaw(self, x, y, z, orientation, name, target, pool, final_state, priority=0):
+        """A higher priority is tried earlier among a piece's jigsaws, and what it places goes on first."""
         self.set(x, y, z, "minecraft:jigsaw", {
             "id": "minecraft:jigsaw", "name": name, "target": target, "pool": pool, "final_state": final_state,
-            "joint": "aligned", "selection_priority": 0, "placement_priority": 0,
+            "joint": "aligned", "selection_priority": priority, "placement_priority": priority,
         }, orientation=orientation)
 
     def entry(self, x, z, y=0, final_state=DEEPSLATE_TILES):
@@ -128,7 +151,11 @@ class Piece:
         self.jigsaw(x, y, z, "north_up", ENTRY, EMPTY, EMPTY, final_state)
 
     def exit(self, x, z, facing, pool, final_state=DEEPSLATE_TILES):
-        self.jigsaw(x, 0, z, facing + "_up", f"{NAMESPACE}:pale_ruin/exit", ENTRY, pool, final_state)
+        # The line goes on before anything hangs off it.
+        self.jigsaw(x, 0, z, facing + "_up", f"{NAMESPACE}:pale_ruin/exit", ENTRY, pool, final_state, priority=2)
+
+    def side(self, x, z, facing, pool):
+        self.jigsaw(x, 0, z, facing + "_up", f"{NAMESPACE}:pale_ruin/side", ENTRY, pool, DEEPSLATE_TILES)
 
     def entity(self, x, y, z, entity_id):
         self.entities.append({"pos": [x + 0.5, float(y), z + 0.5], "blockPos": [x, y, z], "nbt": {"id": entity_id}})
@@ -600,6 +627,11 @@ def room(slot, bearing, exit_side):
     else:
         doorway(piece, 0, cz, along_x=False)
         piece.exit(0, cz, "west", next_pool)
+    wall = side_door(slot, bearing, exit_side)
+    x, z = {"east": (20, cz), "west": (0, cz), "south": (cx, 15)}[wall]
+    assert piece.block(x, 1, z) != AIR, (piece.name, "its side door is its way on")
+    doorway(piece, x, z, along_x=wall == "south")
+    piece.side(x, z, wall, pool(f"chambers_{slot}"))
     return piece
 
 
@@ -641,6 +673,106 @@ def interior(kind, variant):
     # Its lanterns hang in the room it goes into.
     piece.lit = scratch.darkest_floor()
     return piece
+
+
+CHAMBER_TOP = 6
+
+
+def bare_chamber(name):
+    """A dead end off a room: a short passage from the north into a room 9 x 9 inside and 5 high."""
+    piece = Piece(f"chamber/{name}", (11, CHAMBER_TOP + 1, 14))
+    corridor(piece, 5, 0, 2)
+    shell(piece, 0, 3, 10, 13, CHAMBER_TOP, bands={3})
+    doorway(piece, 5, 3, along_x=True)
+    piece.entry(5, 0)
+    piece.lantern(5, 3, 1, hanging=True)
+    for x, z in ((2, 5), (8, 5), (2, 11), (8, 11), (5, 8)):
+        piece.lantern(x, CHAMBER_TOP - 1, z, hanging=True)
+    return piece
+
+
+def store_room():
+    """What the builders kept by: stacks of their materials, pots, and a chest."""
+    piece = bare_chamber("store_room")
+    piece.fill(1, 1, 4, 2, 2, 5, "minecraft:resin_bricks")
+    piece.set(1, 3, 4, "minecraft:resin_bricks")
+    piece.fill(8, 1, 4, 9, 1, 6, "minecraft:pale_oak_planks")
+    piece.fill(9, 2, 4, 9, 2, 5, "minecraft:pale_oak_planks")
+    piece.fill(1, 1, 10, 1, 2, 12, CUT_COPPER)
+    piece.set(2, 1, 12, CUT_COPPER)
+    piece.fill(8, 1, 11, 9, 2, 12, "minecraft:waxed_weathered_copper")
+    piece.set(7, 1, 12, "minecraft:waxed_weathered_copper")
+    piece.chest(5, 12, "north", "room")
+    # A pot's front is the side away from where it faces: these show theirs to the door.
+    piece.pot(3, 1, 12, "south")
+    piece.pot(4, 1, 12, "south")
+    piece.pot(6, 1, 12, "south")
+    piece.pot(3, 1, 4, "north")
+    overgrow(piece, 1, 4, 9, 12, CHAMBER_TOP, carpets=5, strands=4)
+    return piece
+
+
+def study():
+    """Where the builders wrote it all down: shelves, a lectern, a desk with its candles."""
+    piece = bare_chamber("study")
+    for x in range(1, 10):
+        for y in (1, 2, 3):
+            piece.set(x, y, 12, "minecraft:bookshelf" if piece.random.random() < 0.8 else AIR)
+    for z in (9, 10, 11):
+        piece.set(1, 1, z, "minecraft:bookshelf")
+        piece.set(1, 2, z, "minecraft:bookshelf")
+    piece.set(5, 1, 9, "minecraft:lectern", facing="north", has_book="false", powered="false")
+    for z in (5, 6):
+        piece.set(8, 1, z, "minecraft:tuff_brick_slab", type="top", waterlogged="false")
+    piece.set(8, 2, 5, "minecraft:candle", candles="3", lit="false", waterlogged="false")
+    piece.set(8, 2, 6, "minecraft:candle", candles="1", lit="false", waterlogged="false")
+    piece.set(9, 1, 4, "minecraft:cobweb")
+    piece.set(1, CHAMBER_TOP - 1, 4, "minecraft:cobweb")
+    piece.pot(1, 1, 4, "east")
+    piece.pot(9, 1, 11, "east")
+    piece.heap(3, 7, (2, 7), "pale_ruin")
+    return piece
+
+
+def tomb():
+    """The builders' own: one of them under a slab, pots on plinths along the walls, heaps to brush."""
+    piece = bare_chamber("tomb")
+    for z in (7, 8, 9):
+        piece.set(5, 1, z, POLISHED_TUFF)
+    piece.set(5, 2, 8, "minecraft:tuff_brick_slab", type="bottom", waterlogged="false")
+    piece.set(5, 2, 7, "minecraft:skeleton_skull", rotation="8", powered="false")
+    for x, facing in ((1, "west"), (9, "east")):
+        for z in (5, 8, 11):
+            piece.set(x, 1, z, CHISELED_TUFF)
+            piece.pot(x, 2, z, facing)
+    piece.heap(3, 12, (2, 12), "pale_ruin")
+    piece.heap(7, 12, (8, 12), "pale_ruin")
+    piece.heap(4, 5, (4, 4), "pale_ruin")
+    piece.set(1, CHAMBER_TOP - 1, 12, "minecraft:cobweb")
+    piece.set(9, CHAMBER_TOP - 1, 4, "minecraft:cobweb")
+    return piece
+
+
+def collapsed_passage():
+    """A passage that went somewhere once: fallen stone and roots after a few blocks, one heap before them."""
+    piece = Piece("chamber/collapsed_passage", (5, 5, 9))
+    corridor(piece, 2, 0, 8)
+    piece.entry(2, 0)
+    piece.lantern(2, 3, 1, hanging=True)
+    for x in range(5):
+        for y in range(5):
+            piece.set(x, y, 8, piece.pick(RUBBLE if 0 < y < 4 and 0 < x < 4 else WALLS))
+    for (x, z), height in (((1, 7), 3), ((2, 7), 2), ((3, 7), 3), ((1, 6), 2), ((3, 6), 1), ((2, 6), 1), ((3, 5), 1)):
+        for y in range(1, height + 1):
+            piece.set(x, y, z, piece.pick(RUBBLE))
+    piece.set(2, 3, 7, ROOT, axis="z")
+    piece.set(2, 3, 6, ROOT, axis="z")
+    piece.set(1, 3, 6, HANGING_MOSS, tip="true")
+    piece.heap(1, 4, (1, 5), "pale_ruin")
+    return piece
+
+
+CHAMBER_KINDS = {"store_room": store_room, "study": study, "tomb": tomb, "collapsed_passage": collapsed_passage}
 
 
 def descent():
@@ -767,6 +899,8 @@ def main():
         for bearing in (["ahead"] if slot == 1 else TURNS):
             pieces += [room(slot, bearing, side) for side in TURNS[bearing]]
             write_pool(f"rooms_{slot}_{bearing}", [(room_name(slot, bearing, side), 1) for side in TURNS[bearing]])
+        write_pool(f"chambers_{slot}", [(f"chamber/{kind}", 1) for kind in CHAMBERS[slot]])
+    pieces += [build() for build in CHAMBER_KINDS.values()]
     for variant in VARIANTS:
         pieces += [interior(kind, variant) for kind in ROOM_KINDS]
         write_pool(f"interior_{variant}", [(f"interior/{kind}_{variant}", 1) for kind in ROOM_KINDS])
