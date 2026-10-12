@@ -96,6 +96,62 @@ public class RuinSentryTest {
 		});
 	}
 
+	// Either it comes for whoever hits it or the hit does nothing: from just beyond its leash it
+	// used to stand and take it.
+	@GameTest(environment = MIDNIGHT)
+	public void aHitFromBeyondItsLeashBouncesOff(GameTestHelper helper) {
+		RuinSentry sentry = sentry(helper);
+		sentry.setPost(helper.absolutePos(SENTRY_POS).north(RuinSentry.LEASH_RADIUS));
+		Player player = swordsman(helper, IN_FRONT, 180.0F);
+
+		helper.assertFalse(hit(helper, sentry, player), "A hit from beyond its leash should bounce off");
+		helper.assertValueEqual(sentry.getCracks(), 0, "cracks");
+		helper.assertTrue(sentry.getTarget() == null, "It shouldn't hunt a player beyond its leash");
+		helper.succeed();
+	}
+
+	@GameTest(environment = MIDNIGHT, maxTicks = 200)
+	public void itWalksBackToItsPostWithNobodyToHunt(GameTestHelper helper) {
+		floor(helper);
+		BlockPos post = helper.absolutePos(SENTRY_POS);
+		RuinSentry sentry = helper.spawn(ModEntities.RUIN_SENTRY, new Vec3(1.5, 1.0, 7.5));
+		sentry.setPost(post);
+
+		helper.succeedWhen(() -> helper.assertTrue(post.closerThan(sentry.blockPosition(), 3.0), "It should be back at its post"));
+	}
+
+	@GameTest(environment = MIDNIGHT, maxTicks = 40)
+	public void twoGazesPetrifyNoFasterThanOne(GameTestHelper helper) {
+		RuinSentry sentry = sentry(helper);
+		RuinSentry other = sentry(helper);
+		Player player = player(helper, IN_FRONT, 180.0F);
+		sentry.setTarget(player);
+		other.setTarget(player);
+
+		helper.runAfterDelay(20, () -> {
+			int meter = Petrification.getMeter(player);
+			helper.assertTrue(meter >= 19 * RuinSentry.GAZE_RATE && meter <= 21 * RuinSentry.GAZE_RATE, "meter after a second: " + meter);
+			helper.succeed();
+		});
+	}
+
+	@GameTest(environment = MIDNIGHT)
+	public void itsBlowBreaksTheStoneItTurnedAPlayerInto(GameTestHelper helper) {
+		RuinSentry sentry = sentry(helper);
+		// A plain mock player: a mock ServerPlayer has no connection to take a hit with.
+		Player player = helper.makeMockPlayer(GameType.SURVIVAL);
+		player.snapTo(helper.absoluteVec(IN_FRONT), 180.0F, 0.0F);
+		player.setAttached(Petrification.METER, Petrification.FULL + Petrification.PETRIFIED_TICKS);
+		helper.assertTrue(Petrification.isPetrified(player), "The player should be petrified");
+		float health = player.getHealth();
+
+		helper.assertTrue(sentry.doHurtTarget(helper.getLevel(), player), "The blow should land");
+		helper.assertTrue(player.getHealth() < health, "The blow should hurt");
+		helper.assertValueEqual(Petrification.getMeter(player), 0, "meter");
+		helper.assertTrue(Petrification.isImmune(player), "Cracked free, no gaze should take hold for a moment");
+		helper.succeed();
+	}
+
 	@GameTest(environment = MIDNIGHT)
 	public void itTakesItsPostWhereItFirstStands(GameTestHelper helper) {
 		RuinSentry sentry = helper.spawn(ModEntities.RUIN_SENTRY, SENTRY);

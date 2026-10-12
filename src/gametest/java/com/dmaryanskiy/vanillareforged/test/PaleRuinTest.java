@@ -2,7 +2,9 @@ package com.dmaryanskiy.vanillareforged.test;
 
 import java.util.List;
 
+import com.dmaryanskiy.vanillareforged.ModEntities;
 import com.dmaryanskiy.vanillareforged.VanillaReforged;
+import com.dmaryanskiy.vanillareforged.sentry.RuinSentry;
 
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
@@ -13,6 +15,7 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -136,6 +139,39 @@ public class PaleRuinTest {
 		}
 		helper.assertValueEqual(hearts, 3, "hearts found");
 		helper.succeed();
+	}
+
+	// A Sentry is at home in its whole Ruin, however far from its post: it used to let go of a player
+	// 16 blocks from where it stood, a few steps into the corridor of its own room.
+	@GameTest
+	public void aSentryGuardsItsWholeRuinAndNothingBeyond(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerChunkCache chunks = level.getChunkSource();
+		Holder<Structure> ruin = ruin(level);
+		ChunkPos where = new ChunkPos(3300, 3300);
+		StructureStart start = ruin.value().generate(ruin, level.dimension(), level.registryAccess(), chunks.getGenerator(),
+				chunks.getGenerator().getBiomeSource(), chunks.randomState().createClimateSampler(SamplerContext.EMPTY_UNCACHED), chunks.randomState(),
+				level.getStructureTemplateManager(), 1L, where, 0, level, biome -> true);
+		BlockPos post = box(start, "pale_ruin/room_1").getCenter();
+		BlockPos inTheHall = box(start, "pale_ruin/hall").getCenter();
+		BlockPos atTheEntrance = box(start, "pale_ruin/entrance").getCenter();
+		// The Ruin as the world would know it, without building it.
+		level.getChunk(where.x(), where.z()).setStartForStructure(ruin.value(), start);
+		level.getChunk(post).addReferenceForStructure(ruin.value(), where.pack());
+
+		RuinSentry sentry = ModEntities.RUIN_SENTRY.create(level, EntitySpawnReason.COMMAND);
+		sentry.setPost(post);
+
+		helper.assertFalse(post.closerThan(inTheHall, RuinSentry.LEASH_RADIUS), "The hall should be farther than its old leash");
+		helper.assertTrue(sentry.guards(inTheHall), "It should guard the hall");
+		helper.assertTrue(sentry.guards(atTheEntrance), "It should guard the entrance");
+		helper.assertFalse(sentry.guards(post.above(100)), "It shouldn't guard the sky over its room");
+		helper.assertFalse(sentry.guards(inTheHall.east(200)), "It shouldn't guard the rock far from the Ruin");
+		helper.succeed();
+	}
+
+	private static BoundingBox box(StructureStart start, String template) {
+		return start.getPieces().stream().filter(piece -> template(piece).startsWith(template)).findFirst().orElseThrow().getBoundingBox();
 	}
 
 	// Lays the Ruin out many times without building it: wherever its rooms turn, none may be squeezed out.
