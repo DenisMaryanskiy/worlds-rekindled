@@ -65,7 +65,8 @@ what to write down. Tick what's fine, note what isn't.
 - [ ] First look from the stairs: does it land?
 - [ ] The chest before the stump: did you open it before the fight? Is it obvious that the
       Creaking Heart in it goes on the stump? If not, what would have told you?
-- [ ] The four heaps in the corners: did you find the Elderwood armor trim?
+- [ ] The four heaps in the corners: the one by the mural, on its right as you face it, always
+      holds the Elderwood armor trim. Did you get it, with the brush from the tool chest?
 
 ## 4. The Elderwood
 

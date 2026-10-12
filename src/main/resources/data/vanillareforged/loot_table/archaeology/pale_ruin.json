@@ -6,12 +6,12 @@
         {
           "type": "minecraft:item",
           "name": "vanillareforged:gaze_pottery_sherd",
-          "weight": 2
+          "weight": 1
         },
         {
           "type": "minecraft:item",
           "name": "vanillareforged:creaking_pottery_sherd",
-          "weight": 2
+          "weight": 1
         },
         {
           "type": "minecraft:item",

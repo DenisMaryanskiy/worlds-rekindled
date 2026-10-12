@@ -30,7 +30,7 @@ DATA = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src", "ma
 # What a room holds besides its furniture: how many Ruin Sentries, whether it has a natural Creaking
 # Heart, and which chest if any. The tool chest has the builders' Silk Touch axe, for taking such a
 # heart whole.
-VARIANTS = {"plain": (2, False, None), "tools": (1, True, "tool_chest"), "heart": (2, True, "room")}
+VARIANTS = {"plain": (2, False, None), "tools": (1, True, "tool_chest"), "heart": (2, True, None)}
 # The four rooms in order: 7 Sentries in all.
 ROOM_VARIANTS = ["plain", "tools", "plain", "heart"]
 ROOM_SLOTS = len(ROOM_VARIANTS)
@@ -703,6 +703,13 @@ def collapsed_room(piece, top, heart, sentries):
 
 ROOM_KINDS = {"shrine": shrine, "foundry": foundry, "collapsed": collapsed_room, "guard": guard_room, "overgrown": overgrown_room, "workshop": workshop, "archive": archive, "cells": cells,
               "lens_room": lens_room, "resin_works": resin_works, "nursery": nursery}
+GAZE = f"{NAMESPACE}:gaze_pottery_sherd"
+CREAKING = f"{NAMESPACE}:creaking_pottery_sherd"
+# The sherd one pot of a room shows: the eye where the builders watched and worked on the lens,
+# the tree where the room is about what grew there.
+ROOM_SHERDS = {"guard": GAZE, "cells": GAZE, "lens_room": GAZE, "archive": GAZE, "foundry": GAZE,
+               "overgrown": CREAKING, "nursery": CREAKING, "shrine": CREAKING, "resin_works": CREAKING, "workshop": CREAKING,
+               "collapsed": CREAKING}
 ROOM_TOP = 8
 ROOM_CENTER = (10, 8)
 # The furnishing of a room is a piece of its own, set into the room through a jigsaw in its floor:
@@ -761,10 +768,10 @@ def interior(kind, variant):
     scratch.random = random.Random(f"{kind}_{variant}")
     posts = ROOM_KINDS[kind](scratch, ROOM_TOP, heart, sentries)
 
-    # Every room has two pots and two heaps to brush, wherever its furniture stands.
-    scratch.pot(1, 1, 2, "east")
+    # Every room has two pots and a heap to brush, wherever its furniture stands. A pot's front is
+    # the side away from where it faces: the one with a sherd shows it to the room, not to the wall.
+    scratch.pot(1, 1, 2, "west", front=ROOM_SHERDS[kind])
     scratch.pot(2, 1, 14, "north")
-    scratch.heap(7, 2, (6, 2), "pale_ruin")
     scratch.heap(13, 14, (14, 14), "pale_ruin")
     if chest:
         scratch.chest(18, 14, "north", chest)
@@ -821,12 +828,12 @@ def store_room():
     piece.set(2, 1, 12, CUT_COPPER)
     piece.fill(8, 1, 11, 9, 2, 12, "minecraft:waxed_weathered_copper")
     piece.set(7, 1, 12, "minecraft:waxed_weathered_copper")
-    piece.chest(5, 12, "north", "room")
+    piece.chest(5, 12, "north", "store_room")
     # A pot's front is the side away from where it faces: these show theirs to the door.
     piece.pot(3, 1, 12, "south")
-    piece.pot(4, 1, 12, "south")
+    piece.pot(4, 1, 12, "south", front=GAZE)
     piece.pot(6, 1, 12, "south")
-    piece.pot(3, 1, 4, "north")
+    piece.pot(3, 1, 4, "north", front=CREAKING)
     overgrow(piece, 1, 4, 9, 12, CHAMBER_TOP, carpets=5, strands=4)
     return piece
 
@@ -848,7 +855,8 @@ def study():
     piece.set(9, 1, 4, "minecraft:cobweb")
     piece.set(1, CHAMBER_TOP - 1, 4, "minecraft:cobweb")
     piece.pot(1, 1, 4, "east")
-    piece.pot(9, 1, 11, "east")
+    piece.pot(9, 1, 11, "east", front=GAZE)
+    piece.chest(8, 7, "west", "study")
     piece.heap(3, 7, (2, 7), "pale_ruin")
     return piece
 
@@ -863,10 +871,10 @@ def tomb():
     for x, facing in ((1, "west"), (9, "east")):
         for z in (5, 8, 11):
             piece.set(x, 1, z, CHISELED_TUFF)
-            piece.pot(x, 2, z, facing)
-    piece.heap(3, 12, (2, 12), "pale_ruin")
-    piece.heap(7, 12, (8, 12), "pale_ruin")
-    piece.heap(4, 5, (4, 4), "pale_ruin")
+            piece.pot(x, 2, z, facing, front={(1, 8): GAZE, (9, 8): CREAKING}.get((x, z), "minecraft:brick"))
+    piece.heap(3, 12, (2, 12), "pale_ruin_tomb")
+    piece.heap(7, 12, (8, 12), "pale_ruin_tomb")
+    piece.heap(4, 5, (4, 4), "pale_ruin_tomb")
     piece.set(1, CHAMBER_TOP - 1, 12, "minecraft:cobweb")
     piece.set(9, CHAMBER_TOP - 1, 4, "minecraft:cobweb")
     return piece
@@ -887,7 +895,7 @@ def collapsed_passage():
     piece.set(2, 3, 7, ROOT, axis="z")
     piece.set(2, 3, 6, ROOT, axis="z")
     piece.set(1, 3, 6, HANGING_MOSS, tip="true")
-    piece.heap(1, 4, (1, 5), "pale_ruin")
+    piece.heap(1, 4, (1, 5), "pale_ruin_tomb")
     return piece
 
 
@@ -1034,13 +1042,14 @@ def hall():
     for x in (cx - 2, cx + 2):
         piece.set(x, 1, cz - 5, AIR)
         # A pot's front is the side away from where it faces: these show theirs to the door.
-        piece.pot(x, 1, cz - 5, "south", front=f"{NAMESPACE}:creaking_pottery_sherd")
+        piece.pot(x, 1, cz - 5, "south", front=CREAKING)
     piece.set(cx, 1, cz - 5, AIR)
     piece.chest(cx, cz - 5, "north", "hall")
     for (x, z), dx in (((3, 6), 1), ((23, 6), -1), ((3, 26), 1), ((23, 26), -1)):
         piece.set(x, 1, z, AIR)
         piece.set(x + dx, 1, z, AIR)
-        piece.heap(x, z, (x + dx, z), "pale_ruin_hall")
+        # The trim is in the heap by the mural, always: left to chance, half the Ruins had none.
+        piece.heap(x, z, (x + dx, z), "pale_ruin_hall_trim" if (x, z) == (3, 26) else "pale_ruin_hall")
     return piece
 
 

@@ -303,9 +303,9 @@ Built so far (`tools/pale_ruin.py` writes the templates and the worldgen files):
 
 #### Side chambers and more rooms
 
-> Built: the side doors, four plain chambers, the Sentry workshop, three more kinds of room and
-> the hall's mural. Planned: the loot pass. Both playthroughs said the same thing: the Ruin
-> is one corridor that is walked from end to end, with nowhere to step aside.
+> Built: the side doors, four plain chambers, the Sentry workshop, three more kinds of room,
+> the hall's mural and the loot pass. Both playthroughs said the same thing: the Ruin is one
+> corridor that is walked from end to end, with nowhere to step aside.
 
 **Side chambers**
 
@@ -324,14 +324,14 @@ Built so far (`tools/pale_ruin.py` writes the templates and the worldgen files):
   | 3 | **the Sentry workshop**, always |
   | 4 | a store room, the tomb, or a collapsed passage |
 
-  - **store room**: barrels and a chest of supplies, shelves, pots. Where the supplies now
-    lying about the rooms go;
+  - **store room**: stacks of the builders' materials, pots, and a chest of supplies: bread,
+    arrows, candles, ingots;
   - **collapsed passage**: a corridor that ends in fallen stone and roots after a few blocks,
-    with one heap to brush. A dead end that is only that;
-  - **study**: a lectern, a few shelves, a desk with candles. The enchanted book the fourth
-    room's chest sometimes holds moves here;
-  - **tomb**: the builders' own. Pots in niches and most of the Ruin's suspicious gravel, so
-    archaeology has a place of its own instead of two heaps in every room.
+    with one heap to brush, as good as the tomb's. A dead end that is only that;
+  - **study**: a lectern, a few shelves, a desk with candles, and a chest that always holds an
+    enchanted book;
+  - **tomb**: the builders' own. Pots in niches and three heaps richer than the rooms', so
+    archaeology has a place of its own.
 - **How it's built**: the chamber is one more jigsaw piece on the room, 9 x 9 inside and 5 high
   behind a passage three blocks long (the collapsed passage is only the passage, nine long).
   A room's way on is tried before its side door, but its chamber still goes up before the rooms
@@ -343,8 +343,7 @@ Built so far (`tools/pale_ruin.py` writes the templates and the worldgen files):
   4 that rule let a few chambers collide with earlier ones, so theirs are set case by case.
 - The GameTest that lays the Ruin out 300 times checks it with the game's own placement: all 41
   windings come up, the line is whole in each, and four chambers hang off it.
-- The chambers are furnished as first versions; their loot is the rooms' own until the loot
-  pass.
+- The chambers are furnished as first versions. What they hold is under Rewards.
 
 **The Sentry workshop**
 
@@ -400,7 +399,7 @@ lens. The hearts are resin blocks: seven real ones in a wall would be seven to c
 
 **Build order**: (1) the side doors and the four plain chambers, with the layout test, done;
 (2) the Sentry workshop and the Guardian sherd, done; (3) the three kinds of room and the hall's
-mural, done; (4) the loot pass (see Rewards). A playthrough after all four.
+mural, done; (4) the loot pass (see Rewards), done. A playthrough after all four.
 
 #### Ruin Sentries
 
@@ -499,33 +498,45 @@ Placed so (loot tables under `chests/pale_ruin/`, `pots/` and `archaeology/`):
 
 - **The hall's chest** stands before the stump, between two pots that show the Creaking sherd
   (the tree with its heart) to the door. It always holds **one Creaking Heart** and **two lens
-  shards**, with 4-6 stacks of treasure: resin bricks and clumps, copper blocks, amethyst,
-  emeralds, pale oak saplings, rarely diamonds or a golden apple.
+  shards**, with 4-6 stacks of treasure: resin bricks and clumps, copper blocks, emeralds, pale
+  oak saplings, rarely diamonds or a golden apple.
 - **The tool chest**, in the second room, whose root carries a heart: always a **worn iron axe
-  with Silk Touch**, and supplies (resin, copper and iron ingots, pale oak logs, candles, bread).
-  The fourth room, the other one with a heart, has a chest of supplies with now and then
-  emeralds or an enchanted book.
-- **Pots**: two in every room and the workshop's own five, each with one stack: resin, copper,
-  or emeralds.
+  with Silk Touch** and a **brush**, and supplies (resin, copper and iron ingots, candles,
+  bread). It is the only chest in the line: the line is for fighting, the chambers for looting.
+- **The chambers' chests**: the store room's holds supplies (bread, arrows, candles, ingots,
+  resin, a few logs), the study's always an **enchanted book** with books and paper, the Sentry
+  workshop's the shears and the pumpkin.
+- **Pots**: two in every room, more in the chambers, each with one stack: resin, copper, or
+  emeralds. A pot broken with a tool gives the sherds on its sides, so only some show one: one
+  of the two in every room (the **Gaze** sherd in the guard room, the cells, the lens room, the
+  archive and the foundry; the **Creaking** sherd in the others), two of the store room's four,
+  one of the study's two, two of the tomb's six, both of the hall's, and the Sentry workshop's
+  two, the only ones with the **Guardian**. The rest are plain.
 - **Heaps to brush**: suspicious gravel lying on the floor with rubble beside it (in the floor
-  it could fall through a cave under the Ruin), two in every room and four in the hall's corners.
-  In the rooms 4 of 14 finds are a sherd, the rest resin, copper, emeralds and odds and ends. In
-  the hall 6 of 12 are a sherd, 2 the **Elderwood armor trim**, 1 a lens shard: about half of
-  all Ruins give a trim.
+  it could fall through a cave under the Ruin).
+  - One in every room: 2 of 12 finds are a sherd, the rest resin, copper, emeralds and odds
+    and ends. The pots are where the rooms' sherds are.
+  - Three in the tomb and one in the collapsed passage: 6 of 14 are a sherd, the rest
+    emeralds, bones, resin and copper. One in the study, like the rooms'.
+  - Four in the hall's corners. **The one by the mural, right of it as one faces it, always
+    holds the Elderwood armor trim.** The other three: 6 of 10 a sherd, 1 a lens shard, the
+    rest emeralds and a diamond.
+- **The brush** is in the tool chest because nothing else in the Ruin gives one, and gravel
+  broken without it gives nothing.
 
-**Loot pass (planned)**, with the side chambers:
+**What the loot pass changed**, after two playthroughs:
 
-- **Fewer pale oak logs.** There's a forest of them overhead. They leave the chests but for a
-  few in the store room.
-- **Pots show sherds**: every pot has a face that fits its room (the Gaze sherd in the lens room
-  and the cells, the Creaking sherd by the roots and in the nursery, the Guardian sherd in the
-  Sentry workshop), not only the two in the hall.
+- **Fewer pale oak logs.** There's a forest of them overhead. They left the chests but for a
+  few in the store room and the Sentry workshop, where a log is a part of the pattern.
 - **No amethyst.** It was meant as what a lens is ground from, but a lens is made of shards and
-  nothing in the game says otherwise. Copper and resin take its place.
-- **Supplies move to the side chambers**: the fourth room's chest goes to a store room, the
-  enchanted book to the study, most of the gravel to the tomb. The tool chest stays in the
-  second room, beside the heart it's for. The rooms of the line keep their pots and one heap
-  each: the line is for fighting, the chambers for looting.
+  nothing in the game says otherwise. Copper and resin took its place.
+- **The fourth room's chest is gone**, and one of every room's two heaps: what they held is in
+  the chambers.
+- **The trim is certain.** It was 2 of 12 finds in each of the hall's four heaps, so about half
+  of all Ruins had none, and two playthroughs never saw it.
+- **The chambers are random, so what they hold is too**: one Ruin in three has no store room,
+  one in three no tomb, one in two no study. Nothing a player needs is in them: the axe, the
+  brush, the heart, the shards, the trim and the shears are where every Ruin has them.
 
 #### The missing heart
 
@@ -836,8 +847,8 @@ Six are in (feature 6). Left:
 
 ### B. Finish what's on hold
 
-- **The Pale Ruin** (feature 4): it generates, with its Sentries and its loot. Left: the hall's
-  mural; how often it generates; a second playthrough from the pavilion to the Elderwood. The
+- **The Pale Ruin** (feature 4): it generates, with its Sentries and its loot. Left: how often
+  it generates; a third playthrough from the pavilion to the Elderwood. The
   first, in iron armor without a shield, ended in three deaths to the Sentries and four to the
   Elderwood; the Sentries were eased after it (gazes that don't add up, a blow that breaks the
   stone, 4 damage, the leash to the whole Ruin), and so was the Elderwood (its drawn trunk no
@@ -849,10 +860,10 @@ Six are in (feature 6). Left:
 - **Left as it is after the second playthrough**, to look at again if it still hurts: the
   Elderwood's resin burns for 5 s and comes every 3 s, so in its gaze the fire never goes out;
   its gaze covers 60 degrees to each side.
-- **Next for the Ruin**: the loot pass, planned in feature 4; its side chambers, the Sentry
-  workshop, three more kinds of room and the hall's mural are in. They answer what both playthroughs
-  found: one long corridor with nowhere to step aside, too many pale oak logs in the chests,
-  pots that all look alike, amethyst that doesn't explain itself.
+- **Next for the Ruin**: a third playthrough. Its side chambers, the Sentry workshop, three
+  more kinds of room, the hall's mural and the loot pass are in. They answer what both
+  playthroughs found: one long corridor with nowhere to step aside, too many pale oak logs in
+  the chests, pots that all look alike, amethyst that doesn't explain itself.
 - **Left as vanilla has it**, by decision: at night the rooms' Creakings come on top of the
   Elderwood, and dying deep in the Ruin leaves the gear under its Sentries. Both are the game's
   own rules at work.
