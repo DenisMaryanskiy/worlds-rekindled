@@ -26,11 +26,13 @@ DATA_VERSION = 5023
 NAMESPACE = "vanillareforged"
 DATA = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src", "main", "resources", "data", NAMESPACE)
 
-# How many Ruin Sentries stand in each room: 7 in all.
-SENTRIES_PER_ROOM = [2, 1, 2, 2]
-ROOM_SLOTS = len(SENTRIES_PER_ROOM)
-# Rooms whose root carries a natural Creaking Heart.
-HEART_ROOMS = {2, 4}
+# What a room holds besides its furniture: how many Ruin Sentries, whether it has a natural Creaking
+# Heart, and which chest if any. The tool chest has the builders' Silk Touch axe, for taking such a
+# heart whole.
+VARIANTS = {"plain": (2, False, None), "tools": (1, True, "tool_chest"), "heart": (2, True, "room")}
+# The four rooms in order: 7 Sentries in all.
+ROOM_VARIANTS = ["plain", "tools", "plain", "heart"]
+ROOM_SLOTS = len(ROOM_VARIANTS)
 STAIR_DEPTH = 20
 # How far below the first free block above the ground the pavilion's floor lies: 1 is level with it.
 SUNK = 1
@@ -65,8 +67,13 @@ RUBBLE = [("minecraft:cobbled_deepslate", 3), (DEEPSLATE_BRICKS, 1), ("minecraft
 
 LIGHT = {LANTERN: 15}
 # Blocks light passes through; everything else a piece places stops it.
+BARS = "minecraft:waxed_oxidized_copper_bars"
+CUT_COPPER = "minecraft:waxed_oxidized_cut_copper"
 CLEAR = {AIR, LANTERN, CHAIN, MOSS_CARPET, HANGING_MOSS, "minecraft:tuff_brick_wall", "minecraft:tuff_brick_slab",
-         "minecraft:tuff_brick_stairs", "minecraft:closed_eyeblossom", "minecraft:decorated_pot", "minecraft:chest"}
+         "minecraft:tuff_brick_stairs", "minecraft:closed_eyeblossom", "minecraft:decorated_pot", "minecraft:chest",
+         BARS, "minecraft:cobweb", "minecraft:orange_stained_glass", "minecraft:grindstone", "minecraft:amethyst_cluster",
+         "minecraft:resin_clump", "minecraft:cauldron", "minecraft:pale_oak_sapling", "minecraft:skeleton_skull",
+         "minecraft:lectern", "minecraft:jigsaw"}
 # What loot may be put down on: nothing that holds anything up.
 SOFT = {AIR, MOSS_CARPET, HANGING_MOSS, "minecraft:closed_eyeblossom"}
 # Blocks a mob can't stand on although they're in the way of light too little to matter.
@@ -105,18 +112,18 @@ class Piece:
         entry = self.blocks.get((x, y, z))
         return entry[0] if entry else None
 
-    def jigsaw(self, x, y, z, facing, name, target, pool, final_state):
+    def jigsaw(self, x, y, z, orientation, name, target, pool, final_state):
         self.set(x, y, z, "minecraft:jigsaw", {
             "id": "minecraft:jigsaw", "name": name, "target": target, "pool": pool, "final_state": final_state,
             "joint": "aligned", "selection_priority": 0, "placement_priority": 0,
-        }, orientation=facing + "_up")
+        }, orientation=orientation)
 
     def entry(self, x, z, y=0, final_state=DEEPSLATE_TILES):
         """Where the piece before this one attaches: in the floor of the doorway on its north side."""
-        self.jigsaw(x, y, z, "north", ENTRY, EMPTY, EMPTY, final_state)
+        self.jigsaw(x, y, z, "north_up", ENTRY, EMPTY, EMPTY, final_state)
 
     def exit(self, x, z, facing, pool, final_state=DEEPSLATE_TILES):
-        self.jigsaw(x, 0, z, facing, f"{NAMESPACE}:pale_ruin/exit", ENTRY, pool, final_state)
+        self.jigsaw(x, 0, z, facing + "_up", f"{NAMESPACE}:pale_ruin/exit", ENTRY, pool, final_state)
 
     def entity(self, x, y, z, entity_id):
         self.entities.append({"pos": [x + 0.5, float(y), z + 0.5], "blockPos": [x, y, z], "nbt": {"id": entity_id}})
@@ -326,7 +333,7 @@ def entrance():
     for x, z in ((6, north + 6), (7, north + 2), (5, north + 4), (2, north + 8), (4, north)):
         piece.set(x, depth + 1, z, MOSS_CARPET)
     piece.set(5, depth + 1, north + 1, CALCITE)
-    piece.jigsaw(4, depth, north + 7, "north", ANCHOR, EMPTY, EMPTY, TUFF_BRICKS)
+    piece.jigsaw(4, depth, north + 7, "north_up", ANCHOR, EMPTY, EMPTY, TUFF_BRICKS)
 
     # The first flight, down the west side and out to the north.
     stairway(piece, 2, north + 5, depth, flight, direction=-1, open_above=depth)
@@ -404,8 +411,7 @@ def workshop(piece, top, heart, sentries):
     """Where the builders worked: benches and pots along the walls, and a stump they never finished."""
     for x in (5, 14):
         column(piece, x, 11, top)
-    for z in (3, 4, 5, 6, 9, 10, 11, 12):
-        piece.set(1, 1, z, "minecraft:tuff_brick_slab", type="top", waterlogged="false")
+    bench(piece, 1, (3, 4, 5, 6, 10, 11, 12, 13))
     for x, y, z, facing in ((1, 2, 4, "east"), (1, 2, 11, "east"), (18, 1, 13, "north"), (19, 1, 12, "west"), (19, 1, 6, "west")):
         piece.pot(x, y, z, facing)
 
@@ -425,34 +431,160 @@ def workshop(piece, top, heart, sentries):
     return {1: [(10, 11)], 2: [(8, 12), (12, 12)]}[sentries]
 
 
-ROOM_KINDS = {"guard": guard_room, "overgrown": overgrown_room, "workshop": workshop}
+def bench(piece, x, zs):
+    for z in zs:
+        piece.set(x, 1, z, "minecraft:tuff_brick_slab", type="top", waterlogged="false")
 
 
-def room(kind, slot, bearing, exit_side):
-    """A room 19 wide, 13 deep and 7 high inside, entered from the north, furnished by its kind."""
-    top = 8
-    cx, cz = 10, 8
-    piece = Piece(room_name(kind, slot, bearing, exit_side), (21, top + 1, 16))
-    # Every copy of a slot's room is the same room: only its way out differs.
-    piece.random = random.Random(f"{kind}_{slot}")
+def archive(piece, top, heart, sentries):
+    """Their records: rows of bookshelves, which make the cover here, and a lectern between them."""
+    for x, facing in ((5, "west"), (14, "east")):
+        for z in (4, 5, 6, 7, 10, 11, 12, 13):
+            for y in range(1, 4 if piece.random.random() < 0.7 else 3):
+                if piece.random.random() < 0.2:
+                    piece.set(x, y, z, "minecraft:chiseled_bookshelf", facing=facing,
+                              **{f"slot_{slot}_occupied": "false" for slot in range(6)})
+                else:
+                    piece.set(x, y, z, "minecraft:bookshelf")
+    for x in range(13, 17):
+        for y in range(1, 4):
+            piece.set(x, y, 2, "minecraft:bookshelf")
+    piece.set(10, 1, 6, "minecraft:lectern", facing="north", has_book="false", powered="false")
+    for x, y, z in ((5, 4, 7), (14, 4, 10), (13, 4, 2), (1, 6, 14), (19, 6, 14), (6, 1, 13)):
+        if piece.block(x, y, z) == AIR:
+            piece.set(x, y, z, "minecraft:cobweb")
+    root(piece, 19, 2, top, heart)
+    overgrow(piece, 1, 2, 19, 14, top, carpets=8, strands=8)
+    return {1: [(10, 10)], 2: [(3, 12), (16, 12)]}[sentries]
+
+
+def cells(piece, top, heart, sentries):
+    """Where they kept what they studied: barred cells along the far wall, one still holding a heart."""
+    for x in (5, 14):
+        column(piece, x, 4, top)
+    for x in list(range(1, 9)) + list(range(12, 20)):
+        wall = x in (4, 8, 12, 16)
+        for z in ((11, 12, 13, 14) if wall else (11,)):
+            for y in range(1, top):
+                gate = z == 11 and y <= 2 and x in (2, 6, 14, 18)
+                if wall:
+                    piece.set(x, y, z, wall_block(piece, y, ()))
+                elif not gate:
+                    piece.set(x, y, z, BARS, east="true", west="true", north="false", south="false", waterlogged="false")
+    # One cell's captive: a heart between two logs, as a living tree holds it.
+    for y in (1, 2, 3):
+        piece.set(6, y, 13, "minecraft:pale_oak_log", axis="y")
+    if heart:
+        piece.set(6, 2, 13, "minecraft:creaking_heart", axis="y", creaking_heart_state="uprooted", natural="true")
+    piece.set(6, 1, 12, "minecraft:resin_clump", south="true", north="false", east="false", west="false", up="false", down="false",
+              waterlogged="false")
+    for y in range(4, top):
+        piece.set(2, y, 13, CHAIN, axis="y", waterlogged="false")
+        piece.set(18, y, 12, CHAIN, axis="y", waterlogged="false")
+    piece.set(15, 1, 12, "minecraft:skeleton_skull", rotation="5", powered="false")
+    # The two middle cells are walled off from the room's lanterns.
+    for x in (6, 14):
+        piece.lantern(x, top - 1, 12, hanging=True)
+    overgrow(piece, 1, 2, 19, 10, top, carpets=10, strands=8)
+    return {1: [(10, 8)], 2: [(6, 7), (14, 7)]}[sentries]
+
+
+def lens_room(piece, top, heart, sentries):
+    """Where the lens was ground and tried: one in its copper frame, aimed at posts of pale oak."""
+    for x in range(8, 13):
+        for y in range(1, 6):
+            rim = x in (8, 12) or y in (1, 5)
+            piece.set(x, y, 10, CUT_COPPER if rim else "minecraft:orange_stained_glass")
+    for x, height in ((8, 2), (10, 2), (12, 3)):
+        for y in range(1, height + 1):
+            piece.set(x, y, 6, "minecraft:pale_oak_log", axis="y")
+        piece.set(x, 2, 7, "minecraft:resin_clump", north="true", south="false", east="false", west="false", up="false",
+                  down="false", waterlogged="false")
+    bench(piece, 1, (3, 4, 5, 6))
+    for z in (4, 5):
+        piece.set(1, 2, z, "minecraft:amethyst_cluster", facing="up", waterlogged="false")
+    for x, z in ((17, 11), (17, 13)):
+        piece.set(x, 1, z, "minecraft:grindstone", face="floor", facing="east")
+    root(piece, 19, 2, top, heart)
+    overgrow(piece, 1, 2, 19, 14, top, carpets=10, strands=8)
+    return {1: [(10, 13)], 2: [(5, 12), (15, 12)]}[sentries]
+
+
+def resin_works(piece, top, heart, sentries):
+    """Where resin was rendered: copper vats of it under their hoists, one split open, and bricks of it stacked."""
+    for vx, vz, whole in ((5, 5, True), (15, 5, True), (5, 11, False)):
+        for dx in range(-1, 2):
+            for dz in range(-1, 2):
+                if (dx, dz) == (0, 0):
+                    piece.set(vx, 1, vz, "minecraft:resin_block")
+                elif whole or (dx, dz) not in ((1, 0), (1, 1), (0, 1)):
+                    piece.set(vx + dx, 1, vz + dz, CUT_COPPER)
+                else:
+                    piece.set(vx + dx, 1, vz + dz, "minecraft:resin_clump", down="true", up="false", north="false",
+                              south="false", east="false", west="false", waterlogged="false")
+        if whole:
+            for y in range(3, top):
+                piece.set(vx, y, vz, CHAIN, axis="y", waterlogged="false")
+    for x, y, z in ((15, 1, 11), (16, 1, 11), (15, 1, 12), (16, 1, 12), (15, 2, 11)):
+        piece.set(x, y, z, "minecraft:resin_bricks")
+    piece.set(16, 2, 12, "minecraft:chiseled_resin_bricks")
+    for x in (9, 11):
+        piece.set(x, 1, 6, "minecraft:cauldron")
+    root(piece, 19, 2, top, heart)
+    overgrow(piece, 1, 2, 19, 14, top, carpets=8, strands=8)
+    return {1: [(10, 10)], 2: [(8, 12), (12, 12)]}[sentries]
+
+
+def nursery(piece, top, heart, sentries):
+    """Where they raised pale oaks under lantern light: beds of earth, saplings that never grew, eyeblossoms."""
+    for bx, bz in ((4, 5), (16, 5), (4, 11), (16, 11)):
+        for dx in range(-1, 2):
+            for dz in range(-1, 2):
+                piece.set(bx + dx, 1, bz + dz, "minecraft:coarse_dirt")
+                if (dx, dz) == (0, 0):
+                    piece.set(bx, 2, bz, "minecraft:pale_oak_sapling", stage="0")
+                elif piece.random.random() < 0.3:
+                    piece.set(bx + dx, 2, bz + dz, "minecraft:closed_eyeblossom")
+    piece.set(10, 1, 6, "minecraft:cauldron")
+    root(piece, 19, 2, top, heart)
+    overgrow(piece, 1, 2, 19, 14, top, carpets=20, strands=16)
+    return {1: [(10, 9)], 2: [(8, 9), (12, 9)]}[sentries]
+
+
+ROOM_KINDS = {"guard": guard_room, "overgrown": overgrown_room, "workshop": workshop, "archive": archive, "cells": cells,
+              "lens_room": lens_room, "resin_works": resin_works, "nursery": nursery}
+ROOM_TOP = 8
+ROOM_CENTER = (10, 8)
+# The furnishing of a room is a piece of its own, set into the room through a jigsaw in its floor:
+# with the walls and the way out in one piece and the furniture in another, a new kind of room is
+# three templates (one per variant) instead of one for every way a room can lie in the line.
+INTERIOR = f"{NAMESPACE}:pale_ruin/interior"
+INTERIOR_ORIGIN = (1, 0, 2)
+INTERIOR_SIZE = (19, ROOM_TOP, 13)
+FURNISHED_FROM = (10, 2)
+
+
+def bare_room(name):
+    """A room 19 wide, 13 deep and 7 high inside with its lanterns, entered from the north, and nothing in it."""
+    cx, _ = ROOM_CENTER
+    piece = Piece(name, (21, ROOM_TOP + 1, 16))
+    piece.random = random.Random("room")
     corridor(piece, cx, 0, 0)
-    shell(piece, 0, 1, 20, 15, top, bands={4})
+    shell(piece, 0, 1, 20, 15, ROOM_TOP, bands={4})
     doorway(piece, cx, 1, along_x=True)
-    piece.entry(cx, 0)
     for x, z in ((3, 3), (17, 3), (3, 13), (17, 13), (10, 3), (10, 13), (10, 8), (3, 8), (17, 8)):
-        piece.lantern(x, top - 1, z, hanging=True)
+        piece.lantern(x, ROOM_TOP - 1, z, hanging=True)
+    return piece
 
-    posts = ROOM_KINDS[kind](piece, top, slot in HEART_ROOMS, SENTRIES_PER_ROOM[slot - 1])
 
-    # Every room has two pots and two heaps to brush. The rooms with a heart in their root have a
-    # chest too: the first one holds the builders' Silk Touch axe, for taking such a heart whole.
-    piece.pot(1, 1, 2, "east")
-    piece.pot(2, 1, 14, "north")
-    piece.heap(7, 2, (6, 2), "pale_ruin")
-    piece.heap(13, 14, (14, 14), "pale_ruin")
-    if slot in HEART_ROOMS:
-        piece.chest(18, 14, "north", "tool_chest" if slot == min(HEART_ROOMS) else "room")
-
+def room(slot, bearing, exit_side):
+    """The room of one slot for one bearing of the line, with its way out and the jigsaw that furnishes it."""
+    cx, cz = ROOM_CENTER
+    piece = bare_room(room_name(slot, bearing, exit_side))
+    piece.entry(cx, 0)
+    fx, fz = FURNISHED_FROM
+    piece.jigsaw(fx, 0, fz, "up_north", f"{NAMESPACE}:pale_ruin/floor", INTERIOR, pool(f"interior_{ROOM_VARIANTS[slot - 1]}"),
+                 DEEPSLATE_TILES)
     next_pool = pool(slot + 1, TURNS[bearing][exit_side]) if slot < ROOM_SLOTS else pool("descent")
     if exit_side == "straight":
         doorway(piece, cx, 15, along_x=True)
@@ -463,12 +595,46 @@ def room(kind, slot, bearing, exit_side):
     else:
         doorway(piece, 0, cz, along_x=False)
         piece.exit(0, cz, "west", next_pool)
+    return piece
 
+
+def interior(kind, variant):
+    """What one kind of room holds, in one variant: everything that differs from the bare room."""
+    sentries, heart, chest = VARIANTS[variant]
+    scratch = bare_room("scratch")
+    bare = dict(scratch.blocks)
+    scratch.random = random.Random(f"{kind}_{variant}")
+    posts = ROOM_KINDS[kind](scratch, ROOM_TOP, heart, sentries)
+
+    # Every room has two pots and two heaps to brush, wherever its furniture stands.
+    scratch.pot(1, 1, 2, "east")
+    scratch.pot(2, 1, 14, "north")
+    scratch.heap(7, 2, (6, 2), "pale_ruin")
+    scratch.heap(13, 14, (14, 14), "pale_ruin")
+    if chest:
+        scratch.chest(18, 14, "north", chest)
     for x, z in posts:
         for y in range(1, 4):
-            assert piece.block(x, y, z) in (AIR, MOSS_CARPET, HANGING_MOSS, "minecraft:closed_eyeblossom"), (piece.name, x, y, z)
-            piece.set(x, y, z, AIR)
-        piece.entity(x, 1, z, f"{NAMESPACE}:ruin_sentry")
+            assert scratch.block(x, y, z) in SOFT, (kind, x, y, z)
+            scratch.set(x, y, z, AIR)
+        scratch.entity(x, 1, z, f"{NAMESPACE}:ruin_sentry")
+    # Whichever way out the room gets, the way to it stays open.
+    for x, z in [(9, 2), (10, 2), (11, 2), (9, 14), (10, 14), (11, 14), (1, 7), (1, 8), (1, 9), (19, 7), (19, 8), (19, 9)]:
+        for y in (1, 2):
+            assert scratch.block(x, y, z) in SOFT, (kind, "blocks a doorway at", x, y, z)
+
+    ox, oy, oz = INTERIOR_ORIGIN
+    piece = Piece(f"interior/{kind}_{variant}", INTERIOR_SIZE)
+    for (x, y, z), block in scratch.blocks.items():
+        if bare.get((x, y, z)) != block:
+            piece.set(x - ox, y - oy, z - oz, block[0], block[2], **dict(block[1]))
+    for entity in scratch.entities:
+        x, y, z = entity["blockPos"]
+        piece.entity(x - ox, y - oy, z - oz, entity["nbt"]["id"])
+    fx, fz = FURNISHED_FROM
+    piece.jigsaw(fx - ox, 1 - oy, fz - oz, "down_north", INTERIOR, EMPTY, EMPTY, AIR)
+    # Its lanterns hang in the room it goes into.
+    piece.lit = scratch.darkest_floor()
     return piece
 
 
@@ -560,8 +726,8 @@ def hall():
     return piece
 
 
-def room_name(kind, slot, bearing, exit_side):
-    return f"room_{slot}_{kind}_{bearing}_{exit_side}"
+def room_name(slot, bearing, exit_side):
+    return f"room_{slot}_{bearing}_{exit_side}"
 
 
 def pool(slot, bearing=None):
@@ -594,15 +760,18 @@ def main():
     pieces = [entrance(), descent(), hall()]
     for slot in range(1, ROOM_SLOTS + 1):
         for bearing in (["ahead"] if slot == 1 else TURNS):
-            choices = [(kind, side) for kind in ROOM_KINDS for side in TURNS[bearing]]
-            pieces += [room(kind, slot, bearing, side) for kind, side in choices]
-            write_pool(f"rooms_{slot}_{bearing}", [(room_name(kind, slot, bearing, side), 1) for kind, side in choices])
+            pieces += [room(slot, bearing, side) for side in TURNS[bearing]]
+            write_pool(f"rooms_{slot}_{bearing}", [(room_name(slot, bearing, side), 1) for side in TURNS[bearing]])
+    for variant in VARIANTS:
+        pieces += [interior(kind, variant) for kind in ROOM_KINDS]
+        write_pool(f"interior_{variant}", [(f"interior/{kind}_{variant}", 1) for kind in ROOM_KINDS])
+    assert sum(VARIANTS[variant][0] for variant in ROOM_VARIANTS) == 7
     write_pool("entrance", [("entrance", 1)])
     write_pool("descent", [("descent", 1)])
     write_pool("hall", [("hall", 1)])
     for piece in pieces:
         piece.save()
-        darkest = piece.darkest_floor()
+        darkest = piece.lit if hasattr(piece, "lit") else piece.darkest_floor()
         print(f"{piece.name}: {piece.size}, {len(piece.blocks)} blocks, {len(piece.entities)} entities, darkest floor {darkest}")
         # The pavilion is under the open sky; everywhere else the builders' lanterns reach.
         assert darkest > 0 or piece.name == "entrance", piece.name
@@ -615,7 +784,7 @@ def main():
         "liquid_settings": "ignore_waterlogging",
         "max_distance_from_center": 128,
         "project_start_to_heightmap": "WORLD_SURFACE_WG",
-        "size": ROOM_SLOTS + 4,
+        "size": ROOM_SLOTS + 5,
         # Nothing but its own guards lives in the Ruin, lit or not.
         "spawn_overrides": {"monster": {"bounding_box": "piece", "spawns": []}},
         # Jigsaw puts the start piece's bottom layer one below this height above the surface, wherever its

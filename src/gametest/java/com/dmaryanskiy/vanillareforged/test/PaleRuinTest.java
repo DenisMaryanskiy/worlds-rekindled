@@ -26,6 +26,7 @@ import net.minecraft.world.level.levelgen.densityfunction.SamplerContext;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.PoolElementStructurePiece;
 import net.minecraft.world.level.levelgen.structure.Structure;
+import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.levelgen.structure.pools.SinglePoolElement;
 
@@ -86,7 +87,8 @@ public class PaleRuinTest {
 		StructureStart start = ruin.value().generate(ruin, level.dimension(), level.registryAccess(), chunks.getGenerator(),
 				chunks.getGenerator().getBiomeSource(), chunks.randomState().createClimateSampler(SamplerContext.EMPTY_UNCACHED), chunks.randomState(),
 				level.getStructureTemplateManager(), 1L, where, 0, level, biome -> true);
-		BoundingBox hall = start.getPieces().getLast().getBoundingBox();
+		BoundingBox hall = start.getPieces().stream().filter(piece -> template(piece).equals("pale_ruin/hall")).findFirst().orElseThrow()
+				.getBoundingBox();
 		Iterable<BlockPos> inTheHall = BlockPos.betweenClosed(hall.minX(), hall.minY(), hall.minZ(), hall.maxX(), hall.maxY(), hall.maxZ());
 		if (intoWater) {
 			for (BlockPos pos : inTheHall) {
@@ -112,18 +114,29 @@ public class PaleRuinTest {
 			StructureStart start = ruin.value().generate(ruin, level.dimension(), level.registryAccess(), chunks.getGenerator(),
 					chunks.getGenerator().getBiomeSource(), chunks.randomState().createClimateSampler(SamplerContext.EMPTY_UNCACHED), chunks.randomState(),
 					level.getStructureTemplateManager(), layout * 7919L, new ChunkPos(layout * 40, 0), 0, level, biome -> true);
-			List<String> pieces = start.getPieces().stream()
-					.map(piece -> ((SinglePoolElement) ((PoolElementStructurePiece) piece).getElement()).getTemplateLocation().getPath())
+			List<String> pieces = start.getPieces().stream().map(PaleRuinTest::template).toList();
+			List<StructurePiece> rooms = start.getPieces().stream().filter(piece -> template(piece).startsWith("pale_ruin/room_")).toList();
+			List<StructurePiece> interiors = start.getPieces().stream().filter(piece -> template(piece).startsWith("pale_ruin/interior/"))
 					.toList();
 
-			helper.assertValueEqual(pieces.size(), ROOMS + 3, "pieces in layout " + layout + " " + pieces);
+			helper.assertValueEqual(pieces.size(), 2 * ROOMS + 3, "pieces in layout " + layout + " " + pieces);
 			helper.assertValueEqual(pieces.getFirst(), "pale_ruin/entrance", "first piece of layout " + layout);
-			helper.assertValueEqual(pieces.get(ROOMS + 1), "pale_ruin/descent", "the way down in layout " + layout);
-			helper.assertValueEqual(pieces.getLast(), "pale_ruin/hall", "last piece of layout " + layout);
+			helper.assertTrue(pieces.contains("pale_ruin/descent"), "Layout " + layout + " should have its way down " + pieces);
+			helper.assertTrue(pieces.contains("pale_ruin/hall"), "Layout " + layout + " should end in the hall " + pieces);
+			helper.assertValueEqual(rooms.size(), ROOMS, "rooms in layout " + layout + " " + pieces);
 			for (int room = 1; room <= ROOMS; room++) {
-				helper.assertTrue(pieces.get(room).startsWith("pale_ruin/room_" + room + "_"), "room " + room + " of layout " + layout + " " + pieces);
+				helper.assertTrue(template(rooms.get(room - 1)).startsWith("pale_ruin/room_" + room + "_"),
+						"room " + room + " of layout " + layout + " " + pieces);
 			}
-			sawTheLongest |= pieces.subList(1, ROOMS + 1).stream().allMatch(room -> room.endsWith("_straight"));
+			// Every room is furnished, from inside its own walls.
+			helper.assertValueEqual(interiors.size(), ROOMS, "furnished rooms in layout " + layout + " " + pieces);
+			for (StructurePiece interior : interiors) {
+				helper.assertTrue(rooms.stream().anyMatch(room -> contains(room.getBoundingBox(), interior.getBoundingBox())),
+						template(interior) + " should lie inside a room in layout " + layout);
+			}
+			helper.assertValueEqual(interiors.stream().filter(interior -> template(interior).endsWith("_tools")).count(), 1L,
+					"rooms with the tool chest in layout " + layout);
+			sawTheLongest |= rooms.stream().allMatch(room -> template(room).endsWith("_straight"));
 		}
 		// With every exit straight the line is at its longest, which is the one that could outgrow jigsaw's reach.
 		helper.assertTrue(sawTheLongest, "The layouts tried should include the straight line");
@@ -133,5 +146,14 @@ public class PaleRuinTest {
 	private static Holder<Structure> ruin(ServerLevel level) {
 		return level.registryAccess().lookupOrThrow(Registries.STRUCTURE)
 				.getOrThrow(ResourceKey.create(Registries.STRUCTURE, VanillaReforged.id("pale_ruin")));
+	}
+
+	private static String template(StructurePiece piece) {
+		return ((SinglePoolElement) ((PoolElementStructurePiece) piece).getElement()).getTemplateLocation().getPath();
+	}
+
+	private static boolean contains(BoundingBox outer, BoundingBox inner) {
+		return outer.minX() <= inner.minX() && outer.minY() <= inner.minY() && outer.minZ() <= inner.minZ()
+				&& outer.maxX() >= inner.maxX() && outer.maxY() >= inner.maxY() && outer.maxZ() >= inner.maxZ();
 	}
 }

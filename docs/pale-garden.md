@@ -180,7 +180,7 @@ slowing it, done.
 
 ### 4. Pale Ruin (structure)
 
-> Implemented: the Ruin Sentry, the structure (the entrance, three kinds of room and the hall) and
+> Implemented: the Ruin Sentry, the structure (the entrance, eight kinds of room and the hall) and
 > its loot.
 
 The ancient builders' temple, where they bound Creakings to guard and woke the Elderwood. The
@@ -223,7 +223,7 @@ Built so far (`tools/pale_ruin.py` writes the templates and the worldgen files):
 - Jigsaw placement doesn't backtrack: a piece that doesn't fit is dropped with everything after
   it. Two rules keep the line whole. A room only gets exits that keep the line within one turn of
   the stairway's direction, so it never curls back on itself; that takes one copy of each room
-  per bearing and kind, 75 templates in all. And the hall, twice as wide as a room, lies **a level below**
+  per bearing, 24 in all. And the hall, twice as wide as a room, lies **a level below**
   the rooms, where nothing of the Ruin is in its way.
 - **The pavilion**'s floor is level with the ground: on a slope the uphill side is cut back (the
   air above the floor is cleared) and the downhill side stands on a rubble footing. Pale oaks
@@ -234,8 +234,8 @@ Built so far (`tools/pale_ruin.py` writes the templates and the worldgen files):
   buried or on stilts. Doubled back, the middle lies under the pavilion.
 - **Rooms** are 19 x 13 inside and 7 high, lit by lanterns hanging from the ceiling. The first
   ones were 13 x 11 and felt cramped with two Sentries between the columns; the line didn't get
-  longer for it, the passages between rooms got shorter. Each of the four is one of three kinds,
-  picked at random:
+  longer for it, the passages between rooms got shorter. Each of the four is one of eight kinds,
+  picked at random. Three are the temple's own:
   - **guard room**: four 2 x 2 columns set wide apart, a root down one corner, moss;
   - **overgrown room**: the woods have it. A great root comes through the ceiling, slants down
     across the room and runs out along the floor; two of the columns are down, with moss,
@@ -243,9 +243,27 @@ Built so far (`tools/pale_ruin.py` writes the templates and the worldgen files):
   - **workshop**: benches and pots along the walls, two columns, and a stump the builders never
     finished: the log and two of its four resin roots on a plinth, the copper for its cap
     standing beside it. It's the hint at what the hall's stump is.
-- **7 Sentries**: 2, 1, 2 and 2 in the four rooms, whatever their kind. The root of the second
-  and of the fourth room carries a Creaking Heart; in the overgrown room it lies in plain sight
-  in the root on the floor.
+
+  Five show what the builders did here, which was study the Creakings and their freeze and turn
+  it into the Sentries' eyes and the Elderwood's lens:
+  - **archive**: rows of bookshelves, which are the cover here instead of columns, a lectern
+    between them, cobwebs;
+  - **cells**: copper-barred cells along the far wall, their gates open now. One still holds a
+    pale oak log; in a room with a heart, the heart is in it, between two logs as a living tree
+    holds one. A skull lies in another;
+  - **lens room**: a lens in its copper frame, five blocks square (amber glass), aimed at three
+    posts of pale oak with resin on them; grindstones, and a bench with crystals;
+  - **resin works**: copper vats full of resin under their hoist chains, a third one split with
+    resin spilled around it, cauldrons, and resin bricks stacked by the wall;
+  - **nursery**: four beds of earth with pale oak saplings that never grew, and eyeblossoms.
+- **Furnishing is a piece of its own**: a room's walls, lanterns and way out are one template,
+  and what stands in it another, set into the room through a jigsaw in its floor. Without that
+  every kind needed a copy for each of the 24 ways a room can lie in the line; now a kind is
+  three templates, one per variant (two Sentries; one Sentry, a heart and the tool chest; two
+  Sentries, a heart and a chest), and the Ruin is 51 templates in all.
+- **7 Sentries**: 2, 1, 2 and 2 in the four rooms, whatever their kind. The second and the
+  fourth room have a Creaking Heart, in the root down their corner; in the overgrown room it
+  lies in plain sight in the root on the floor, and in the cells it's the captive.
 - **The hall** is 25 x 25 inside and 13 high: two colonnades of four columns, the stump on a
   stepped dais between them with a pale square in the floor around it, lanterns on posts along
   the walls and on chains over the nave, roots in two corners.

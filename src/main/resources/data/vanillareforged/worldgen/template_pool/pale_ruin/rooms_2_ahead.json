@@ -3,7 +3,7 @@
     {
       "element": {
         "element_type": "minecraft:single_pool_element",
-        "location": "vanillareforged:pale_ruin/room_2_guard_ahead_straight",
+        "location": "vanillareforged:pale_ruin/room_2_ahead_straight",
         "processors": "minecraft:empty",
         "projection": "rigid"
       },
@@ -12,7 +12,7 @@
     {
       "element": {
         "element_type": "minecraft:single_pool_element",
-        "location": "vanillareforged:pale_ruin/room_2_guard_ahead_left",
+        "location": "vanillareforged:pale_ruin/room_2_ahead_left",
         "processors": "minecraft:empty",
         "projection": "rigid"
       },
@@ -21,61 +21,7 @@
     {
       "element": {
         "element_type": "minecraft:single_pool_element",
-        "location": "vanillareforged:pale_ruin/room_2_guard_ahead_right",
-        "processors": "minecraft:empty",
-        "projection": "rigid"
-      },
-      "weight": 1
-    },
-    {
-      "element": {
-        "element_type": "minecraft:single_pool_element",
-        "location": "vanillareforged:pale_ruin/room_2_overgrown_ahead_straight",
-        "processors": "minecraft:empty",
-        "projection": "rigid"
-      },
-      "weight": 1
-    },
-    {
-      "element": {
-        "element_type": "minecraft:single_pool_element",
-        "location": "vanillareforged:pale_ruin/room_2_overgrown_ahead_left",
-        "processors": "minecraft:empty",
-        "projection": "rigid"
-      },
-      "weight": 1
-    },
-    {
-      "element": {
-        "element_type": "minecraft:single_pool_element",
-        "location": "vanillareforged:pale_ruin/room_2_overgrown_ahead_right",
-        "processors": "minecraft:empty",
-        "projection": "rigid"
-      },
-      "weight": 1
-    },
-    {
-      "element": {
-        "element_type": "minecraft:single_pool_element",
-        "location": "vanillareforged:pale_ruin/room_2_workshop_ahead_straight",
-        "processors": "minecraft:empty",
-        "projection": "rigid"
-      },
-      "weight": 1
-    },
-    {
-      "element": {
-        "element_type": "minecraft:single_pool_element",
-        "location": "vanillareforged:pale_ruin/room_2_workshop_ahead_left",
-        "processors": "minecraft:empty",
-        "projection": "rigid"
-      },
-      "weight": 1
-    },
-    {
-      "element": {
-        "element_type": "minecraft:single_pool_element",
-        "location": "vanillareforged:pale_ruin/room_2_workshop_ahead_right",
+        "location": "vanillareforged:pale_ruin/room_2_ahead_right",
         "processors": "minecraft:empty",
         "projection": "rigid"
       },
