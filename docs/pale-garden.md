@@ -129,6 +129,33 @@ slowing it, done.
   Doesn't work while the Sentry is hunting that player: an angry Sentry must be killed. Ruin
   Sentries don't allow it at all.
 
+**The lensed Sentry** (planned)
+
+The Elderwood's lens is what gave the Ruin's guards their gaze. Set in a player's own Sentry, it
+gives it the same gaze, turned on the mobs it fights: a second use for a lens, and a reason to
+fell the tree again once the mask is made.
+
+- **Setting it**: use an **Elderwood Lens** on a Heartwood Sentry, awake or a statue, that isn't
+  hunting you. The lens is used up and sits in its chest above the heart, a small amber disc
+  that glows faintly, so a lensed Sentry is told apart at a glance. One lens per Sentry; using a
+  second does nothing.
+- **Getting it back**: taking the Sentry apart (sneak + axe) returns the lens with the heart and
+  the head, and a Sentry that dies drops it. Nothing else takes it out.
+- **The gaze**: while it's awake, its gaze holds **the mob it's fighting**, within **12 blocks**,
+  60 degrees to each side of where its head points, with a clear line, as a Ruin Sentry's does.
+  The same thin trail of amber motes as the Elderwood's shows where it looks.
+  - a mob it holds is **slowed** (Slowness II, 0.5 s after the gaze breaks), like under the Pale
+    Mask's gaze;
+  - held for **5 s** without a break, a mob is **petrified for 3 s**: it can't move or jump, and it
+    can't be petrified again for 3 s after;
+  - bosses (`#vanillareforged:gaze_resistant`) are only slowed, with Slowness I and the drag, as
+    under the mask, and never petrified.
+- **Turned on a player**, as any Sentry is once that player hits it, the gaze petrifies them at
+  a Ruin Sentry's rate (5 s), and the mask and a raised shield block it as they block the Ruin
+  Sentries'.
+- Its melee, its range and its heart are unchanged: the lens holds mobs for it, it doesn't make
+  it tougher. Placeholder look for the lens in its chest.
+
 **Technical**
 - Heart hitbox: a small box (0.5 blocks) in the chest, front side. Hits on the Sentry are traced
   through it: the attacker's look ray for melee, the projectile's flight path for arrows and
@@ -539,6 +566,18 @@ Placed so (loot tables under `chests/pale_ruin/`, `pots/` and `archaeology/`):
   one in three no tomb, one in two no study. Nothing a player needs is in them: the axe, the
   brush, the heart, the shards, the trim and the shears are where every Ruin has them.
 
+**Richer chests (planned)**. For the hardest structure in the mod the chests held little worth
+taking home: one diamond in the whole Ruin now and then, iron by the one to three. The hall's
+chest becomes a treasure chest worth the fight, and the supply chests carry real metal:
+
+- **The hall's chest** keeps its heart, its shards and its resin and copper, and gains a pool of
+  **2-3 valuables**: diamonds (1-3), iron ingots (4-10), gold ingots (3-8), emeralds (3-8), a
+  golden apple, a randomly enchanted diamond pickaxe or sword, and rarely an enchanted golden
+  apple. About two Ruins in three give at least one diamond from it.
+- **The tool chest**: iron ingots 2-5 (was 1-3), and a diamond now and then.
+- **The store room**: iron ingots 2-6 (was 1-3), gold ingots now and then, and rarely a diamond.
+- The study, the workshop and the gravel stay as they are.
+
 #### The missing heart
 
 The stump shows that something goes on top; nothing says it's a Creaking Heart, or how to get one
@@ -631,7 +670,7 @@ iron/diamond gear: a huge, rooted tree fought by moving around it.
 - **It turns slowly in place** to face its target, slower than a player can circle it (about 30°
   a second; a sprinting player 4 blocks away circles at about 80°).
 - It hunts players only and never despawns. It counts as gaze-resistant for the Pale Mask. Drops
-  its lens and 2–4 resin clumps (kept).
+  its lens and 2–4 resin clumps (kept), and its core as a trophy (planned, see the craft chain).
 
 **Petrification** (kept; shared with Ruin Sentries)
 - A **meter**, like vanilla freezing in powder snow, not a status effect: milk clears all effects,
@@ -757,6 +796,17 @@ all around the trunk, so the player has to keep moving between the two.
 2. **Creaking Eye**: the lens in the middle, 4 resin clumps around it (plus shape). Setting the
    lens in living resin turns it back into an eye. Shaped recipe, 1 eye.
 3. **Pale Mask**: unchanged (`L E L` / `L _ L` with pale oak logs).
+
+A lens can also go into a player's own Sentry instead, which gives it a gaze of its own (planned,
+see [The lensed Sentry](#2-heartwood-sentry-golem)).
+
+**The Elderwood Core** (planned): the trophy. The heart that broke last, under the lens, dropped
+on **every kill**, as the Wither always drops its star and the Elder Guardian its sponge.
+- A block: the core's resin cracked through and dull, with a glow that pulses slowly in its
+  cracks (an animated texture) and a faint light (level 5). Placed and mined like a Creaking
+  Heart, with an axe; it drops itself.
+- Decorative only: it does nothing and goes into no recipe, so it stays a trophy. Placeholder
+  texture.
 
 The lens, shard and both recipes are implemented (recipe book unlocks on picking up a lens or a
 shard). Placeholder textures: amber resin glass in a weathered
@@ -928,10 +978,13 @@ first:
 
 The loop's last step, "return for more resin and hearts", is thin once the player has a mask.
 
-- **More uses for the lens**: after the first mask a second kill gives nothing new. Candidates:
+- **Planned now**, in this order: the lensed Sentry (feature 2), the Elderwood Core (feature 5),
+  the richer chests (feature 4, Rewards). Each its own PR.
+- **More uses for the lens**: after the first mask a second kill gives nothing new. The lensed
+  Sentry is the first; other candidates:
   the gaze block for redstone (parked below) made from a lens; a spyglass upgrade that outlines
   mobs in view; repairing a mask with a lens shard for a big chunk of durability.
-- **A trophy**: a decorative drop from the tree with a low chance or from the challenge
+- **A trophy**: planned as the Elderwood Core. First ideas were a decorative drop from the tree with a low chance or from the challenge
   advancement, e.g. its dead heart as a block that pulses faintly, or a copper-banded pale log.
 - **Something left behind**: after the death burst, a dead stump remains (decorative, or a
   one-time source of pale oak and the copper collar back).
