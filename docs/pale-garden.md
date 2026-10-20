@@ -843,10 +843,10 @@ added, so another mod that overrides the same file wins or loses as a whole.
 |---|---|
 | **Monster Hunter** (kill any monster) | a Ruin Sentry, the Elderwood |
 | **Monsters Hunted** (kill one of every monster) | a Ruin Sentry and the Elderwood, both required, as vanilla requires its bosses and the Creaking |
-| **Hired Help** (build an Iron Golem) | building a Heartwood Sentry |
 | **Crafting a New Look** (trim any armor) | the Elderwood trim |
 
-- Left alone: **Smithing with Style** asks for eight of vanilla's rarest trims, not all of them;
+- Left alone: **Hired Help** names the Iron Golem and counts nothing else, not even the Snow
+  Golem, so a Heartwood Sentry doesn't grant it. **Smithing with Style** asks for eight of vanilla's rarest trims, not all of them;
   adding ours would only make it harder. **How Did We Get Here** counts status effects, and petrification is a
   meter like powder snow's freezing, which isn't on it either.
 
@@ -864,7 +864,7 @@ roughly in the order they'd pay off.
 
 ### A. Advancements
 
-Six are in (feature 6), and four of vanilla's count the mod's mobs and trim. Nothing left
+Six are in (feature 6), and three of vanilla's count the mod's mobs and trim. Nothing left
 planned.
 
 ### B. Finish what's on hold

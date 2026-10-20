@@ -9,7 +9,6 @@ import com.dmaryanskiy.vanillareforged.sentry.SentryLantern;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.animal.cow.Cow;
@@ -38,24 +37,6 @@ public class HeartwoodSentryTest {
 		helper.assertBlockPresent(Blocks.AIR, PEDESTAL.above(2));
 		helper.assertValueEqual(sentry.getPedestal(), helper.absolutePos(PEDESTAL), "pedestal");
 		helper.assertFalse(sentry.isJackOLantern(), "Carved pumpkin head");
-		helper.succeed();
-	}
-
-	@GameTest
-	// The builder credits the players around it in the level, and this is the only mock player that's
-	// in it. Vanilla has it marked for removal without a replacement so far.
-	@SuppressWarnings("removal")
-	public void buildingOneNextToAPlayerGrantsHiredHelp(GameTestHelper helper) {
-		ServerPlayer player = helper.makeMockServerPlayerInLevel();
-		try {
-			player.snapTo(helper.absoluteVec(Vec3.atBottomCenterOf(PEDESTAL).add(2.0, 0.0, 0.0)), 0.0F, 0.0F);
-
-			build(helper, Blocks.CARVED_PUMPKIN);
-
-			helper.assertTrue(AdvancementTest.hasVanilla(helper, player, "adventure/summon_iron_golem"), "Building a Sentry should grant Hired Help");
-		} finally {
-			helper.getLevel().getServer().getPlayerList().remove(player);
-		}
 		helper.succeed();
 	}
 
