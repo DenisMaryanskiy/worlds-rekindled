@@ -699,14 +699,20 @@ all around the trunk, so the player has to keep moving between the two.
     `#vanillareforged:elderwood_breakable` tag (logs, planks, leaves, dirt and the like) break
     and drop. Stone and harder cover holds, so a quick wooden hut doesn't trivialize the fight.
     Follows the `mobGriefing` game rule.
-- **Root eruption** (new): against a player it can't see in front of it (behind, to the side or
-  behind cover) within 24 blocks, as far as the lens sees, **every 4 s**. At 12 blocks, as
-  first built, the hall's corners (about 15 from the trunk) were out of the roots' reach, and
-  where the colonnade stood in the lens's line nothing reached them: a third playthrough found
-  one and stood there safe. The ground under the player cracks for
-  1 s, then roots burst out: 6 damage (the brittle bonus applies) and a toss into the air. Moving
-  out of the cracked patch dodges it, like evoker fangs. It keeps circling and camping from being
-  free.
+- **Root eruption** (new): within 24 blocks, as far as the lens sees, **every 4 s**, against a
+  player its branches don't deal with: one it can't see (behind, to the side or behind cover),
+  and one it sees beyond the slam's reach of 6. The ground under the player cracks for 1 s, then
+  roots burst out: 6 damage (the brittle bonus applies), a toss into the air, and a petrified
+  player's stone breaks, as under the slam. Moving out of the cracked patch dodges it, like
+  evoker fangs. It keeps circling, camping and standing back from being free.
+  - **After the third playthrough**: roots first reached 12 blocks and only came for a player
+    the lens couldn't see. The hall's corners, about 15 from the trunk, were out of their reach,
+    and where the colonnade stood in the lens's line nothing reached a player there at all. And
+    a player the lens saw at range had only the gaze and the resin to face: one stood by a
+    column, petrified, hitting every glob back, and the fight stalled. Up close, meanwhile,
+    slam, gaze and roots all came at once, so playing aggressively was what got punished.
+    Roots now come at range too, and their stone-breaking hit frees the statue, which then has
+    the 3 s in which no gaze takes hold to move before the next.
   - **Armor takes its share**: the roots have their own damage type
     (`vanillareforged:roots`). They were magic at first, which goes straight through armor: 3
     hearts a strike whatever the player wore, 4.5 on a petrified one, every 2.5 s. Through iron

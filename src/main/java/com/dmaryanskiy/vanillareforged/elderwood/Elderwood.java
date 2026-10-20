@@ -392,9 +392,8 @@ public class Elderwood extends Monster {
 		// While a branch is planted it strains at it and does not gaze.
 		if (this.getSlamPhase() != SlamPhase.STUCK && this.lens.sees(player)) {
 			this.lens.watch(level, player);
-		} else {
-			this.tickRoots(level, player);
 		}
+		this.tickRoots(level, player);
 	}
 
 	public boolean isWatching(Player player) {
@@ -472,9 +471,14 @@ public class Elderwood extends Monster {
 		this.playSound(ModSounds.ELDERWOOD_STUN, 1.5F, 0.6F);
 	}
 
-	/** A player its lens can't see, beside it, behind it or behind cover, gets roots from below. */
+	/**
+	 * Roots from below for a player its branches don't deal with: one its lens can't see (beside it,
+	 * behind it or behind cover), and one it sees beyond their reach. Seen at range, a player had
+	 * only the gaze and the resin to face, and could stand petrified hitting the resin back.
+	 */
 	private void tickRoots(ServerLevel level, Player target) {
-		if (this.lens.sees(target) || this.distanceToSqr(target) > ROOT_RANGE * ROOT_RANGE) {
+		double distance = this.distanceToSqr(target);
+		if (distance > ROOT_RANGE * ROOT_RANGE || this.lens.sees(target) && distance <= ElderwoodSlam.REACH * ElderwoodSlam.REACH) {
 			return;
 		}
 		if (--this.rootCooldown <= 0) {
