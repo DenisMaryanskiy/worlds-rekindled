@@ -578,6 +578,19 @@ chest becomes a treasure chest worth the fight, and the supply chests carry real
 - **The store room**: iron ingots 2-6 (was 1-3), gold ingots now and then, and rarely a diamond.
 - The study, the workshop and the gravel stay as they are.
 
+**Things only the Ruin has** (planned), so a second Ruin is worth clearing:
+- **A banner pattern**, the lens's eye, like the Trial Chambers' Flow and Guster: in the study's
+  chest one time in three and the hall's one time in four.
+- **A painting**, the tree with its seven hearts as the mural shows it, in the hall's chest one
+  time in three. Paintings are data in 26.3; this one isn't placeable at random, so it's only
+  found. Placeholder art for both.
+
+**A map to it** (planned). The Pale Garden is the hardest biome to find. The **Cartographer**
+sells a **Pale Ruin explorer map** at Journeyman, for emeralds and a compass, as it sells the
+Woodland and Ocean explorer maps. Like those, the trade only shows a Ruin within the map's search
+reach and is skipped where there's none, so in a world without a Pale Garden near the village it
+won't appear.
+
 #### The missing heart
 
 The stump shows that something goes on top; nothing says it's a Creaking Heart, or how to get one
@@ -807,6 +820,33 @@ on **every kill**, as the Wither always drops its star and the Elder Guardian it
   Heart, with an axe; it drops itself.
 - Decorative only: it does nothing and goes into no recipe, so it stays a trophy. Placeholder
   texture.
+- **One Core per tier** (below): its cracks are rimmed in the collar's copper, plain, exposed,
+  weathered or oxidized, four blocks that never weather. A full set takes a kill at every tier.
+
+**Tiers: the collar sets the fight** (planned). The copper on the stump only shows on the tree
+today. It becomes the difficulty dial, so the same stump gives four fights, each harder and
+better paid than the last, as Ominous trials are to plain ones:
+
+| Collar | The fight | Drops, besides its Core and the resin |
+|---|---|---|
+| Copper | as it is now | 1 lens |
+| Exposed | roots every 3.5 s, turns 15% faster | 1 lens, 2-4 lens shards |
+| Weathered | roots every 3 s, resin every 2.5 s, turns 30% faster, one more crack on every heart | 2 lenses |
+| Oxidized | as weathered, and its gaze fills 50% faster | 2 lenses, 4-6 lens shards |
+
+- Waxed copper counts as its stage. An axe scrapes a stage off before the heart goes on, so the
+  player picks the tier.
+- **The Ruin's own stump gets waxed plain copper**, so the first fight, the one the Ruin builds
+  up to, is the lowest tier, as playtested. (Its cap is oxidized copper now, which would make it
+  the hardest.)
+- The numbers are first values, for the playthroughs to tune.
+- **A challenge advancement** for felling it with an oxidized collar (feature 6).
+
+**More players, more tree** (planned). With more players it's an easy fight shared out and a
+single lens for the group. The players within 24 blocks when it wakes set it, up to four:
+- every heart takes **one more crack per player past the first**;
+- every player who cracked a heart during the fight gets **a lens of their own**, dropped where
+  the trunk stood with the rest. Shards, Core and resin stay one set.
 
 The lens, shard and both recipes are implemented (recipe book unlocks on picking up a lens or a
 shard). Placeholder textures: amber resin glass in a weathered
@@ -858,7 +898,7 @@ Ruin Sentries petrify too, more slowly (feature 4).
 
 ### 6. Advancements
 
-Seven advancements in vanilla's **Adventure** tab (no tab of our own, like a Mojang update would).
+Seven advancements in vanilla's **Adventure** tab, an eighth planned, (no tab of our own, like a Mojang update would).
 Their descriptions double as the hints the mod otherwise lacks.
 
 | Advancement | Earned by | Frame | Trigger |
@@ -870,6 +910,7 @@ Their descriptions double as the hints the mod otherwise lacks.
 | **Deadwood** | Killing the Elderwood | goal | vanilla `player_killed_entity`: the core's last crack is credited to whoever dealt it |
 | **One of Them** | Wearing a Pale Mask next to a Creaking that ignores you | task | `vanillareforged:ignored_by_creaking` |
 | **Don't Blink** | Killing the Elderwood without being petrified once | challenge, 100 XP | `vanillareforged:killed_elderwood_unpetrified` |
+| **Verdigris** (planned) | Killing the Elderwood with an oxidized collar | challenge, 100 XP | vanilla `player_killed_entity`, with the tree's collar stage in the predicate |
 
 - **Tree**: Old Growth hangs off vanilla's **Heart Transplanter** (placing a Creaking Heart), so
   its description, which spells out the stump, shows up for anyone who has started the Adventure
@@ -903,11 +944,23 @@ added, so another mod that overrides the same file wins or loses as a whole.
   adding ours would only make it harder. **How Did We Get Here** counts status effects, and petrification is a
   meter like powder snow's freezing, which isn't on it either.
 
+### 7. More for resin (planned)
+
+Resin is the Pale Garden's own resource, and besides the bricks the mod only asks for it to
+summon the tree and repair the mask. Two steady uses, so a resin farm under a Pale Mask among
+the Creakings has something to feed:
+
+- **Resin glass**: 8 glass around a block of resin give 8 resin glass, as dye makes stained
+  glass; 6 of it give 16 panes. Translucent amber, the lens's own glass. Placeholder texture.
+- **Healing a Sentry by hand**: a resin clump used on a Heartwood Sentry mends one crack, as iron
+  ingots heal an Iron Golem. Any time but while it's hunting that player; not on Ruin Sentries.
+
 ## Parked for later (warrior content and extras)
 
 - **Resin Tappers**: illager-type faction that farms resin from captive hearts, uses resin traps.
 - Ambient threat: moths drawn to open eyeblossoms at night.
-- Gaze block for redstoners: outputs a signal while a player looks at it.
+- Gaze block for redstoners: outputs a signal while a player looks at it. Dropped by decision,
+  as the Watcher (a lens block that sees mobs) was.
 - Other resin uses: slowing resin-coated blocks, amber preservation displays, tool handle upgrade.
 
 ## What's left
@@ -950,8 +1003,8 @@ planned.
 - **Difficulty**: the Sentry's cracks scale with difficulty, the Elderwood's nothing does.
   Candidates: gaze fill rate, slam damage, root interval. Also what Peaceful means for it (it's
   a monster, so it would vanish; refusing to wake may read better).
-- **Multiplayer**: whom it targets and turns to with several players around, the gaze holding
-  only one of them, more cracks per heart with more players, and loot (one lens for the group).
+- **Multiplayer**: whom it targets and turns to with several players around, and the gaze
+  holding only one of them. More cracks and a lens each are planned (feature 5).
   Petrification isn't saved, so relogging mid-fight clears it; fine alone, an exploit in a group.
 - **Dedicated server run**: everything so far was tested through GameTests and a single-player
   client.
@@ -978,18 +1031,26 @@ first:
 
 The loop's last step, "return for more resin and hearts", is thin once the player has a mask.
 
-- **Planned now**, in this order: the lensed Sentry (feature 2), the Elderwood Core (feature 5),
-  the richer chests (feature 4, Rewards). Each its own PR.
-- **More uses for the lens**: after the first mask a second kill gives nothing new. The lensed
-  Sentry is the first; other candidates:
-  the gaze block for redstone (parked below) made from a lens; a spyglass upgrade that outlines
-  mobs in view; repairing a mask with a lens shard for a big chunk of durability.
-- **A trophy**: planned as the Elderwood Core. First ideas were a decorative drop from the tree with a low chance or from the challenge
-  advancement, e.g. its dead heart as a block that pulses faintly, or a copper-banded pale log.
-- **Something left behind**: after the death burst, a dead stump remains (decorative, or a
-  one-time source of pale oak and the copper collar back).
-- **Healing a Sentry by hand** with a resin clump, like an iron golem with ingots: resin gets a
-  repeat use and guarding a base gets less fiddly than waiting for dawn.
+**Planned**, a reason to return for every kind of player, each its own PR, in this order:
+
+| # | What | For | Where |
+|---|---|---|---|
+| 1 | The lensed Sentry | fighters, base guards | feature 2 |
+| 2 | The Elderwood Core | collectors | feature 5 |
+| 3 | Richer chests | everyone | feature 4, Rewards |
+| 4 | Tiers, a Core per tier, Verdigris | fighters, collectors | features 5 and 6 |
+| 5 | The Pale Ruin explorer map | explorers | feature 4, Rewards |
+| 6 | Resin glass, healing a Sentry by hand | builders, farmers | feature 7 |
+| 7 | The banner pattern and the painting | collectors, explorers | feature 4, Rewards |
+| 8 | More players, more tree | multiplayer | feature 5 |
+
+What makes each a reason to come back: a lens per Sentry, four tiers and a set of four Cores,
+a map to every next Ruin, and resin that keeps being used.
+
+- **Dropped by decision**: a spyglass set with a lens that outlines mobs; the felled tree leaving
+  its stump and collar behind; a lens block for redstone that sees mobs (the Watcher).
+- **Other lens uses**, not planned: repairing a mask with a lens shard for a big chunk of
+  durability.
 - **Sentry quality of life**: name tags showing on the statue, a visible range marker when
   placing the pedestal, and whether a Sentry should follow orders at all (stay, or guard a wider
   radius). Decide what's vanilla-like before adding any.
