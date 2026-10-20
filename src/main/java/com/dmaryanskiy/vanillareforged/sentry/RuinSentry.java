@@ -16,7 +16,6 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.DamageTypeTags;
-import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -252,13 +251,7 @@ public class RuinSentry extends AbstractSentry {
 	}
 
 	public boolean gazesAt(Player player) {
-		return this.distanceToSqr(player) <= GAZE_RANGE * GAZE_RANGE
-				&& Math.abs(Mth.degreesDifference(this.yHeadRot, this.yawTo(player))) <= GAZE_ARC_DEGREES
-				&& this.getSensing().hasLineOfSight(player);
-	}
-
-	private float yawTo(Player player) {
-		return (float) (Mth.atan2(player.getZ() - this.getZ(), player.getX() - this.getX()) * Mth.RAD_TO_DEG) - 90.0F;
+		return SentryLens.sees(this, player);
 	}
 
 	@Override

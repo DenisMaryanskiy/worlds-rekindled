@@ -11,6 +11,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -50,18 +51,27 @@ public final class ElderwoodGaze {
 			return;
 		}
 
-		LivingEntity mob = target.get();
-		boolean boss = mob.getType().builtInRegistryHolder().is(GAZE_RESISTANT);
-		mob.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, SLOWNESS_TICKS, boss ? 0 : 1), player);
-		if (boss) {
-			// The Wither ignores all effects and chases with hard-coded acceleration, so bosses also get drag.
-			mob.setDeltaMovement(mob.getDeltaMovement().multiply(BOSS_DRAG, 1.0, BOSS_DRAG));
-		}
+		slow(target.get(), player);
 
 		int ticks = GAZE_TICKS.merge(player, 1, Integer::sum);
 		if (ticks >= TICKS_PER_DURABILITY) {
 			GAZE_TICKS.put(player, 0);
 			mask.hurtAndBreak(1, player, EquipmentSlot.HEAD);
+		}
+	}
+
+	/** Whether the mob is one of the bosses, which a gaze only slows a little. */
+	public static boolean resists(LivingEntity mob) {
+		return mob.getType().builtInRegistryHolder().is(GAZE_RESISTANT);
+	}
+
+	/** One tick of a slowing gaze from {@code source} holding the mob: Slowness II, a boss Slowness I and a drag. */
+	public static void slow(LivingEntity mob, Entity source) {
+		boolean boss = resists(mob);
+		mob.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, SLOWNESS_TICKS, boss ? 0 : 1), source);
+		if (boss) {
+			// The Wither ignores all effects and chases with hard-coded acceleration, so bosses also get drag.
+			mob.setDeltaMovement(mob.getDeltaMovement().multiply(BOSS_DRAG, 1.0, BOSS_DRAG));
 		}
 	}
 

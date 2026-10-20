@@ -129,16 +129,17 @@ slowing it, done.
   Doesn't work while the Sentry is hunting that player: an angry Sentry must be killed. Ruin
   Sentries don't allow it at all.
 
-**The lensed Sentry** (planned)
+**The lensed Sentry** (built)
 
 The Elderwood's lens is what gave the Ruin's guards their gaze. Set in a player's own Sentry, it
 gives it the same gaze, turned on the mobs it fights: a second use for a lens, and a reason to
 fell the tree again once the mask is made.
 
 - **Setting it**: use an **Elderwood Lens** on a Heartwood Sentry, awake or a statue, that isn't
-  hunting you. The lens is used up and sits in its chest above the heart, a small amber disc
-  that glows faintly, so a lensed Sentry is told apart at a glance. One lens per Sentry; using a
-  second does nothing.
+  hunting you. The lens is used up and sits high on its chest beside the heart (the heart fills
+  the chest up to the shoulders, so there's no room above it), drawn as the lens item at full
+  brightness, so a lensed Sentry is told apart at a glance, statue or not. One lens per Sentry;
+  using a second does nothing.
 - **Getting it back**: taking the Sentry apart (sneak + axe) returns the lens with the heart and
   the head, and a Sentry that dies drops it. Nothing else takes it out.
 - **The gaze**: while it's awake, its gaze holds **the mob it's fighting**, within **12 blocks**,
@@ -146,15 +147,21 @@ fell the tree again once the mask is made.
   The same thin trail of amber motes as the Elderwood's shows where it looks.
   - a mob it holds is **slowed** (Slowness II, 0.5 s after the gaze breaks), like under the Pale
     Mask's gaze;
-  - held for **5 s** without a break, a mob is **petrified for 3 s**: it can't move or jump, and it
-    can't be petrified again for 3 s after;
+  - held for **5 s** without a break, a mob is **petrified for 3 s**: Slowness VII, which takes
+    all of a mob's speed (each level takes 15%), so it's rooted to the spot. Its next
+    petrification takes another full 5 s hold, counted once this one is over. A status effect,
+    so it wears off by itself and is saved with the mob; flying mobs move by their flying speed,
+    which Slowness doesn't touch, so a phantom is only slowed;
   - bosses (`#vanillareforged:gaze_resistant`) are only slowed, with Slowness I and the drag, as
     under the mask, and never petrified.
 - **Turned on a player**, as any Sentry is once that player hits it, the gaze petrifies them at
   a Ruin Sentry's rate (5 s), and the mask and a raised shield block it as they block the Ruin
   Sentries'.
 - Its melee, its range and its heart are unchanged: the lens holds mobs for it, it doesn't make
-  it tougher. Placeholder look for the lens in its chest.
+  it tougher.
+- Code: `SentryLens` (the gaze, also what a Ruin Sentry's gaze checks it sees with), the
+  `lensed` flag on the Sentry, synced and saved; the slowing is the Pale Mask's own
+  (`ElderwoodGaze.slow`) and the trail the Elderwood's (`ElderwoodLens.showTrail`).
 
 **Technical**
 - Heart hitbox: a small box (0.5 blocks) in the chest, front side. Hits on the Sentry are traced
@@ -1035,7 +1042,7 @@ The loop's last step, "return for more resin and hearts", is thin once the playe
 
 | # | What | For | Where |
 |---|---|---|---|
-| 1 | The lensed Sentry | fighters, base guards | feature 2 |
+| 1 | The lensed Sentry (built) | fighters, base guards | feature 2 |
 | 2 | The Elderwood Core | collectors | feature 5 |
 | 3 | Richer chests | everyone | feature 4, Rewards |
 | 4 | Tiers, a Core per tier, Verdigris | fighters, collectors | features 5 and 6 |

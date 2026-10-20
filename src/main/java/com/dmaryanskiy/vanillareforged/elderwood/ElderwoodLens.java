@@ -6,6 +6,7 @@ import com.dmaryanskiy.vanillareforged.petrification.Petrification;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 
@@ -23,7 +24,7 @@ public final class ElderwoodLens {
 	public static final double RESIN_MIN_RANGE = 6.0;
 	public static final int RESIN_INTERVAL_TICKS = 60;
 	private static final int RESIN_FIRST_TICKS = 20;
-	private static final int TRAIL_INTERVAL_TICKS = 4;
+	public static final int TRAIL_INTERVAL_TICKS = 4;
 	private static final double TRAIL_SPACING = 1.5;
 	private static final DustParticleOptions TRAIL = new DustParticleOptions(0xFAB326, 0.7F);
 
@@ -56,17 +57,21 @@ public final class ElderwoodLens {
 		this.throwResin(level, player);
 	}
 
-	// Nothing else shows where the lens looks before the stone starts to creep in: a thin trail of
-	// motes from the lens towards whoever it holds, stopping short of their face.
 	private void showGaze(ServerLevel level, Player player) {
-		if (this.tree.tickCount % TRAIL_INTERVAL_TICKS != 0) {
-			return;
+		if (this.tree.tickCount % TRAIL_INTERVAL_TICKS == 0) {
+			showTrail(level, this.tree.getEyePosition().add(this.tree.facing().scale(1.6)), player.getEyePosition(), this.tree.getRandom());
 		}
-		Vec3 from = this.tree.getEyePosition().add(this.tree.facing().scale(1.6));
-		Vec3 line = player.getEyePosition().subtract(from);
+	}
+
+	/**
+	 * Nothing else shows where a lens looks before the stone starts to creep in: a thin trail of
+	 * motes from it towards whoever it holds, stopping short of their face. Meant for every few ticks.
+	 */
+	public static void showTrail(ServerLevel level, Vec3 from, Vec3 to, RandomSource random) {
+		Vec3 line = to.subtract(from);
 		Vec3 step = line.normalize();
 		double end = line.length() - TRAIL_SPACING;
-		for (double along = this.tree.getRandom().nextDouble() * TRAIL_SPACING; along < end; along += TRAIL_SPACING) {
+		for (double along = random.nextDouble() * TRAIL_SPACING; along < end; along += TRAIL_SPACING) {
 			Vec3 mote = from.add(step.scale(along));
 			level.sendParticles(TRAIL, mote.x, mote.y, mote.z, 1, 0.05, 0.05, 0.05, 0.0);
 		}

@@ -1,10 +1,13 @@
 package com.dmaryanskiy.vanillareforged.sentry;
 
+import com.dmaryanskiy.vanillareforged.ModItems;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionHand;
@@ -52,9 +55,12 @@ public class HeartwoodSentry extends AbstractSentry {
 			EntityDataSerializers.BOOLEAN);
 	private static final EntityDataAccessor<Boolean> JACK_O_LANTERN = SynchedEntityData.defineId(HeartwoodSentry.class,
 			EntityDataSerializers.BOOLEAN);
+	private static final EntityDataAccessor<Boolean> LENSED = SynchedEntityData.defineId(HeartwoodSentry.class,
+			EntityDataSerializers.BOOLEAN);
 
 	private int returnTicks;
 	private final SentryLantern lantern = new SentryLantern();
+	private final SentryLens lens = new SentryLens();
 
 	public HeartwoodSentry(EntityType<? extends HeartwoodSentry> type, Level level) {
 		super(type, level);
@@ -79,6 +85,7 @@ public class HeartwoodSentry extends AbstractSentry {
 		super.defineSynchedData(builder);
 		builder.define(STATUE, false);
 		builder.define(JACK_O_LANTERN, false);
+		builder.define(LENSED, false);
 	}
 
 	public BlockPos getPedestal() {
@@ -118,6 +125,15 @@ public class HeartwoodSentry extends AbstractSentry {
 		this.entityData.set(JACK_O_LANTERN, jackOLantern);
 	}
 
+	/** Whether an Elderwood Lens is set in its chest, which gives it a gaze (see {@link SentryLens}). */
+	public boolean isLensed() {
+		return this.entityData.get(LENSED);
+	}
+
+	public void setLensed(boolean lensed) {
+		this.entityData.set(LENSED, lensed);
+	}
+
 	public boolean isDaylightAtPedestal() {
 		return this.level().isBrightOutside() && this.level().canSeeSky(this.getStandingPos());
 	}
@@ -141,6 +157,9 @@ public class HeartwoodSentry extends AbstractSentry {
 			}
 			this.updateStatue();
 			this.lantern.tick(level, this);
+			if (this.isLensed() && !this.isStatue()) {
+				this.lens.tick(level, this);
+			}
 		}
 	}
 
@@ -197,10 +216,28 @@ public class HeartwoodSentry extends AbstractSentry {
 		return this.hurtHeart(level, source);
 	}
 
-	/** Sneak + axe takes apart a Sentry that isn't hunting the player; a statue can also just be chopped. */
+	/**
+	 * An Elderwood Lens sets itself in a Sentry that isn't hunting the player. Sneak + axe takes apart
+	 * a Sentry that isn't hunting the player; a statue can also just be chopped.
+	 */
 	@Override
 	protected InteractionResult mobInteract(Player player, InteractionHand hand) {
-		if (!player.isSecondaryUseActive() || !player.getItemInHand(hand).is(ItemTags.AXES)) {
+		ItemStack stack = player.getItemInHand(hand);
+		if (stack.is(ModItems.ELDERWOOD_LENS)) {
+			if (this.isLensed()) {
+				return InteractionResult.PASS;
+			}
+			if (this.getTarget() == player) {
+				return InteractionResult.FAIL;
+			}
+			if (!this.level().isClientSide()) {
+				this.setLensed(true);
+				stack.consume(1, player);
+				this.playSound(SoundEvents.RESIN_PLACE, 1.0F, 0.8F);
+			}
+			return InteractionResult.SUCCESS;
+		}
+		if (!player.isSecondaryUseActive() || !stack.is(ItemTags.AXES)) {
 			return super.mobInteract(player, hand);
 		}
 		if (this.level() instanceof ServerLevel level) {
@@ -212,14 +249,26 @@ public class HeartwoodSentry extends AbstractSentry {
 		return InteractionResult.SUCCESS;
 	}
 
-	/** Returns the heart and the head; the pedestal log stays where it is. */
+	/** Returns the heart, the head and the lens; the pedestal log stays where it is. */
 	private void dismantle(ServerLevel level, Player player, InteractionHand hand) {
 		this.spawnAtLocation(level, new ItemStack(Items.CREAKING_HEART), 1.5F);
+		if (this.isLensed()) {
+			this.spawnAtLocation(level, new ItemStack(ModItems.ELDERWOOD_LENS), 1.7F);
+		}
 		this.spawnAtLocation(level, new ItemStack(this.isJackOLantern() ? Items.JACK_O_LANTERN : Items.CARVED_PUMPKIN), 2.3F);
 		level.levelEvent(LevelEvent.PARTICLES_AND_SOUND_DESTROY_BLOCK, this.blockPosition().above(),
 				Block.getId(Blocks.PALE_OAK_WOOD.defaultBlockState()));
 		player.getItemInHand(hand).hurtAndBreak(1, player, hand == InteractionHand.MAIN_HAND ? EquipmentSlot.MAINHAND : EquipmentSlot.OFFHAND);
 		this.discard();
+	}
+
+	// The lens isn't part of its loot table: only a Sentry that had one drops it.
+	@Override
+	protected void dropCustomDeathLoot(ServerLevel level, DamageSource source, boolean killedByPlayer) {
+		super.dropCustomDeathLoot(level, source, killedByPlayer);
+		if (this.isLensed()) {
+			this.spawnAtLocation(level, new ItemStack(ModItems.ELDERWOOD_LENS), 1.7F);
+		}
 	}
 
 	@Override
@@ -237,6 +286,7 @@ public class HeartwoodSentry extends AbstractSentry {
 		output.store("pedestal", BlockPos.CODEC, this.getPedestal());
 		output.putBoolean("statue", this.isStatue());
 		output.putBoolean("jack_o_lantern", this.isJackOLantern());
+		output.putBoolean("lensed", this.isLensed());
 		this.lantern.getLightPos().ifPresent(pos -> output.store("light", BlockPos.CODEC, pos));
 	}
 
@@ -246,6 +296,7 @@ public class HeartwoodSentry extends AbstractSentry {
 		input.read("pedestal", BlockPos.CODEC).ifPresent(this::setPedestal);
 		this.entityData.set(STATUE, input.getBooleanOr("statue", false));
 		this.setJackOLantern(input.getBooleanOr("jack_o_lantern", false));
+		this.setLensed(input.getBooleanOr("lensed", false));
 		this.lantern.setLightPos(input.read("light", BlockPos.CODEC));
 	}
 }

@@ -2,6 +2,7 @@ package com.dmaryanskiy.vanillareforged.client.sentry;
 
 import java.util.List;
 
+import com.dmaryanskiy.vanillareforged.ModItems;
 import com.dmaryanskiy.vanillareforged.VanillaReforged;
 import com.dmaryanskiy.vanillareforged.sentry.HeartwoodSentry;
 
@@ -9,6 +10,8 @@ import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraft.world.item.ItemStack;
 
 public class HeartwoodSentryRenderer extends MobRenderer<HeartwoodSentry, HeartwoodSentryRenderState, HeartwoodSentryModel> {
 	public static final ModelLayerLocation LAYER = new ModelLayerLocation(VanillaReforged.id("heartwood_sentry"), "main");
@@ -28,6 +31,7 @@ public class HeartwoodSentryRenderer extends MobRenderer<HeartwoodSentry, Heartw
 		super(context, new HeartwoodSentryModel(context.bakeLayer(LAYER)), 0.6F);
 		this.addLayer(new SentryHeartCracksLayer(this, CRACKS));
 		this.addLayer(new SentryGlowLayer(this, HEART_GLOW, JACK_O_LANTERN_GLOW));
+		this.addLayer(new SentryLensLayer(this));
 	}
 
 	static Identifier texture(String name) {
@@ -47,6 +51,12 @@ public class HeartwoodSentryRenderer extends MobRenderer<HeartwoodSentry, Heartw
 		state.glowingFace = entity.isJackOLantern();
 		state.cracks = entity.getCracks();
 		state.canMove = !state.statue;
+		if (entity.isLensed()) {
+			// Not a constant: renderers are made before item components are bound.
+			this.itemModelResolver.updateForLiving(state.lens, new ItemStack(ModItems.ELDERWOOD_LENS), ItemDisplayContext.FIXED, entity);
+		} else {
+			state.lens.clear();
+		}
 	}
 
 	@Override

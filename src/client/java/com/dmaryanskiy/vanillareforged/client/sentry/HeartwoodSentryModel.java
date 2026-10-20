@@ -4,6 +4,7 @@ import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.client.model.monster.creaking.CreakingModel;
@@ -16,12 +17,26 @@ import net.minecraft.client.renderer.entity.state.CreakingRenderState;
 public class HeartwoodSentryModel extends CreakingModel {
 	private final ModelPart rightArm;
 	private final ModelPart leftArm;
+	private final ModelPart rootPart;
+	private final ModelPart upperBody;
+	private final ModelPart body;
 
 	public HeartwoodSentryModel(ModelPart root) {
 		super(root);
-		ModelPart upperBody = root.getChild("root").getChild("upper_body");
-		this.rightArm = upperBody.getChild("right_arm");
-		this.leftArm = upperBody.getChild("left_arm");
+		this.rootPart = root.getChild("root");
+		this.upperBody = this.rootPart.getChild("upper_body");
+		this.body = this.upperBody.getChild("body");
+		this.rightArm = this.upperBody.getChild("right_arm");
+		this.leftArm = this.upperBody.getChild("left_arm");
+	}
+
+	/** Moves to where a lens is set: on the front of the chest, high up beside the heart. */
+	public void translateToLens(PoseStack poseStack) {
+		this.root().translateAndRotate(poseStack);
+		this.rootPart.translateAndRotate(poseStack);
+		this.upperBody.translateAndRotate(poseStack);
+		this.body.translateAndRotate(poseStack);
+		poseStack.translate(-3.0F / 16.0F, -1.5F / 16.0F, -3.1F / 16.0F);
 	}
 
 	@Override
