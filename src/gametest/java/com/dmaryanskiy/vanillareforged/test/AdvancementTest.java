@@ -13,6 +13,7 @@ import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.gametest.framework.GameTestSequence;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -79,6 +80,7 @@ public class AdvancementTest {
 					helper.assertFalse(elderwood.isAlive(), "The Elderwood should be dead");
 					helper.assertTrue(has(helper, player, "deadwood"), "Killing the Elderwood should grant Deadwood");
 					helper.assertTrue(has(helper, player, "dont_blink"), "Killing it without being petrified should grant Don't Blink");
+					helper.assertTrue(hasVanilla(helper, player, "adventure/kill_a_mob"), "Killing the Elderwood should grant Monster Hunter");
 				})
 				.thenSucceed();
 	}
@@ -136,6 +138,37 @@ public class AdvancementTest {
 		helper.succeed();
 	}
 
+	@GameTest
+	// The builder credits the players around it in the level, and this is the only mock player that's
+	// in it. Vanilla has it marked for removal without a replacement so far.
+	@SuppressWarnings("removal")
+	public void buildingAHeartwoodSentryGrantsHeartwoodGuardian(GameTestHelper helper) {
+		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		try {
+			player.snapTo(helper.absoluteVec(new Vec3(3.5, 1.0, 1.5)), 0.0F, 0.0F);
+			helper.setBlock(new BlockPos(1, 1, 1), Blocks.PALE_OAK_LOG);
+			helper.setBlock(new BlockPos(1, 2, 1), Blocks.CREAKING_HEART);
+			helper.assertFalse(has(helper, player, "heartwood_guardian"), "Heartwood Guardian shouldn't be granted before the Sentry is built");
+
+			helper.setBlock(new BlockPos(1, 3, 1), Blocks.CARVED_PUMPKIN);
+
+			helper.assertTrue(has(helper, player, "heartwood_guardian"), "Building a Heartwood Sentry should grant Heartwood Guardian");
+		} finally {
+			helper.getLevel().getServer().getPlayerList().remove(player);
+		}
+		helper.succeed();
+	}
+
+	@GameTest
+	public void craftingANewLookCountsTheElderwoodTrim(GameTestHelper helper) {
+		AdvancementHolder advancement = helper.getLevel().getServer().getAdvancements()
+				.get(Identifier.withDefaultNamespace("adventure/trim_with_any_armor_pattern"));
+		helper.assertTrue(advancement.value().criteria()
+				.containsKey("armor_trimmed_vanillareforged:elderwood_armor_trim_smithing_template_smithing_trim"),
+				"Crafting a New Look should count the Elderwood trim");
+		helper.succeed();
+	}
+
 	/** Destroys every other heart at once, then the core with as many sword swings as it takes. */
 	private static GameTestSequence kill(GameTestHelper helper, GameTestSequence sequence, Elderwood elderwood, Player killer) {
 		Runnable hitCore = () -> ElderwoodTest.hitAs(helper, killer, elderwood, ElderwoodHeart.CORE, elderwood.getLookAngle(), 2.0, 1.0F);
@@ -166,8 +199,16 @@ public class AdvancementTest {
 	}
 
 	private static boolean has(GameTestHelper helper, Player player, String name) {
-		AdvancementHolder advancement = helper.getLevel().getServer().getAdvancements().get(VanillaReforged.id("adventure/" + name));
-		helper.assertTrue(advancement != null, "Advancement " + name + " should exist");
+		return isDone(helper, player, VanillaReforged.id("adventure/" + name));
+	}
+
+	static boolean hasVanilla(GameTestHelper helper, Player player, String name) {
+		return isDone(helper, player, Identifier.withDefaultNamespace(name));
+	}
+
+	private static boolean isDone(GameTestHelper helper, Player player, Identifier id) {
+		AdvancementHolder advancement = helper.getLevel().getServer().getAdvancements().get(id);
+		helper.assertTrue(advancement != null, "Advancement " + id + " should exist");
 		return ((ServerPlayer) player).getAdvancements().getOrStartProgress(advancement).isDone();
 	}
 }
