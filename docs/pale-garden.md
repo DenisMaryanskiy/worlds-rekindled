@@ -808,13 +808,14 @@ Ruin Sentries petrify too, more slowly (feature 4).
 
 ### 6. Advancements
 
-Six advancements in vanilla's **Adventure** tab (no tab of our own, like a Mojang update would).
+Seven advancements in vanilla's **Adventure** tab (no tab of our own, like a Mojang update would).
 Their descriptions double as the hints the mod otherwise lacks.
 
 | Advancement | Earned by | Frame | Trigger |
 |---|---|---|---|
 | **Buried Garden** | Entering a Pale Ruin | task | vanilla `location`, inside the structure |
 | **Old Growth** | Waking the Elderwood | goal | vanilla `summoned_entity`, which the summon fires for players within 8 blocks |
+| **Heartwood Guardian** | Building a Heartwood Sentry | task | vanilla `summoned_entity`, which the build fires for players within 5 blocks, as an Iron Golem's does |
 | **Set in Stone** | Being fully petrified and living through it | task | `vanillareforged:survived_petrification` |
 | **Deadwood** | Killing the Elderwood | goal | vanilla `player_killed_entity`: the core's last crack is credited to whoever dealt it |
 | **One of Them** | Wearing a Pale Mask next to a Creaking that ignores you | task | `vanillareforged:ignored_by_creaking` |
@@ -823,7 +824,9 @@ Their descriptions double as the hints the mod otherwise lacks.
 - **Tree**: Old Growth hangs off vanilla's **Heart Transplanter** (placing a Creaking Heart), so
   its description, which spells out the stump, shows up for anyone who has started the Adventure
   tab. It leads to Set in Stone and Deadwood, and Deadwood to One of Them and Don't Blink.
-  Buried Garden hangs off Heart Transplanter too, beside it.
+  Buried Garden hangs off Heart Transplanter too, beside it, and so does Heartwood Guardian,
+  whose description spells out the Sentry's pattern for anyone who has placed a heart, as the
+  Sentry workshop shows it in the Ruin.
 - **Triggers**: the three of our own are plain vanilla `PlayerTrigger`s registered under our ids
   (`ModCriteria`), like vanilla's `avoid_vibration`: the code decides when they fire.
 - **Set in Stone** is granted when the stone cracks open, by time or by a hit, if the player is
@@ -864,7 +867,7 @@ roughly in the order they'd pay off.
 
 ### A. Advancements
 
-Six are in (feature 6), and three of vanilla's count the mod's mobs and trim. Nothing left
+Seven are in (feature 6), and three of vanilla's count the mod's mobs and trim. Nothing left
 planned.
 
 ### B. Finish what's on hold

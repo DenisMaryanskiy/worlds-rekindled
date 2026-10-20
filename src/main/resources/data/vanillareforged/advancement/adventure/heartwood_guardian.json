@@ -1,0 +1,34 @@
+{
+  "parent": "minecraft:adventure/heart_transplanter",
+  "criteria": {
+    "built_heartwood_sentry": {
+      "conditions": {
+        "entity": {
+          "type": "minecraft:entity_properties",
+          "entity": "this",
+          "predicate": {
+            "minecraft:entity_type": "vanillareforged:heartwood_sentry"
+          }
+        }
+      },
+      "trigger": "minecraft:summoned_entity"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.vanillareforged.heartwood_guardian.description"
+    },
+    "frame": "task",
+    "icon": {
+      "id": "minecraft:carved_pumpkin"
+    },
+    "title": {
+      "translate": "advancements.vanillareforged.heartwood_guardian.title"
+    }
+  },
+  "requirements": [
+    [
+      "built_heartwood_sentry"
+    ]
+  ]
+}
