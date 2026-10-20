@@ -354,6 +354,18 @@ public class RuinSentryTest {
 		}
 	}
 
+	@GameTest(environment = MIDNIGHT)
+	public void killingItGrantsMonsterHunter(GameTestHelper helper) {
+		RuinSentry sentry = sentry(helper);
+		sentry.setCracks(sentry.getMaxCracks() - 1);
+		Player player = swordsman(helper, IN_FRONT, 180.0F);
+
+		hit(helper, sentry, player);
+
+		helper.assertTrue(AdvancementTest.hasVanilla(helper, player, "adventure/kill_a_mob"), "Killing a Ruin Sentry should grant Monster Hunter");
+		helper.succeed();
+	}
+
 	private static RuinSentry sentry(GameTestHelper helper) {
 		RuinSentry sentry = helper.spawn(ModEntities.RUIN_SENTRY, SENTRY);
 		sentry.setPost(helper.absolutePos(SENTRY_POS));

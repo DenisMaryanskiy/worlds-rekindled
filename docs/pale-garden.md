@@ -835,6 +835,21 @@ Their descriptions double as the hints the mod otherwise lacks.
   fight. Only the player who lands the last crack is checked and rewarded, like Deadwood. A Pale
   Mask makes it easy, which fits: that's the second kill.
 
+**Vanilla's own advancements** count what the mod adds where vanilla would, through overrides
+of their files in `data/minecraft/advancement/adventure/`. Each is vanilla's file with criteria
+added, so another mod that overrides the same file wins or loses as a whole.
+
+| Advancement | Now also counts |
+|---|---|
+| **Monster Hunter** (kill any monster) | a Ruin Sentry, the Elderwood |
+| **Monsters Hunted** (kill one of every monster) | a Ruin Sentry and the Elderwood, both required, as vanilla requires its bosses and the Creaking |
+| **Hired Help** (build an Iron Golem) | building a Heartwood Sentry |
+| **Crafting a New Look** (trim any armor) | the Elderwood trim |
+
+- Left alone: **Smithing with Style** asks for eight of vanilla's rarest trims, not all of them;
+  adding ours would only make it harder. **How Did We Get Here** counts status effects, and petrification is a
+  meter like powder snow's freezing, which isn't on it either.
+
 ## Parked for later (warrior content and extras)
 
 - **Resin Tappers**: illager-type faction that farms resin from captive hearts, uses resin traps.
@@ -849,11 +864,8 @@ roughly in the order they'd pay off.
 
 ### A. Advancements
 
-Six are in (feature 6). Left:
-
-- Vanilla's "Crafting a New Look" and "Smithing with Style" list trim recipes and templates by
-  id, so the Elderwood trim doesn't count towards them. Adding it means overriding vanilla's
-  advancement files; probably not worth it for the second one, which would become harder.
+Six are in (feature 6), and four of vanilla's count the mod's mobs and trim. Nothing left
+planned.
 
 ### B. Finish what's on hold
 

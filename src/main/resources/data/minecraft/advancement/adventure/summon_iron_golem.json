@@ -1,0 +1,48 @@
+{
+  "parent": "minecraft:adventure/trade",
+  "criteria": {
+    "summoned_golem": {
+      "conditions": {
+        "entity": {
+          "type": "minecraft:entity_properties",
+          "entity": "this",
+          "predicate": {
+            "minecraft:entity_type": "minecraft:iron_golem"
+          }
+        }
+      },
+      "trigger": "minecraft:summoned_entity"
+    },
+    "vanillareforged:heartwood_sentry": {
+      "conditions": {
+        "entity": {
+          "type": "minecraft:entity_properties",
+          "entity": "this",
+          "predicate": {
+            "minecraft:entity_type": "vanillareforged:heartwood_sentry"
+          }
+        }
+      },
+      "trigger": "minecraft:summoned_entity"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.adventure.summon_iron_golem.description"
+    },
+    "frame": "goal",
+    "icon": {
+      "id": "minecraft:carved_pumpkin"
+    },
+    "title": {
+      "translate": "advancements.adventure.summon_iron_golem.title"
+    }
+  },
+  "requirements": [
+    [
+      "summoned_golem",
+      "vanillareforged:heartwood_sentry"
+    ]
+  ],
+  "sends_telemetry_event": true
+}
