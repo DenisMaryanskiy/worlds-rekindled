@@ -430,6 +430,19 @@ public class ElderwoodTest {
 		helper.succeedWhen(() -> helper.assertEntityPresent(ModEntities.ELDERWOOD_ROOTS));
 	}
 
+	// As far from the trunk as the hall's corners.
+	@GameTest(environment = MIDNIGHT, maxTicks = 40)
+	public void itRaisesRootsUnderAPlayerAsFarAsTheHallsCorners(GameTestHelper helper) {
+		Elderwood elderwood = facingSouth(helper.spawn(ModEntities.ELDERWOOD, ELDERWOOD));
+		Player player = helper.makeMockServerPlayer(GameType.SURVIVAL);
+		player.snapTo(helper.absoluteVec(ELDERWOOD.add(-12.0, 0.0, -12.0)), 0.0F, 0.0F);
+		elderwood.setTarget(player);
+
+		helper.succeedWhen(() -> helper.assertFalse(
+				helper.getLevel().getEntities(ModEntities.ELDERWOOD_ROOTS, player.getBoundingBox().inflate(2.0), roots -> true).isEmpty(),
+				"Roots should come up under the player"));
+	}
+
 	@GameTest(environment = MIDNIGHT, maxTicks = 60)
 	public void itRaisesNoRootsUnderAPlayerItWatches(GameTestHelper helper) {
 		Elderwood elderwood = facingSouth(helper.spawn(ModEntities.ELDERWOOD, ELDERWOOD));

@@ -700,7 +700,10 @@ all around the trunk, so the player has to keep moving between the two.
     and drop. Stone and harder cover holds, so a quick wooden hut doesn't trivialize the fight.
     Follows the `mobGriefing` game rule.
 - **Root eruption** (new): against a player it can't see in front of it (behind, to the side or
-  behind cover) within about 12 blocks, **every 4 s**. The ground under the player cracks for
+  behind cover) within 24 blocks, as far as the lens sees, **every 4 s**. At 12 blocks, as
+  first built, the hall's corners (about 15 from the trunk) were out of the roots' reach, and
+  where the colonnade stood in the lens's line nothing reached them: a third playthrough found
+  one and stood there safe. The ground under the player cracks for
   1 s, then roots burst out: 6 damage (the brittle bonus applies) and a toss into the air. Moving
   out of the cracked patch dodges it, like evoker fangs. It keeps circling and camping from being
   free.

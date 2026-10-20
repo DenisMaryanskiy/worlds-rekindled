@@ -61,7 +61,9 @@ public class Elderwood extends Monster {
 	private static final float GROW_SNAP_TICKS = 3.0F;
 	public static final int STUN_TICKS = 60;
 	public static final int STUN_IMMUNITY_TICKS = 100;
-	public static final double ROOT_RANGE = 12.0;
+	// As far as the lens sees, so no spot is out of reach of both. At 12 the hall's corners, about 15
+	// from the trunk, got roots no more and the lens only when nothing stood in its line.
+	public static final double ROOT_RANGE = ElderwoodLens.RANGE;
 	public static final int ROOT_INTERVAL_TICKS = 80;
 	private static final int ROOT_FIRST_TICKS = 20;
 	private static final int ROOT_GROUND_SEARCH = 4;
