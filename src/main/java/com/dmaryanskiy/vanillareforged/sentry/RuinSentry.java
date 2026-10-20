@@ -175,9 +175,9 @@ public class RuinSentry extends AbstractSentry {
 	@Override
 	public int getMaxCracks() {
 		return switch (this.level().getDifficulty()) {
-			case PEACEFUL, EASY -> 4;
-			case NORMAL -> 5;
-			case HARD -> 6;
+			case PEACEFUL, EASY -> 3;
+			case NORMAL -> 4;
+			case HARD -> 5;
 		};
 	}
 

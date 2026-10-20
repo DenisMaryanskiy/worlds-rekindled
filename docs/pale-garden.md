@@ -106,9 +106,9 @@ slowing it, done.
 
   | Difficulty | Ruin Sentry | Player's Sentry |
   |---|---|---|
-  | Easy   | 4 | 5 |
-  | Normal | 5 | 5 |
-  | Hard   | 6 | 5 |
+  | Easy   | 3 | 5 |
+  | Normal | 4 | 5 |
+  | Hard   | 5 | 5 |
 
 - Last crack: the heart is destroyed and the Sentry collapses into 1–3 resin clumps and a pale oak
   log (loot table `vanillareforged:entities/heartwood_sentry`).
@@ -445,7 +445,8 @@ mural, done; (4) the loot pass (see Rewards), done. A playthrough after all four
     landed in the 3 s of being stuck. It **doesn't throw the player up** as the player's own
     Sentry throws a mob: thrown, they took the next blow in the air, from it or from the Sentry
     beside it;
-  - **cracks**: 4 on Easy and Peaceful, 5 on Normal, 6 on Hard, as in the table above. A
+  - **cracks**: 3 on Easy and Peaceful, 4 on Normal, 5 on Hard, as in the table above (one
+    fewer since the third playthrough, in iron armor with a shield, still found them tough). A
     **critical hit** (a sword swung while falling) **cracks it twice**, on the player's own
     Sentry too. The Elderwood's hearts take one crack a hit either way;
   - **drops**: 1-3 resin clumps, 1-2 Elderwood Lens Shards and 10 XP;
