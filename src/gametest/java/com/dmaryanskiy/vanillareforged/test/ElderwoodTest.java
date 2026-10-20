@@ -443,6 +443,39 @@ public class ElderwoodTest {
 				"Roots should come up under the player"));
 	}
 
+	@GameTest(environment = MIDNIGHT, maxTicks = 40)
+	public void itRaisesRootsUnderAPlayerItWatchesBeyondItsBranches(GameTestHelper helper) {
+		Elderwood elderwood = facingSouth(helper.spawn(ModEntities.ELDERWOOD, ELDERWOOD));
+		Player player = helper.makeMockServerPlayer(GameType.SURVIVAL);
+		// 6.4 blocks off, 39 degrees from straight ahead: just beyond the branches, inside this test's plot.
+		player.snapTo(helper.absoluteVec(ELDERWOOD.add(4.0, 0.0, 5.0)), 0.0F, 0.0F);
+		helper.assertTrue(player.distanceTo(elderwood) > ElderwoodSlam.REACH, "The player should stand beyond the branches");
+		elderwood.setTarget(player);
+
+		helper.succeedWhen(() -> {
+			helper.assertTrue(elderwood.isWatching(player), "The lens should see the player");
+			helper.assertFalse(helper.getLevel().getEntities(ModEntities.ELDERWOOD_ROOTS, player.getBoundingBox().inflate(2.0), roots -> true)
+					.isEmpty(), "Roots should come up under the player");
+		});
+	}
+
+	@GameTest(environment = MIDNIGHT, maxTicks = ElderwoodRoots.LIFE_TICKS + 20)
+	public void rootsShatterAPetrifiedPlayersStone(GameTestHelper helper) {
+		Elderwood elderwood = stillElderwood(helper);
+		Player player = plainPlayer(helper, ELDERWOOD.add(-2.5, 0.0, 1.0));
+		Petrification.expose(player, Petrification.FULL);
+		elderwood.raiseRoots(helper.getLevel(), player.position());
+
+		helper.startSequence()
+				.thenWaitUntil(() -> helper.assertEntityNotPresent(ModEntities.ELDERWOOD_ROOTS))
+				.thenExecute(() -> {
+					helper.assertTrue(player.getHealth() < player.getMaxHealth() - ElderwoodRoots.DAMAGE,
+							"A petrified player should take more than the roots' base damage");
+					helper.assertValueEqual(Petrification.getMeter(player), 0, "meter after the roots");
+				})
+				.thenSucceed();
+	}
+
 	@GameTest(environment = MIDNIGHT, maxTicks = 60)
 	public void itRaisesNoRootsUnderAPlayerItWatches(GameTestHelper helper) {
 		Elderwood elderwood = facingSouth(helper.spawn(ModEntities.ELDERWOOD, ELDERWOOD));

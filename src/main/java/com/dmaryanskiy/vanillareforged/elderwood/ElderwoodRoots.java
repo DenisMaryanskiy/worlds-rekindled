@@ -4,6 +4,7 @@ import org.jspecify.annotations.Nullable;
 
 import com.dmaryanskiy.vanillareforged.ModEntities;
 import com.dmaryanskiy.vanillareforged.ModSounds;
+import com.dmaryanskiy.vanillareforged.petrification.Petrification;
 import com.dmaryanskiy.vanillareforged.VanillaReforged;
 
 import net.minecraft.core.BlockPos;
@@ -27,9 +28,9 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 
 /**
- * The Elderwood's roots breaking out of the ground under a player it can't see, like an evoker's
- * fangs: the ground cracks for a moment as a warning, then the roots burst out, hurt whoever still
- * stands there and toss them into the air.
+ * The Elderwood's roots breaking out of the ground under a player, like an evoker's fangs: the
+ * ground cracks for a moment as a warning, then the roots burst out, hurt whoever still stands
+ * there, break a petrified player's stone and toss them into the air.
  */
 public class ElderwoodRoots extends Entity {
 	public static final int WARNING_TICKS = 20;
@@ -85,6 +86,7 @@ public class ElderwoodRoots extends Entity {
 				this, owner);
 		for (Player player : level.getEntitiesOfClass(Player.class, this.getBoundingBox().inflate(0.2, 0.0, 0.2))) {
 			if (player.hurtServer(level, source, DAMAGE)) {
+				Petrification.shatter(player);
 				player.push(0.0, TOSS, 0.0);
 			}
 		}
