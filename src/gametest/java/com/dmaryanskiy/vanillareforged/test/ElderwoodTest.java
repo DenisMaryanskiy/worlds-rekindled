@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.dmaryanskiy.vanillareforged.ModEntities;
+import com.dmaryanskiy.vanillareforged.ModBlocks;
 import com.dmaryanskiy.vanillareforged.ModItems;
 import com.dmaryanskiy.vanillareforged.petrification.Petrification;
 import com.dmaryanskiy.vanillareforged.elderwood.BurningResin;
@@ -34,6 +35,7 @@ import net.minecraft.world.entity.projectile.arrow.Arrow;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.WeatheringCopper;
@@ -536,7 +538,22 @@ public class ElderwoodTest {
 		helper.succeedWhen(() -> {
 			helper.assertTrue(elderwood.isRemoved(), "It should be gone once the stump has burst");
 			helper.assertItemEntityPresent(ModItems.ELDERWOOD_LENS);
+			helper.assertItemEntityPresent(ModBlocks.ELDERWOOD_CORE.asItem());
 		});
+	}
+
+	@GameTest
+	public void theCoreGlowsFaintlyAndDropsItself(GameTestHelper helper) {
+		BlockPos pos = new BlockPos(1, 1, 1);
+		helper.setBlock(pos, ModBlocks.ELDERWOOD_CORE);
+
+		helper.startSequence()
+				// The light engine catches up a tick or two later.
+				.thenWaitUntil(() -> helper.assertValueEqual(helper.getLevel().getBrightness(LightLayer.BLOCK, helper.absolutePos(pos)), 5,
+						"the Core's light"))
+				.thenExecute(() -> helper.getLevel().destroyBlock(helper.absolutePos(pos), true))
+				.thenExecute(() -> helper.assertItemEntityPresent(ModBlocks.ELDERWOOD_CORE.asItem()))
+				.thenSucceed();
 	}
 
 	@GameTest(environment = MIDNIGHT, maxTicks = 60)

@@ -690,7 +690,7 @@ iron/diamond gear: a huge, rooted tree fought by moving around it.
 - **It turns slowly in place** to face its target, slower than a player can circle it (about 30°
   a second; a sprinting player 4 blocks away circles at about 80°).
 - It hunts players only and never despawns. It counts as gaze-resistant for the Pale Mask. Drops
-  its lens and 2–4 resin clumps (kept), and its core as a trophy (planned, see the craft chain).
+  its lens and 2–4 resin clumps (kept), and its core as a trophy (see the craft chain).
 
 **Petrification** (kept; shared with Ruin Sentries)
 - A **meter**, like vanilla freezing in powder snow, not a status effect: milk clears all effects,
@@ -820,13 +820,15 @@ all around the trunk, so the player has to keep moving between the two.
 A lens can also go into a player's own Sentry instead, which gives it a gaze of its own (planned,
 see [The lensed Sentry](#2-heartwood-sentry-golem)).
 
-**The Elderwood Core** (planned): the trophy. The heart that broke last, under the lens, dropped
+**The Elderwood Core** (built): the trophy. The heart that broke last, under the lens, dropped
 on **every kill**, as the Wither always drops its star and the Elder Guardian its sponge.
 - A block: the core's resin cracked through and dull, with a glow that pulses slowly in its
-  cracks (an animated texture) and a faint light (level 5). Placed and mined like a Creaking
-  Heart, with an axe; it drops itself.
+  cracks (an animated texture, a 2 s pulse) and a faint light (level 5). Placed and mined like a
+  Creaking Heart, best with an axe, and it drops itself with any tool, or none; an explosion
+  destroys it. Rare (aqua name), next to the Creaking Heart in the Natural Blocks tab.
 - Decorative only: it does nothing and goes into no recipe, so it stays a trophy. Placeholder
-  texture.
+  texture: vanilla's Creaking Heart, dulled, fading between its dormant and awake looks.
+- It's the mod's first block (`ModBlocks`).
 - **One Core per tier** (below): its cracks are rimmed in the collar's copper, plain, exposed,
   weathered or oxidized, four blocks that never weather. A full set takes a kill at every tier.
 
@@ -1043,7 +1045,7 @@ The loop's last step, "return for more resin and hearts", is thin once the playe
 | # | What | For | Where |
 |---|---|---|---|
 | 1 | The lensed Sentry (built) | fighters, base guards | feature 2 |
-| 2 | The Elderwood Core | collectors | feature 5 |
+| 2 | The Elderwood Core (built) | collectors | feature 5 |
 | 3 | Richer chests | everyone | feature 4, Rewards |
 | 4 | Tiers, a Core per tier, Verdigris | fighters, collectors | features 5 and 6 |
 | 5 | The Pale Ruin explorer map | explorers | feature 4, Rewards |
