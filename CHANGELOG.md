@@ -10,6 +10,11 @@ The design behind all of it is in [docs/pale-garden.md](docs/pale-garden.md).
 
 After the third playtest: the fights tuned once more, and rewards for every kind of player.
 
+### 0.4.9 (#68)
+
+- **Translations** into Russian, German, French, Spanish and Italian, using vanilla's own words for
+  vanilla things (the Creaking Heart, resin, banner patterns, trims) in each language.
+
 ### 0.4.8 (#67)
 
 - **The Elderwood scales for groups**: with more players near the stump when it wakes, up to

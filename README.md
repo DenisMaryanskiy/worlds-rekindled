@@ -7,6 +7,8 @@ meaningful rewards: new items, ingredients and mechanics that fit the base game.
 - Loader: Fabric Loader 0.19.5 + Fabric API
 - Java: 25
 
+- Languages: English, Russian, German, French, Spanish, Italian
+
 What each version added is in [CHANGELOG.md](CHANGELOG.md).
 
 ## Development
