@@ -199,7 +199,7 @@ public class PaleRuinTest {
 
 	// The workshop shows a Sentry being built, and must not build one itself: its mural is the
 	// pattern in blocks, and a real heart under its pumpkin would be the pattern in earnest.
-	@GameTest(maxTicks = 100)
+	@GameTest(maxTicks = 400)
 	public void theSentryWorkshopHoldsOneSentryOnItsLog(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
 		// Far from the tests: the chamber is bigger than a test's plot. It fits in one chunk, which
@@ -209,28 +209,33 @@ public class PaleRuinTest {
 		StructureTemplate template = level.getStructureTemplateManager().get(VanillaReforged.id("pale_ruin/chamber/sentry_workshop")).orElseThrow();
 		AABB chamber = AABB.encapsulatingFullBlocks(origin, origin.offset(template.getSize()));
 
-		// Not at once: the test world is kept between runs, and what an earlier run left in the
-		// chunk only shows once it has loaded.
-		helper.runAfterDelay(20, () -> {
-			level.getEntities(ModEntities.HEARTWOOD_SENTRY, chamber, sentry -> true).forEach(Entity::discard);
-			for (BlockPos pos : BlockPos.betweenClosed(origin, origin.offset(template.getSize()))) {
-				level.setBlock(pos, Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
-			}
-			template.placeInWorld(level, origin, origin, new StructurePlaceSettings(), level.getRandom(), Block.UPDATE_CLIENTS);
-		});
-		helper.runAfterDelay(40, () -> {
-			List<HeartwoodSentry> sentries = level.getEntities(ModEntities.HEARTWOOD_SENTRY, chamber, sentry -> true);
-			helper.assertValueEqual(sentries.size(), 1, "Sentries in the workshop");
-			BlockPos pedestal = sentries.getFirst().getPedestal();
-			helper.assertTrue(level.getBlockState(pedestal).is(Blocks.PALE_OAK_LOG), "Its pedestal should be the log it stands on, not " + pedestal);
-			// The plinth beside it is one pumpkin short of a Sentry, for whoever takes the hint.
-			helper.assertTrue(level.getBlockState(pedestal.east(2)).is(Blocks.PALE_OAK_LOG)
-					&& level.getBlockState(pedestal.east(2).above()).is(Blocks.CREAKING_HEART), "The second plinth should hold a log and a heart");
-			helper.assertTrue(level.getBlockState(pedestal.east(2).above(2)).isAir(), "Nothing should be on that heart yet");
-			sentries.forEach(Entity::discard);
-			level.setChunkForced(3400, 3400, false);
-			helper.succeed();
-		});
+		// Not until the chunk's entities have loaded: the test world is kept between runs, and what an
+		// earlier run left there only shows then. On a fresh machine that takes longer than on a warm one.
+		helper.startSequence()
+				.thenWaitUntil(() -> helper.assertTrue(level.areEntitiesActuallyLoadedAndTicking(new ChunkPos(3400, 3400)),
+						"The workshop's chunk should load"))
+				.thenExecute(() -> {
+					level.getEntities(ModEntities.HEARTWOOD_SENTRY, chamber, sentry -> true).forEach(Entity::discard);
+					for (BlockPos pos : BlockPos.betweenClosed(origin, origin.offset(template.getSize()))) {
+						level.setBlock(pos, Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
+					}
+					template.placeInWorld(level, origin, origin, new StructurePlaceSettings(), level.getRandom(), Block.UPDATE_CLIENTS);
+				})
+				// A Sentry set down by a structure takes the log under it as its pedestal on its first tick.
+				.thenWaitUntil(() -> helper.assertValueEqual(level.getEntities(ModEntities.HEARTWOOD_SENTRY, chamber, HeartwoodSentry::hasHome).size(), 1,
+						"Sentries in the workshop, on their pedestal"))
+				.thenExecute(() -> {
+					List<HeartwoodSentry> sentries = level.getEntities(ModEntities.HEARTWOOD_SENTRY, chamber, sentry -> true);
+					BlockPos pedestal = sentries.getFirst().getPedestal();
+					helper.assertTrue(level.getBlockState(pedestal).is(Blocks.PALE_OAK_LOG), "Its pedestal should be the log it stands on, not " + pedestal);
+					// The plinth beside it is one pumpkin short of a Sentry, for whoever takes the hint.
+					helper.assertTrue(level.getBlockState(pedestal.east(2)).is(Blocks.PALE_OAK_LOG)
+							&& level.getBlockState(pedestal.east(2).above()).is(Blocks.CREAKING_HEART), "The second plinth should hold a log and a heart");
+					helper.assertTrue(level.getBlockState(pedestal.east(2).above(2)).isAir(), "Nothing should be on that heart yet");
+					sentries.forEach(Entity::discard);
+					level.setChunkForced(3400, 3400, false);
+				})
+				.thenSucceed();
 	}
 
 	// Jigsaw only looks at the ground under the entrance. On a hillside the rooms, a fixed depth
