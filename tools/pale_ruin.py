@@ -1004,7 +1004,8 @@ def hall():
     piece.set(cx, 2, cz, "minecraft:pale_oak_log", axis="y")
     for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1)):
         piece.set(cx + dx, 2, cz + dz, "minecraft:resin_block")
-    piece.set(cx, 3, cz, "minecraft:oxidized_copper")
+    # Waxed plain copper: the Ruin's own fight is the lowest tier, and stays it however long it waits.
+    piece.set(cx, 3, cz, "minecraft:waxed_copper_block")
 
     # Lanterns on posts along the walls and on chains over the nave.
     posts = [(1, z) for z in (6, 11, 16, 21, 26)] + [(25, z) for z in (6, 11, 16, 21, 26)]

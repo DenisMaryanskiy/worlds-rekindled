@@ -4,6 +4,7 @@ import java.util.Locale;
 
 import com.dmaryanskiy.vanillareforged.VanillaReforged;
 import com.dmaryanskiy.vanillareforged.elderwood.ElderwoodHeart;
+import com.dmaryanskiy.vanillareforged.elderwood.ElderwoodTier;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.renderer.SubmitNodeCollector;
@@ -47,7 +48,7 @@ public class ElderwoodHeartsLayer extends RenderLayer<ElderwoodRenderState, Elde
 		}
 		for (ElderwoodHeart heart : ElderwoodHeart.ALL) {
 			int i = heart.ordinal();
-			if (state.heartCracks[i] >= heart.maxCracks()) {
+			if (state.heartCracks[i] >= ElderwoodTier.of(state.copperStage).maxCracks(heart)) {
 				renderColoredCutoutModel(this.getParentModel(), this.broken[i], poseStack, submitNodeCollector, lightCoords, state, -1, 1);
 				continue;
 			}

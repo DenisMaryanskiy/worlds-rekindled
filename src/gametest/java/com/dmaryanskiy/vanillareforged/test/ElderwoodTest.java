@@ -7,6 +7,7 @@ import java.util.Map;
 import com.dmaryanskiy.vanillareforged.ModEntities;
 import com.dmaryanskiy.vanillareforged.ModBlocks;
 import com.dmaryanskiy.vanillareforged.ModItems;
+import com.dmaryanskiy.vanillareforged.elderwood.ElderwoodTier;
 import com.dmaryanskiy.vanillareforged.petrification.Petrification;
 import com.dmaryanskiy.vanillareforged.elderwood.BurningResin;
 import com.dmaryanskiy.vanillareforged.elderwood.Elderwood;
@@ -32,6 +33,7 @@ import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.arrow.Arrow;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
@@ -39,6 +41,9 @@ import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.WeatheringCopper;
+import net.minecraft.world.level.storage.loot.LootParams;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
@@ -83,6 +88,54 @@ public class ElderwoodTest {
 
 		helper.assertValueEqual(findElderwood(helper).getCopperStage(), WeatheringCopper.WeatherState.OXIDIZED, "copper stage");
 		helper.succeed();
+	}
+
+	@GameTest(environment = MIDNIGHT)
+	public void aTreeWokenWithoutACollarStageIsThePlainCopperTier(GameTestHelper helper) {
+		helper.assertValueEqual(stillElderwood(helper).getTier(), ElderwoodTier.COPPER, "tier");
+		helper.succeed();
+	}
+
+	@GameTest(environment = MIDNIGHT)
+	public void fromWeatheredOnItsHeartsTakeOneMoreCrack(GameTestHelper helper) {
+		Elderwood elderwood = stillElderwood(helper);
+		elderwood.setCopperStage(WeatheringCopper.WeatherState.WEATHERED);
+		int plain = ElderwoodHeart.TRUNK_FRONT.maxCracks();
+
+		elderwood.setCracks(ElderwoodHeart.TRUNK_FRONT, plain);
+		helper.assertFalse(elderwood.isDestroyed(ElderwoodHeart.TRUNK_FRONT), "A weathered tree's heart should hold one more crack");
+		elderwood.setCracks(ElderwoodHeart.TRUNK_FRONT, plain + 1);
+		helper.assertTrue(elderwood.isDestroyed(ElderwoodHeart.TRUNK_FRONT), "One more crack should break it");
+		helper.succeed();
+	}
+
+	@GameTest(environment = MIDNIGHT)
+	public void everyTierDropsItsOwnLensesShardsAndCore(GameTestHelper helper) {
+		Elderwood elderwood = stillElderwood(helper);
+		int[][] lensesAndShards = {{1, 0, 0}, {1, 2, 4}, {2, 0, 0}, {2, 4, 6}};
+		Block[] cores = {ModBlocks.ELDERWOOD_CORE, ModBlocks.EXPOSED_ELDERWOOD_CORE, ModBlocks.WEATHERED_ELDERWOOD_CORE,
+				ModBlocks.OXIDIZED_ELDERWOOD_CORE};
+		for (ElderwoodTier tier : ElderwoodTier.values()) {
+			LootParams params = new LootParams.Builder(helper.getLevel())
+					.withParameter(LootContextParams.THIS_ENTITY, elderwood)
+					.withParameter(LootContextParams.ORIGIN, elderwood.position())
+					.withParameter(LootContextParams.DAMAGE_SOURCE, helper.getLevel().damageSources().generic())
+					.create(LootContextParamSets.ENTITY);
+			for (int seed = 0; seed < 10; seed++) {
+				List<ItemStack> loot = helper.getLevel().getServer().reloadableRegistries().getLootTable(tier.lootTable()).getRandomItems(params, seed);
+				int[] expected = lensesAndShards[tier.ordinal()];
+				helper.assertValueEqual(count(loot, ModItems.ELDERWOOD_LENS), expected[0], tier + " lenses");
+				int shards = count(loot, ModItems.ELDERWOOD_LENS_SHARD);
+				helper.assertTrue(shards >= expected[1] && shards <= expected[2], tier + " shards: " + shards);
+				helper.assertValueEqual(count(loot, cores[tier.ordinal()].asItem()), 1, tier + " core");
+				helper.assertTrue(count(loot, Items.RESIN_CLUMP) > 0, tier + " should drop resin");
+			}
+		}
+		helper.succeed();
+	}
+
+	private static int count(List<ItemStack> loot, Item item) {
+		return loot.stream().filter(stack -> stack.is(item)).mapToInt(ItemStack::getCount).sum();
 	}
 
 	@GameTest(environment = MIDNIGHT, skyAccess = true)

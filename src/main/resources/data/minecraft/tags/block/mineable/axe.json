@@ -1,5 +1,8 @@
 {
   "values": [
-    "vanillareforged:elderwood_core"
+    "vanillareforged:elderwood_core",
+    "vanillareforged:exposed_elderwood_core",
+    "vanillareforged:weathered_elderwood_core",
+    "vanillareforged:oxidized_elderwood_core"
   ]
 }
