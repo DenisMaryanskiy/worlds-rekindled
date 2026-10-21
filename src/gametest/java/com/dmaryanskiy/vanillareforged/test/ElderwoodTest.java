@@ -594,7 +594,9 @@ public class ElderwoodTest {
 		helper.succeed();
 	}
 
-	@GameTest(environment = MIDNIGHT, skyAccess = true)
+	// Alone in its environment, so in a batch of its own: the summon counts every player near the
+	// stump, and the players of the tests run beside it would count too.
+	@GameTest(environment = "vanillareforged-test:midnight_alone", skyAccess = true)
 	public void itWakesForAsManyPlayersAsStandAroundTheStump(GameTestHelper helper) {
 		plainPlayer(helper, Vec3.atBottomCenterOf(LOG).add(0.0, 0.0, 4.0));
 		plainPlayer(helper, Vec3.atBottomCenterOf(LOG).add(0.0, 0.0, 8.0));
