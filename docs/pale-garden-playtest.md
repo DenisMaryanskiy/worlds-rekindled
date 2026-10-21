@@ -101,6 +101,8 @@ what to write down. Tick what's fine, note what isn't.
 - [ ] An Elderwood Lens used on your Sentry: can you see it's set? At night, does its gaze slow
       the mob it fights and then root it in place? Is a lensed Sentry worth a lens?
 - [ ] The Elderwood Core it drops: does it read as a trophy, placed in your base?
+- [ ] With friends: does the tree with a crack more per player feel as long as alone? Did
+      everyone who cracked a heart get a lens?
 - [ ] A second fight at home on an exposed, weathered or oxidized collar: does each feel harder
       than the last, and is the extra lens or shards worth it? Is the oxidized tree beatable?
 - [ ] Resin glass: does it look like amber next to orange stained glass? Did you mend your Sentry

@@ -191,12 +191,12 @@ public class AdvancementTest {
 		sequence.thenExecute(() -> {
 			for (ElderwoodHeart heart : ElderwoodHeart.values()) {
 				if (heart != ElderwoodHeart.CORE) {
-					elderwood.setCracks(heart, elderwood.getTier().maxCracks(heart));
+					elderwood.setCracks(heart, elderwood.maxCracks(heart));
 				}
 			}
 			hitCore.run();
 		});
-		for (int i = 1; i < elderwood.getTier().maxCracks(ElderwoodHeart.CORE); i++) {
+		for (int i = 1; i < elderwood.maxCracks(ElderwoodHeart.CORE); i++) {
 			sequence.thenExecuteAfter(TICKS_BETWEEN_HITS, hitCore);
 		}
 		return sequence;

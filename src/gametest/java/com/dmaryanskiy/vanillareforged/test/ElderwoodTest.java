@@ -31,6 +31,9 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.arrow.Arrow;
 import net.minecraft.world.item.Item;
@@ -572,6 +575,55 @@ public class ElderwoodTest {
 		helper.startSequence()
 				.thenWaitUntil(() -> helper.assertTrue(elderwood.getSlamPhase() == Elderwood.SlamPhase.STUCK, "branch planted"))
 				.thenExecute(() -> helper.assertValueEqual(player.getHealth(), player.getMaxHealth(), "health beside the slam"))
+				.thenSucceed();
+	}
+
+	@GameTest(environment = MIDNIGHT)
+	public void everyHeartTakesACrackMoreForEachPlayerPastTheFirst(GameTestHelper helper) {
+		Elderwood elderwood = stillElderwood(helper);
+		int alone = elderwood.maxCracks(ElderwoodHeart.CORE);
+
+		elderwood.setPlayers(3);
+		helper.assertValueEqual(elderwood.maxCracks(ElderwoodHeart.CORE), alone + 2, "core cracks with three players");
+		elderwood.setPlayers(9);
+		helper.assertValueEqual(elderwood.getPlayers(), Elderwood.MAX_PLAYERS, "players, which stop at four");
+		elderwood.setCopperStage(WeatheringCopper.WeatherState.OXIDIZED);
+		elderwood.setCracks(ElderwoodHeart.CORE, elderwood.maxCracks(ElderwoodHeart.CORE) - 1);
+		helper.assertValueEqual(elderwood.getCracks(ElderwoodHeart.CORE), elderwood.maxCracks(ElderwoodHeart.CORE) - 1,
+				"cracks the hardest core holds, which must fit in its share of the synced number");
+		helper.succeed();
+	}
+
+	@GameTest(environment = MIDNIGHT, skyAccess = true)
+	public void itWakesForAsManyPlayersAsStandAroundTheStump(GameTestHelper helper) {
+		plainPlayer(helper, Vec3.atBottomCenterOf(LOG).add(0.0, 0.0, 4.0));
+		plainPlayer(helper, Vec3.atBottomCenterOf(LOG).add(0.0, 0.0, 8.0));
+		buildStump(helper, Blocks.COPPER_BLOCK.weathering().unaffected());
+		helper.setBlock(HEART, Blocks.CREAKING_HEART);
+
+		helper.assertValueEqual(findElderwood(helper).getPlayers(), 2, "players it woke among");
+		helper.succeed();
+	}
+
+	@GameTest(environment = MIDNIGHT, maxTicks = ElderwoodDecay.TICKS + 60)
+	public void everyoneWhoCrackedAHeartTakesALensHome(GameTestHelper helper) {
+		Elderwood elderwood = stillElderwood(helper);
+		elderwood.setPlayers(2);
+		Player first = plainPlayer(helper, ELDERWOOD.add(0.0, 0.0, 3.0));
+		Player second = plainPlayer(helper, ELDERWOOD.add(0.0, 0.0, 3.0));
+
+		helper.startSequence()
+				.thenExecute(() -> helper.assertTrue(hitAs(helper, first, elderwood, ElderwoodHeart.TRUNK_FRONT, elderwood.getLookAngle(), 2.0, 1.0F),
+						"The first player should crack a heart"))
+				.thenExecuteAfter(15, () -> helper.assertTrue(hitAs(helper, second, elderwood, ElderwoodHeart.TRUNK_FRONT, elderwood.getLookAngle(), 2.0, 1.0F),
+						"The second player should crack a heart"))
+				.thenExecute(() -> elderwood.kill(helper.getLevel()))
+				.thenWaitUntil(() -> helper.assertTrue(elderwood.isRemoved(), "It should be gone once the stump has burst"))
+				.thenExecute(() -> {
+					int lenses = helper.getEntities(EntityTypes.ITEM).stream().map(ItemEntity::getItem)
+							.filter(stack -> stack.is(ModItems.ELDERWOOD_LENS)).mapToInt(ItemStack::getCount).sum();
+					helper.assertValueEqual(lenses, 2, "lenses for two players who cracked a heart");
+				})
 				.thenSucceed();
 	}
 

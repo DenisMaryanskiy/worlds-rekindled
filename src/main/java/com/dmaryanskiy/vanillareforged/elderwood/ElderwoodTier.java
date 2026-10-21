@@ -65,10 +65,6 @@ public enum ElderwoodTier {
 		return heart.maxCracks() + this.extraCracks;
 	}
 
-	public int totalCracks() {
-		return ElderwoodHeart.ALL.stream().mapToInt(this::maxCracks).sum();
-	}
-
 	public int gazeRate(boolean coreOpen) {
 		return coreOpen ? this.coreGazeRate : this.gazeRate;
 	}
