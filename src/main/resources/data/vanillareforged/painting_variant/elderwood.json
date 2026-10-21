@@ -1,0 +1,13 @@
+{
+  "asset_id": "vanillareforged:elderwood",
+  "author": {
+    "color": "gray",
+    "translate": "painting.vanillareforged.elderwood.author"
+  },
+  "height": 3,
+  "title": {
+    "color": "yellow",
+    "translate": "painting.vanillareforged.elderwood.title"
+  },
+  "width": 2
+}

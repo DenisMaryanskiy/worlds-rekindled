@@ -10,6 +10,11 @@ The design behind all of it is in [docs/pale-garden.md](docs/pale-garden.md).
 
 After the third playtest: the fights tuned once more, and rewards for every kind of player.
 
+### 0.4.7 (#65)
+
+- **The Gaze Banner Pattern**, the lens's eye, found in the Pale Ruin's study and hall.
+- **The Elderwood**, a painting of the tree and its seven hearts, found only in the hall's chest.
+
 ### 0.4.6 (#64)
 
 - **Resin glass** and **resin glass panes**: 8 glass around a block of resin make 8, as dye makes

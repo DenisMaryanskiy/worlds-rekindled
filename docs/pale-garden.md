@@ -588,12 +588,16 @@ chest became a treasure chest worth the fight, and the supply chests carry real 
 - **The store room**: iron ingots 2-6 (was 1-3), gold ingots now and then, and rarely a diamond.
 - The study, the workshop and the gravel stay as they are.
 
-**Things only the Ruin has** (planned), so a second Ruin is worth clearing:
-- **A banner pattern**, the lens's eye, like the Trial Chambers' Flow and Guster: in the study's
-  chest one time in three and the hall's one time in four.
-- **A painting**, the tree with its seven hearts as the mural shows it, in the hall's chest one
-  time in three. Paintings are data in 26.3; this one isn't placeable at random, so it's only
-  found. Placeholder art for both.
+**Things only the Ruin has** (built), so a second Ruin is worth clearing:
+- **The Gaze Banner Pattern**, the lens's eye, like the Trial Chambers' Flow and Guster: in the
+  study's chest one time in three and the hall's one time in four. Rare, stacks to 1, beside the
+  Guster in the Ingredients tab. On a loom it puts the eye on a banner, and so on a shield.
+- **The Elderwood**, a painting 2 wide and 3 tall: the tree with its lens and seven hearts on
+  calcite, as the mural shows it, "by the builders". In the hall's chest one time in three.
+  Paintings are data in 26.3; this one isn't in `#minecraft:placeable`, so a painting hung at
+  random is never it: it's only found.
+- Placeholder art for both: an almond eye with a round pupil for the pattern, and the painting
+  drawn pixel by pixel in the mural's colours.
 
 **A map to it** (built). The Pale Garden is the hardest biome to find. The **Cartographer**
 sells a **Pale Ruin Map** at Journeyman (level 3), for **14 emeralds and a compass**, beside its
@@ -1074,7 +1078,7 @@ The loop's last step, "return for more resin and hearts", is thin once the playe
 | 4 | Tiers, a Core per tier, Verdigris (built) | fighters, collectors | features 5 and 6 |
 | 5 | The Pale Ruin explorer map (built) | explorers | feature 4, Rewards |
 | 6 | Resin glass, healing a Sentry by hand (built) | builders, farmers | feature 7 |
-| 7 | The banner pattern and the painting | collectors, explorers | feature 4, Rewards |
+| 7 | The banner pattern and the painting (built) | collectors, explorers | feature 4, Rewards |
 | 8 | More players, more tree | multiplayer | feature 5 |
 
 What makes each a reason to come back: a lens per Sentry, four tiers and a set of four Cores,
