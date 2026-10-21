@@ -94,6 +94,8 @@ what to write down. Tick what's fine, note what isn't.
       Did you understand it's a recipe? Did you put the pumpkin on the second plinth's heart?
       Does the builders' own Sentry wandering the chamber help or confuse?
 - [ ] A Heartwood Sentry of your own from a heart you took home: built without looking it up?
+- [ ] An Elderwood Lens used on your Sentry: can you see it's set? At night, does its gaze slow
+      the mob it fights and then root it in place? Is a lensed Sentry worth a lens?
 - [ ] Is there a reason to come back for a second Elderwood, or a second Ruin?
 
 ## Already checked without a player

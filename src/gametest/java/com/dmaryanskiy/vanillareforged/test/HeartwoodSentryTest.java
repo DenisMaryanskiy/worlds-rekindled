@@ -3,15 +3,20 @@ package com.dmaryanskiy.vanillareforged.test;
 import java.util.List;
 
 import com.dmaryanskiy.vanillareforged.ModEntities;
+import com.dmaryanskiy.vanillareforged.ModItems;
+import com.dmaryanskiy.vanillareforged.petrification.Petrification;
 import com.dmaryanskiy.vanillareforged.sentry.HeartwoodSentry;
 import com.dmaryanskiy.vanillareforged.sentry.SentryLantern;
+import com.dmaryanskiy.vanillareforged.sentry.SentryLens;
 
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.animal.cow.Cow;
+import net.minecraft.world.entity.monster.ElderGuardian;
 import net.minecraft.world.entity.monster.zombie.Zombie;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -25,6 +30,7 @@ import net.minecraft.world.phys.Vec3;
 
 public class HeartwoodSentryTest {
 	private static final BlockPos PEDESTAL = new BlockPos(1, 1, 1);
+	private static final Vec3 IN_ITS_GAZE = new Vec3(1.5, 2.0, 4.5);
 	private static final String NOON = "vanillareforged-test:noon";
 	private static final String MIDNIGHT = "vanillareforged-test:midnight";
 
@@ -227,6 +233,120 @@ public class HeartwoodSentryTest {
 			helper.assertBlockPresent(Blocks.AIR, head);
 			helper.succeed();
 		});
+	}
+
+	@GameTest
+	public void aLensSetsItselfInASentryOnce(GameTestHelper helper) {
+		HeartwoodSentry sentry = build(helper, Blocks.CARVED_PUMPKIN);
+		Player player = helper.makeMockServerPlayer(GameType.SURVIVAL);
+		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(ModItems.ELDERWOOD_LENS, 2));
+
+		sentry.interact(player, InteractionHand.MAIN_HAND, sentry.position());
+		helper.assertTrue(sentry.isLensed(), "The lens should be set in the Sentry");
+		sentry.interact(player, InteractionHand.MAIN_HAND, sentry.position());
+
+		helper.assertValueEqual(player.getMainHandItem().getCount(), 1, "lenses left after using two on one Sentry");
+		helper.succeed();
+	}
+
+	@GameTest
+	public void aSentryHuntingThePlayerTakesNoLens(GameTestHelper helper) {
+		HeartwoodSentry sentry = build(helper, Blocks.CARVED_PUMPKIN);
+		Player player = helper.makeMockServerPlayer(GameType.SURVIVAL);
+		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(ModItems.ELDERWOOD_LENS));
+		sentry.setTarget(player);
+
+		sentry.interact(player, InteractionHand.MAIN_HAND, sentry.position());
+
+		helper.assertFalse(sentry.isLensed(), "An angry Sentry shouldn't take a lens");
+		helper.assertValueEqual(player.getMainHandItem().getCount(), 1, "lenses left");
+		helper.succeed();
+	}
+
+	@GameTest
+	public void takingALensedSentryApartReturnsItsLens(GameTestHelper helper) {
+		HeartwoodSentry sentry = build(helper, Blocks.CARVED_PUMPKIN);
+		sentry.setLensed(true);
+
+		sentry.interact(axePlayer(helper, true), InteractionHand.MAIN_HAND, sentry.position());
+
+		helper.assertItemEntityPresent(ModItems.ELDERWOOD_LENS);
+		helper.succeed();
+	}
+
+	@GameTest
+	public void aLensedSentryThatDiesDropsItsLens(GameTestHelper helper) {
+		HeartwoodSentry sentry = build(helper, Blocks.CARVED_PUMPKIN);
+		sentry.setLensed(true);
+
+		sentry.hurtServer(helper.getLevel(), helper.getLevel().damageSources().genericKill(), Float.MAX_VALUE);
+
+		helper.assertFalse(sentry.isAlive(), "The Sentry should be dead");
+		helper.assertItemEntityPresent(ModItems.ELDERWOOD_LENS);
+		helper.succeed();
+	}
+
+	@GameTest(environment = MIDNIGHT, maxTicks = SentryLens.PETRIFY_AFTER_TICKS + 40)
+	public void aLensedSentrysGazeSlowsTheMobItFightsThenPetrifiesIt(GameTestHelper helper) {
+		HeartwoodSentry sentry = gazingSentry(helper);
+		Zombie zombie = helper.spawn(EntityTypes.ZOMBIE, IN_ITS_GAZE);
+		zombie.setNoAi(true);
+		sentry.setTarget(zombie);
+
+		helper.startSequence()
+				.thenWaitUntil(() -> helper.assertTrue(zombie.hasEffect(MobEffects.SLOWNESS), "The gaze should slow the zombie"))
+				.thenExecute(() -> helper.assertFalse(SentryLens.isPetrified(zombie), "Petrified too soon"))
+				.thenWaitUntil(() -> helper.assertTrue(SentryLens.isPetrified(zombie), "Held long enough, the zombie should be petrified"))
+				.thenSucceed();
+	}
+
+	@GameTest(environment = MIDNIGHT)
+	public void aSentryWithoutALensHasNoGaze(GameTestHelper helper) {
+		HeartwoodSentry sentry = gazingSentry(helper);
+		sentry.setLensed(false);
+		Zombie zombie = helper.spawn(EntityTypes.ZOMBIE, IN_ITS_GAZE);
+		zombie.setNoAi(true);
+		sentry.setTarget(zombie);
+
+		helper.runAfterDelay(20, () -> {
+			helper.assertFalse(zombie.hasEffect(MobEffects.SLOWNESS), "Only a lens gives a Sentry a gaze");
+			helper.succeed();
+		});
+	}
+
+	@GameTest(environment = MIDNIGHT, maxTicks = SentryLens.PETRIFY_AFTER_TICKS + 60)
+	public void aLensedSentryOnlySlowsABoss(GameTestHelper helper) {
+		HeartwoodSentry sentry = gazingSentry(helper);
+		ElderGuardian guardian = helper.spawn(EntityTypes.ELDER_GUARDIAN, IN_ITS_GAZE);
+		guardian.setNoAi(true);
+		sentry.setTarget(guardian);
+
+		helper.runAfterDelay(SentryLens.PETRIFY_AFTER_TICKS + 20, () -> {
+			helper.assertTrue(guardian.hasEffect(MobEffects.SLOWNESS), "The gaze should still slow a boss");
+			helper.assertFalse(SentryLens.isPetrified(guardian), "A boss is never petrified");
+			helper.succeed();
+		});
+	}
+
+	@GameTest(environment = MIDNIGHT, maxTicks = 40)
+	public void aLensedSentryTurnedOnAPlayerPetrifiesThem(GameTestHelper helper) {
+		HeartwoodSentry sentry = gazingSentry(helper);
+		Player player = helper.makeMockServerPlayer(GameType.SURVIVAL);
+		player.snapTo(helper.absoluteVec(IN_ITS_GAZE), 180.0F, 0.0F);
+		sentry.setTarget(player);
+
+		helper.succeedWhen(() -> helper.assertTrue(Petrification.getMeter(player) > 0, "Its gaze should start to petrify the player"));
+	}
+
+	/** A lensed Sentry that stays put on its pedestal, looking south. */
+	private static HeartwoodSentry gazingSentry(GameTestHelper helper) {
+		HeartwoodSentry sentry = build(helper, Blocks.CARVED_PUMPKIN);
+		sentry.setLensed(true);
+		sentry.setNoAi(true);
+		sentry.setYRot(0.0F);
+		sentry.setYHeadRot(0.0F);
+		sentry.setYBodyRot(0.0F);
+		return sentry;
 	}
 
 	private static Player axePlayer(GameTestHelper helper, boolean sneaking) {
