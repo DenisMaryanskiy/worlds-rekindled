@@ -26,6 +26,15 @@
           }
         }
       ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "vanillareforged:elderwood_core"
+        }
+      ]
     }
   ],
   "random_sequence": "vanillareforged:entities/elderwood"

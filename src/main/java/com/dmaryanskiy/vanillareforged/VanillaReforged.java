@@ -26,6 +26,7 @@ public class VanillaReforged implements ModInitializer {
 
 		ModSounds.initialize();
 		ModEntities.initialize();
+		ModBlocks.initialize();
 		ModItems.initialize();
 		ModCriteria.initialize();
 		ModStructureTypes.initialize();
