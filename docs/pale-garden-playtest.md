@@ -60,6 +60,8 @@ what to write down. Tick what's fine, note what isn't.
 - [ ] The tool chest in the second room: is the Silk Touch axe there, and is it obvious what
       it's for? Did you take a heart whole with it?
 - [ ] Pots and heaps: worth stopping for with a brush, or noise? Which sherds and how many?
+- [ ] The Gaze Banner Pattern and the Elderwood painting: did either turn up, and was it worth
+      a second Ruin to find the other?
 - [ ] Lens shards by the end: 9 make a lens. How many did you have?
 
 ## 3. The hall

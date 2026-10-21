@@ -7,11 +7,14 @@ import com.dmaryanskiy.vanillareforged.VanillaReforged;
 import com.dmaryanskiy.vanillareforged.sentry.RuinSentry;
 
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.tags.PaintingVariantTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.tags.VillagerTradeTags;
+import net.minecraft.world.entity.decoration.painting.PaintingVariant;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -24,6 +27,7 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.Vec3;
 
 public class PaleRuinLootTest {
+	private static final ResourceKey<PaintingVariant> PAINTING = ResourceKey.create(Registries.PAINTING_VARIANT, VanillaReforged.id("elderwood"));
 	private static final int CHESTS = 30;
 
 	@GameTest
@@ -102,6 +106,37 @@ public class PaleRuinLootTest {
 				"archaeology/pale_ruin_tomb", "archaeology/pale_ruin_hall")) {
 			helper.assertFalse(roll(helper, table, 0).isEmpty(), table + " should give something");
 		}
+		helper.succeed();
+	}
+
+	@GameTest
+	public void theGazeBannerPatternAndThePaintingAreFoundOnlyInTheRuin(GameTestHelper helper) {
+		var registries = helper.getLevel().registryAccess();
+		var gaze = registries.lookupOrThrow(Registries.BANNER_PATTERN).getOrThrow(ResourceKey.create(Registries.BANNER_PATTERN, VanillaReforged.id("gaze")));
+		var provided = new ItemStack(ModItems.GAZE_BANNER_PATTERN).get(DataComponents.PROVIDES_BANNER_PATTERNS);
+		helper.assertTrue(provided != null && provided.contains(gaze), "The pattern item should put the Gaze on a loom");
+		var painting = registries.lookupOrThrow(Registries.PAINTING_VARIANT).getOrThrow(PAINTING);
+		helper.assertFalse(painting.is(PaintingVariantTags.PLACEABLE), "The painting shouldn't turn up when a painting is hung at random");
+
+		int chests = 300;
+		int patternsInTheStudy = 0;
+		int patternsInTheHall = 0;
+		int paintings = 0;
+		for (int seed = 0; seed < chests; seed++) {
+			patternsInTheStudy += count(roll(helper, "chests/pale_ruin/study", seed), ModItems.GAZE_BANNER_PATTERN);
+			List<ItemStack> hall = roll(helper, "chests/pale_ruin/hall", seed);
+			patternsInTheHall += count(hall, ModItems.GAZE_BANNER_PATTERN);
+			for (ItemStack stack : hall) {
+				if (stack.is(Items.PAINTING)) {
+					helper.assertTrue(stack.get(DataComponents.PAINTING_VARIANT).is(PAINTING), "The hall's painting should be the Elderwood");
+					paintings++;
+				}
+			}
+		}
+		// One time in three, one in four and one in three.
+		helper.assertTrue(patternsInTheStudy > chests * 0.23 && patternsInTheStudy < chests * 0.43, "patterns in the study: " + patternsInTheStudy);
+		helper.assertTrue(patternsInTheHall > chests * 0.17 && patternsInTheHall < chests * 0.33, "patterns in the hall: " + patternsInTheHall);
+		helper.assertTrue(paintings > chests * 0.23 && paintings < chests * 0.43, "paintings in the hall: " + paintings);
 		helper.succeed();
 	}
 
