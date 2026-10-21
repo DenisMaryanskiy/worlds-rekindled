@@ -35,6 +35,29 @@ public class PaleRuinLootTest {
 	}
 
 	@GameTest
+	public void theHallsChestHoldsValuablesAndUsuallyADiamond(GameTestHelper helper) {
+		List<Item> valuables = List.of(Items.IRON_INGOT, Items.GOLD_INGOT, Items.DIAMOND, Items.EMERALD, Items.GOLDEN_APPLE,
+				Items.DIAMOND_PICKAXE, Items.DIAMOND_SWORD, Items.ENCHANTED_GOLDEN_APPLE);
+		int chests = 300;
+		int withADiamond = 0;
+		for (int seed = 0; seed < chests; seed++) {
+			List<ItemStack> loot = roll(helper, "chests/pale_ruin/hall", seed);
+			helper.assertTrue(loot.stream().filter(stack -> valuables.contains(stack.getItem())).count() >= 2,
+					"The hall's chest should hold at least two valuables, not " + loot);
+			for (ItemStack stack : loot) {
+				if (stack.is(Items.DIAMOND_PICKAXE) || stack.is(Items.DIAMOND_SWORD)) {
+					helper.assertTrue(stack.isEnchanted(), "A diamond tool in the hall's chest should be enchanted");
+				}
+			}
+			withADiamond += count(loot, Items.DIAMOND) > 0 ? 1 : 0;
+		}
+		// Two chests in three, from a pool of its own.
+		helper.assertTrue(withADiamond > chests * 0.55 && withADiamond < chests * 0.8,
+				"About two hall chests in three should hold a diamond, not " + withADiamond + " of " + chests);
+		helper.succeed();
+	}
+
+	@GameTest
 	public void theToolChestAlwaysHoldsAWornSilkTouchAxeAndABrush(GameTestHelper helper) {
 		var silkTouch = helper.getLevel().registryAccess().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(Enchantments.SILK_TOUCH);
 		for (int seed = 0; seed < CHESTS; seed++) {

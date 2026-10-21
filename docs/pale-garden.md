@@ -533,11 +533,11 @@ Placed so (loot tables under `chests/pale_ruin/`, `pots/` and `archaeology/`):
 
 - **The hall's chest** stands before the stump, between two pots that show the Creaking sherd
   (the tree with its heart) to the door. It always holds **one Creaking Heart** and **two lens
-  shards**, with 4-6 stacks of treasure: resin bricks and clumps, copper blocks, emeralds, pale
-  oak saplings, rarely diamonds or a golden apple.
+  shards**, with 4-6 stacks of resin bricks and clumps, copper blocks, emeralds and pale oak
+  saplings, **2-3 valuables**, and two times in three **1-3 diamonds** (see Richer chests).
 - **The tool chest**, in the second room, whose root carries a heart: always a **worn iron axe
   with Silk Touch** and a **brush**, and supplies (resin, copper and iron ingots, candles,
-  bread). It is the only chest in the line: the line is for fighting, the chambers for looting.
+  bread, now and then a diamond). It is the only chest in the line: the line is for fighting, the chambers for looting.
 - **The chambers' chests**: the store room's holds supplies (bread, arrows, candles, ingots,
   resin, a few logs), the study's always an **enchanted book** with books and paper, the Sentry
   workshop's the shears and the pumpkin.
@@ -573,14 +573,17 @@ Placed so (loot tables under `chests/pale_ruin/`, `pots/` and `archaeology/`):
   one in three no tomb, one in two no study. Nothing a player needs is in them: the axe, the
   brush, the heart, the shards, the trim and the shears are where every Ruin has them.
 
-**Richer chests (planned)**. For the hardest structure in the mod the chests held little worth
+**Richer chests** (built). For the hardest structure in the mod the chests held little worth
 taking home: one diamond in the whole Ruin now and then, iron by the one to three. The hall's
-chest becomes a treasure chest worth the fight, and the supply chests carry real metal:
+chest became a treasure chest worth the fight, and the supply chests carry real metal:
 
-- **The hall's chest** keeps its heart, its shards and its resin and copper, and gains a pool of
-  **2-3 valuables**: diamonds (1-3), iron ingots (4-10), gold ingots (3-8), emeralds (3-8), a
-  golden apple, a randomly enchanted diamond pickaxe or sword, and rarely an enchanted golden
-  apple. About two Ruins in three give at least one diamond from it.
+- **The hall's chest** keeps its heart, its shards and its resin and copper, and gains:
+  - **2-3 valuables**: iron ingots (4-10), gold ingots (3-8), emeralds (3-8), a golden apple, a
+    diamond pickaxe or sword enchanted at levels 20-39, and rarely an enchanted golden apple
+    (weights 6, 5, 4, 2, 1, 1, 1);
+  - **1-3 diamonds two times in three**, from a pool of their own. Among the valuables at the
+    weight first planned (4 of 24, rolled 2-3 times), only one chest in three had a diamond,
+    not two as intended.
 - **The tool chest**: iron ingots 2-5 (was 1-3), and a diamond now and then.
 - **The store room**: iron ingots 2-6 (was 1-3), gold ingots now and then, and rarely a diamond.
 - The study, the workshop and the gravel stay as they are.
@@ -1046,7 +1049,7 @@ The loop's last step, "return for more resin and hearts", is thin once the playe
 |---|---|---|---|
 | 1 | The lensed Sentry (built) | fighters, base guards | feature 2 |
 | 2 | The Elderwood Core (built) | collectors | feature 5 |
-| 3 | Richer chests | everyone | feature 4, Rewards |
+| 3 | Richer chests (built) | everyone | feature 4, Rewards |
 | 4 | Tiers, a Core per tier, Verdigris | fighters, collectors | features 5 and 6 |
 | 5 | The Pale Ruin explorer map | explorers | feature 4, Rewards |
 | 6 | Resin glass, healing a Sentry by hand | builders, farmers | feature 7 |
