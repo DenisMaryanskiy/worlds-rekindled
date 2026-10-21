@@ -4,11 +4,14 @@ import java.util.List;
 
 import com.dmaryanskiy.vanillareforged.ModItems;
 import com.dmaryanskiy.vanillareforged.VanillaReforged;
+import com.dmaryanskiy.vanillareforged.sentry.RuinSentry;
 
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.tags.TagKey;
+import net.minecraft.tags.VillagerTradeTags;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -99,6 +102,17 @@ public class PaleRuinLootTest {
 				"archaeology/pale_ruin_tomb", "archaeology/pale_ruin_hall")) {
 			helper.assertFalse(roll(helper, table, 0).isEmpty(), table + " should give something");
 		}
+		helper.succeed();
+	}
+
+	@GameTest
+	public void journeymanCartographersSellAMapToThePaleRuin(GameTestHelper helper) {
+		var trade = helper.getLevel().registryAccess().lookupOrThrow(Registries.VILLAGER_TRADE)
+				.get(ResourceKey.create(Registries.VILLAGER_TRADE, VanillaReforged.id("cartographer/3/emerald_and_compass_pale_ruin_map")));
+		helper.assertTrue(trade.isPresent(), "The Pale Ruin map trade should load");
+		helper.assertTrue(trade.get().is(VillagerTradeTags.CARTOGRAPHER_LEVEL_3), "A Journeyman Cartographer should offer it");
+		helper.assertTrue(helper.getLevel().registryAccess().lookupOrThrow(Registries.STRUCTURE).getOrThrow(RuinSentry.RUIN)
+				.is(TagKey.create(Registries.STRUCTURE, VanillaReforged.id("on_pale_ruin_maps"))), "The map should lead to a Pale Ruin");
 		helper.succeed();
 	}
 

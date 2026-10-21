@@ -20,6 +20,8 @@ what to write down. Tick what's fine, note what isn't.
 - [ ] The pavilion: does it sit on the ground, or dug in, or on stilts? Is it noticeable among
       the pale oaks, or easy to walk past?
 - [ ] **Buried Garden** is granted on the way down.
+- [ ] A Journeyman Cartographer's **Pale Ruin Map**: did one offer it, and did the map lead to a
+      Ruin? How far was it?
 
 ## 2. The rooms
 

@@ -595,11 +595,20 @@ chest became a treasure chest worth the fight, and the supply chests carry real 
   time in three. Paintings are data in 26.3; this one isn't placeable at random, so it's only
   found. Placeholder art for both.
 
-**A map to it** (planned). The Pale Garden is the hardest biome to find. The **Cartographer**
-sells a **Pale Ruin explorer map** at Journeyman, for emeralds and a compass, as it sells the
-Woodland and Ocean explorer maps. Like those, the trade only shows a Ruin within the map's search
-reach and is skipped where there's none, so in a world without a Pale Garden near the village it
-won't appear.
+**A map to it** (built). The Pale Garden is the hardest biome to find. The **Cartographer**
+sells a **Pale Ruin Map** at Journeyman (level 3), for **14 emeralds and a compass**, beside its
+Ocean Monument and Trial Chambers maps, as an explorer map of its own:
+- in 26.3 trades are data: the trade is `vanillareforged:cartographer/3/emerald_and_compass_pale_ruin_map`,
+  added to vanilla's `#minecraft:cartographer/level_3` trade tag, and leads to
+  `#vanillareforged:on_pale_ruin_maps`;
+- like the other explorer maps it searches **100 chunks** around the villager, and the trade is
+  dropped when no Ruin lies within reach, so in a world without a Pale Garden near the village
+  it never shows up. The reach counts the structure's placement regions, not plain chunks: on
+  one real-terrain seed, the sixth Journeyman tried offered it, and the map led to a Ruin about
+  4,300 blocks from spawn;
+- the map is an item of its own (`pale_ruin_map`, as vanilla's maps are now) with its own mark,
+  the `vanillareforged:pale_ruin` map decoration. Placeholder art for both: vanilla's Trial
+  Chambers icon recoloured pale, with resin for its copper.
 
 #### The missing heart
 
@@ -1059,7 +1068,7 @@ The loop's last step, "return for more resin and hearts", is thin once the playe
 | 2 | The Elderwood Core (built) | collectors | feature 5 |
 | 3 | Richer chests (built) | everyone | feature 4, Rewards |
 | 4 | Tiers, a Core per tier, Verdigris (built) | fighters, collectors | features 5 and 6 |
-| 5 | The Pale Ruin explorer map | explorers | feature 4, Rewards |
+| 5 | The Pale Ruin explorer map (built) | explorers | feature 4, Rewards |
 | 6 | Resin glass, healing a Sentry by hand | builders, farmers | feature 7 |
 | 7 | The banner pattern and the painting | collectors, explorers | feature 4, Rewards |
 | 8 | More players, more tree | multiplayer | feature 5 |
