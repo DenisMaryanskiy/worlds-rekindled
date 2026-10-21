@@ -12,6 +12,8 @@ Vanilla+ Fabric mod (Minecraft 26.3, Java 25). Build commands are in `README.md`
   `feat: Add sticky piston recipe`.
 - Types: `feat`, `fix`, `refactor`, `docs`, `test`, `build`, `ci`, `chore`.
 - Related small changes (e.g. a docs tweak needed by a feature) can share the feature's branch.
+- Every PR that changes what a player sees adds itself to `CHANGELOG.md` as the next patch version
+  of the current minor version (a new minor version for a big new addition), with its PR number.
 - Before pushing, `./gradlew build` must pass (it's the same gate CI runs on every push and PR).
 - After a PR is merged, sync `main` and remove its worktree and local branch (plus any other
   worktrees that are no longer needed).
