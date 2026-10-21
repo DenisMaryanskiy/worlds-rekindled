@@ -10,6 +10,13 @@ The design behind all of it is in [docs/pale-garden.md](docs/pale-garden.md).
 
 After the third playtest: the fights tuned once more, and rewards for every kind of player.
 
+### 0.4.6 (#64)
+
+- **Resin glass** and **resin glass panes**: 8 glass around a block of resin make 8, as dye makes
+  stained glass. Translucent amber; like stained glass it needs Silk Touch to pick up, and it tints
+  a beacon's beam orange.
+- **A resin clump mends a crack** in your Heartwood Sentry, as iron ingots heal an Iron Golem.
+
 ### 0.4.5 (#62)
 
 - A Journeyman **Cartographer** can sell a **Pale Ruin Map** for 14 emeralds and a compass, beside

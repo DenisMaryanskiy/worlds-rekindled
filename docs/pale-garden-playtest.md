@@ -101,6 +101,8 @@ what to write down. Tick what's fine, note what isn't.
 - [ ] The Elderwood Core it drops: does it read as a trophy, placed in your base?
 - [ ] A second fight at home on an exposed, weathered or oxidized collar: does each feel harder
       than the last, and is the extra lens or shards worth it? Is the oxidized tree beatable?
+- [ ] Resin glass: does it look like amber next to orange stained glass? Did you mend your Sentry
+      with resin clumps?
 - [ ] Is there a reason to come back for a second Elderwood, or a second Ruin?
 
 ## Already checked without a player
