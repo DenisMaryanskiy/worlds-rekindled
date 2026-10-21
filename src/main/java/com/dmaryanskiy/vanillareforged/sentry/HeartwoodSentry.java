@@ -217,12 +217,24 @@ public class HeartwoodSentry extends AbstractSentry {
 	}
 
 	/**
-	 * An Elderwood Lens sets itself in a Sentry that isn't hunting the player. Sneak + axe takes apart
-	 * a Sentry that isn't hunting the player; a statue can also just be chopped.
+	 * For a Sentry that isn't hunting the player: a resin clump mends a crack, as iron ingots heal an
+	 * Iron Golem, and an Elderwood Lens sets itself in it. Sneak + axe takes it apart; a statue can
+	 * also just be chopped.
 	 */
 	@Override
 	protected InteractionResult mobInteract(Player player, InteractionHand hand) {
 		ItemStack stack = player.getItemInHand(hand);
+		if (stack.is(Items.RESIN_CLUMP)) {
+			if (this.getCracks() == 0 || this.getTarget() == player) {
+				return InteractionResult.PASS;
+			}
+			if (!this.level().isClientSide()) {
+				this.setCracks(this.getCracks() - 1);
+				stack.consume(1, player);
+				this.playSound(SoundEvents.RESIN_PLACE, 1.0F, 1.2F);
+			}
+			return InteractionResult.SUCCESS;
+		}
 		if (stack.is(ModItems.ELDERWOOD_LENS)) {
 			if (this.isLensed()) {
 				return InteractionResult.PASS;

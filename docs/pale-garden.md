@@ -973,16 +973,20 @@ added, so another mod that overrides the same file wins or loses as a whole.
   adding ours would only make it harder. **How Did We Get Here** counts status effects, and petrification is a
   meter like powder snow's freezing, which isn't on it either.
 
-### 7. More for resin (planned)
+### 7. More for resin (built)
 
 Resin is the Pale Garden's own resource, and besides the bricks the mod only asks for it to
 summon the tree and repair the mask. Two steady uses, so a resin farm under a Pale Mask among
 the Creakings has something to feed:
 
 - **Resin glass**: 8 glass around a block of resin give 8 resin glass, as dye makes stained
-  glass; 6 of it give 16 panes. Translucent amber, the lens's own glass. Placeholder texture.
+  glass; 6 of it give 16 panes, and 8 glass panes around a block of resin give 8. Translucent
+  amber, the lens's own glass. It's stained glass in all but the name: it breaks to nothing
+  without Silk Touch, sits beside orange stained glass in the Colored Blocks tab, and tints a
+  beacon's beam orange. Placeholder texture: orange stained glass shifted towards gold.
 - **Healing a Sentry by hand**: a resin clump used on a Heartwood Sentry mends one crack, as iron
-  ingots heal an Iron Golem. Any time but while it's hunting that player; not on Ruin Sentries.
+  ingots heal an Iron Golem. Any time but while it's hunting that player, and not when it has no
+  cracks (the clump isn't spent); not on Ruin Sentries.
 
 ## Parked for later (warrior content and extras)
 
@@ -1069,7 +1073,7 @@ The loop's last step, "return for more resin and hearts", is thin once the playe
 | 3 | Richer chests (built) | everyone | feature 4, Rewards |
 | 4 | Tiers, a Core per tier, Verdigris (built) | fighters, collectors | features 5 and 6 |
 | 5 | The Pale Ruin explorer map (built) | explorers | feature 4, Rewards |
-| 6 | Resin glass, healing a Sentry by hand | builders, farmers | feature 7 |
+| 6 | Resin glass, healing a Sentry by hand (built) | builders, farmers | feature 7 |
 | 7 | The banner pattern and the painting | collectors, explorers | feature 4, Rewards |
 | 8 | More players, more tree | multiplayer | feature 5 |
 

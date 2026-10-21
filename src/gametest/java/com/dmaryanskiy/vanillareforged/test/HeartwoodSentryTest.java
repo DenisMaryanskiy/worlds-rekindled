@@ -236,6 +236,36 @@ public class HeartwoodSentryTest {
 	}
 
 	@GameTest
+	public void aResinClumpMendsACrack(GameTestHelper helper) {
+		HeartwoodSentry sentry = build(helper, Blocks.CARVED_PUMPKIN);
+		sentry.setCracks(2);
+		Player player = helper.makeMockServerPlayer(GameType.SURVIVAL);
+		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.RESIN_CLUMP, 3));
+
+		sentry.interact(player, InteractionHand.MAIN_HAND, sentry.position());
+
+		helper.assertValueEqual(sentry.getCracks(), 1, "cracks after one clump");
+		helper.assertValueEqual(player.getMainHandItem().getCount(), 2, "clumps left");
+		helper.succeed();
+	}
+
+	@GameTest
+	public void resinIsNotSpentOnAWholeOrAnAngrySentry(GameTestHelper helper) {
+		HeartwoodSentry whole = build(helper, Blocks.CARVED_PUMPKIN);
+		Player player = helper.makeMockServerPlayer(GameType.SURVIVAL);
+		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.RESIN_CLUMP, 3));
+		whole.interact(player, InteractionHand.MAIN_HAND, whole.position());
+
+		whole.setCracks(2);
+		whole.setTarget(player);
+		whole.interact(player, InteractionHand.MAIN_HAND, whole.position());
+
+		helper.assertValueEqual(whole.getCracks(), 2, "cracks on a Sentry hunting the player");
+		helper.assertValueEqual(player.getMainHandItem().getCount(), 3, "clumps left");
+		helper.succeed();
+	}
+
+	@GameTest
 	public void aLensSetsItselfInASentryOnce(GameTestHelper helper) {
 		HeartwoodSentry sentry = build(helper, Blocks.CARVED_PUMPKIN);
 		Player player = helper.makeMockServerPlayer(GameType.SURVIVAL);
