@@ -874,11 +874,18 @@ paid than the last, as Ominous trials are to plain ones:
   constants on `Elderwood` and `ElderwoodLens` are the plain copper tier's. The boss bar counts
   the tier's cracks, so it still empties exactly.
 
-**More players, more tree** (planned). With more players it's an easy fight shared out and a
-single lens for the group. The players within 24 blocks when it wakes set it, up to four:
-- every heart takes **one more crack per player past the first**;
-- every player who cracked a heart during the fight gets **a lens of their own**, dropped where
-  the trunk stood with the rest. Shards, Core and resin stay one set.
+**More players, more tree** (built). With more players it was an easy fight shared out and a
+single lens for the group. The players within 24 blocks of the stump when it wakes set it, up to
+four; spectators and players in Creative don't count:
+- every heart takes **one more crack per player past the first**, on top of its tier's;
+- every player who cracked a heart during the fight gets **a lens of their own**: one more lens
+  for each such player past the first, dropped where the trunk stood with the rest. Shards, Core
+  and resin stay one set.
+- Both are remembered with the tree. Who cracked a heart is forgotten, as who was petrified is,
+  once it has gone dormant and mended whole: that's a new fight. The number of players stays
+  what it woke with.
+- A heart's cracks are packed 4 bits each now (up to 15; the hardest core is 5, one more for the
+  top tiers, three more with four players). Trees saved before are read from the old 3 bits.
 
 The lens, shard and both recipes are implemented (recipe book unlocks on picking up a lens or a
 shard). Placeholder textures: amber resin glass in a weathered
@@ -1041,7 +1048,7 @@ planned.
   Candidates: gaze fill rate, slam damage, root interval. Also what Peaceful means for it (it's
   a monster, so it would vanish; refusing to wake may read better).
 - **Multiplayer**: whom it targets and turns to with several players around, and the gaze
-  holding only one of them. More cracks and a lens each are planned (feature 5).
+  holding only one of them. More cracks and a lens each are in (feature 5).
   Petrification isn't saved, so relogging mid-fight clears it; fine alone, an exploit in a group.
 - **Dedicated server run**: everything so far was tested through GameTests and a single-player
   client.
@@ -1079,7 +1086,7 @@ The loop's last step, "return for more resin and hearts", is thin once the playe
 | 5 | The Pale Ruin explorer map (built) | explorers | feature 4, Rewards |
 | 6 | Resin glass, healing a Sentry by hand (built) | builders, farmers | feature 7 |
 | 7 | The banner pattern and the painting (built) | collectors, explorers | feature 4, Rewards |
-| 8 | More players, more tree | multiplayer | feature 5 |
+| 8 | More players, more tree (built) | multiplayer | feature 5 |
 
 What makes each a reason to come back: a lens per Sentry, four tiers and a set of four Cores,
 a map to every next Ruin, and resin that keeps being used.

@@ -5,6 +5,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.dmaryanskiy.vanillareforged.ModCriteria;
+import com.dmaryanskiy.vanillareforged.ModItems;
 import com.dmaryanskiy.vanillareforged.ModSounds;
 import com.dmaryanskiy.vanillareforged.heart.HeartHit;
 
@@ -33,6 +34,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.WeatheringCopper;
@@ -71,6 +73,9 @@ public class Elderwood extends Monster {
 	// Long enough to die, come back from a respawn point at the Ruin's entrance and find it as it was left.
 	public static final int DORMANT_AFTER_TICKS = 1800;
 	public static final int HEAL_INTERVAL_TICKS = 100;
+	// Players this close when it wakes make it a group's fight, up to this many.
+	public static final double PLAYER_RANGE = 24.0;
+	public static final int MAX_PLAYERS = 4;
 	private static final int CRACK_COOLDOWN_TICKS = 10;
 	private static final double HEART_DEPTH = 0.75;
 	private static final ElderwoodHeart[] BRANCH_HEARTS = {ElderwoodHeart.RIGHT_BRANCH, ElderwoodHeart.LEFT_BRANCH};
@@ -100,6 +105,8 @@ public class Elderwood extends Monster {
 			EntityDataSerializers.BOOLEAN);
 	private static final EntityDataAccessor<Boolean> DORMANT = SynchedEntityData.defineId(Elderwood.class,
 			EntityDataSerializers.BOOLEAN);
+	private static final EntityDataAccessor<Integer> PLAYERS = SynchedEntityData.defineId(Elderwood.class,
+			EntityDataSerializers.INT);
 
 	public enum SlamPhase {
 		NONE, WINDUP, STUCK
@@ -119,6 +126,7 @@ public class Elderwood extends Monster {
 	private int idleTicks;
 	private DamageSource killedBy;
 	private final Set<UUID> petrifiedThisFight = new HashSet<>();
+	private final Set<UUID> crackedThisFight = new HashSet<>();
 
 	public Elderwood(EntityType<? extends Elderwood> type, Level level) {
 		super(type, level);
@@ -151,6 +159,7 @@ public class Elderwood extends Monster {
 		builder.define(STUNNED, false);
 		builder.define(GROWING, false);
 		builder.define(DORMANT, false);
+		builder.define(PLAYERS, 1);
 	}
 
 	/** The collar's oxidation stage, which its copper plates show. */
@@ -161,6 +170,21 @@ public class Elderwood extends Monster {
 	public void setCopperStage(WeatheringCopper.WeatherState stage) {
 		this.entityData.set(COPPER_STAGE, stage.ordinal());
 		this.showCracksOnTheBossBar();
+	}
+
+	/** How many players it woke among: every heart takes a crack more for each past the first. */
+	public int getPlayers() {
+		return this.entityData.get(PLAYERS);
+	}
+
+	public void setPlayers(int players) {
+		this.entityData.set(PLAYERS, Mth.clamp(players, 1, MAX_PLAYERS));
+		this.showCracksOnTheBossBar();
+	}
+
+	/** How many cracks destroy the heart: its tier's, and one more for each player past the first. */
+	public int maxCracks(ElderwoodHeart heart) {
+		return this.getTier().maxCracks(heart) + this.getPlayers() - 1;
 	}
 
 	/** How hard it fights and what it leaves, which its collar sets. */
@@ -200,7 +224,7 @@ public class Elderwood extends Monster {
 	}
 
 	public boolean isDestroyed(ElderwoodHeart heart) {
-		return this.getCracks(heart) >= this.getTier().maxCracks(heart);
+		return this.getCracks(heart) >= this.maxCracks(heart);
 	}
 
 	/** The core only opens once every other heart is destroyed. */
@@ -233,10 +257,12 @@ public class Elderwood extends Monster {
 
 	private void showCracksOnTheBossBar() {
 		int cracks = 0;
+		int total = 0;
 		for (ElderwoodHeart heart : ElderwoodHeart.ALL) {
 			cracks += this.getCracks(heart);
+			total += this.maxCracks(heart);
 		}
-		this.bossEvent.setProgress(1.0F - cracks / (float) this.getTier().totalCracks());
+		this.bossEvent.setProgress(1.0F - cracks / (float) total);
 	}
 
 	@Override
@@ -272,6 +298,9 @@ public class Elderwood extends Monster {
 
 	private boolean crack(ServerLevel level, DamageSource source, ElderwoodHeart heart) {
 		this.crackCooldown = CRACK_COOLDOWN_TICKS;
+		if (source.getEntity() instanceof Player player) {
+			this.crackedThisFight.add(player.getUUID());
+		}
 		this.setCracks(heart, this.getCracks(heart) + 1);
 		// Every crack shows on the heart that took it: resin chips, and the heart's own shards when it breaks.
 		Vec3 at = heart.box(this).getCenter();
@@ -523,6 +552,7 @@ public class Elderwood extends Monster {
 		}
 		// Whole again: whoever comes next starts a new fight.
 		this.petrifiedThisFight.clear();
+		this.crackedThisFight.clear();
 	}
 
 	/** How far it has fallen apart while dying (see {@link ElderwoodDecay#stage}). */
@@ -558,6 +588,11 @@ public class Elderwood extends Monster {
 	@Override
 	protected void dropFromLootTable(ServerLevel level, DamageSource source, boolean killedByPlayer) {
 		this.dropFromLootTable(level, source, killedByPlayer, this.getTier().lootTable());
+		// In a group, everyone who cracked a heart takes a lens home; the rest is one set.
+		int extraLenses = this.crackedThisFight.size() - 1;
+		if (extraLenses > 0) {
+			this.spawnAtLocation(level, new ItemStack(ModItems.ELDERWOOD_LENS, extraLenses));
+		}
 	}
 
 	@Override
@@ -692,8 +727,10 @@ public class Elderwood extends Monster {
 	protected void addAdditionalSaveData(ValueOutput output) {
 		super.addAdditionalSaveData(output);
 		output.putInt("copper_stage", this.getCopperStage().ordinal());
-		output.putInt("heart_cracks", this.entityData.get(HEART_CRACKS));
+		output.putInt("hearts", this.entityData.get(HEART_CRACKS));
+		output.putInt("players", this.getPlayers());
 		output.store("petrified_this_fight", UUIDUtil.CODEC_SET, this.petrifiedThisFight);
+		output.store("cracked_this_fight", UUIDUtil.CODEC_SET, this.crackedThisFight);
 	}
 
 	@Override
@@ -701,7 +738,16 @@ public class Elderwood extends Monster {
 		super.readAdditionalSaveData(input);
 		int stage = input.getIntOr("copper_stage", WeatheringCopper.WeatherState.UNAFFECTED.ordinal());
 		this.setCopperStage(COPPER_STAGES[Mth.clamp(stage, 0, COPPER_STAGES.length - 1)]);
-		this.entityData.set(HEART_CRACKS, input.getIntOr("heart_cracks", 0));
+		this.entityData.set(PLAYERS, Mth.clamp(input.getIntOr("players", 1), 1, MAX_PLAYERS));
+		this.entityData.set(HEART_CRACKS, input.getIntOr("hearts", 0));
+		int old = input.getIntOr("heart_cracks", 0);
+		for (ElderwoodHeart heart : ElderwoodHeart.ALL) {
+			if (old != 0) {
+				this.setCracks(heart, heart.cracksInOld(old));
+			}
+		}
+		this.crackedThisFight.clear();
+		input.read("cracked_this_fight", UUIDUtil.CODEC_SET).ifPresent(this.crackedThisFight::addAll);
 		this.petrifiedThisFight.clear();
 		input.read("petrified_this_fight", UUIDUtil.CODEC_SET).ifPresent(this.petrifiedThisFight::addAll);
 		this.showCracksOnTheBossBar();

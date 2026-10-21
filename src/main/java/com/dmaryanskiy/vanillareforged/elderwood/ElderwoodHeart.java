@@ -30,7 +30,9 @@ public enum ElderwoodHeart {
 
 	// values() copies the array on every call, and the hearts are walked every tick and every frame.
 	public static final List<ElderwoodHeart> ALL = List.of(values());
-	private static final int BITS = 3;
+	// Room for 15: the core's 5, one more on the top tiers, and three more with four players.
+	private static final int BITS = 4;
+	private static final int OLD_BITS = 3;
 	// A branch heart sits this far along its branch from the pivot (the branch hearts' spot above),
 	// in the direction (right, up, forward) the right branch points; the left one mirrors it. These
 	// follow the poses in the client's ElderwoodModel.
@@ -85,6 +87,11 @@ public enum ElderwoodHeart {
 	/** Cracks of every heart packed into one synced number, {@value #BITS} bits each. */
 	public int cracksIn(int packed) {
 		return packed >> this.ordinal() * BITS & (1 << BITS) - 1;
+	}
+
+	/** Cracks as saved before groups, when each heart had {@value #OLD_BITS} bits. */
+	public int cracksInOld(int packed) {
+		return packed >> this.ordinal() * OLD_BITS & (1 << OLD_BITS) - 1;
 	}
 
 	public int withCracks(int packed, int cracks) {

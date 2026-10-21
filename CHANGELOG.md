@@ -10,6 +10,12 @@ The design behind all of it is in [docs/pale-garden.md](docs/pale-garden.md).
 
 After the third playtest: the fights tuned once more, and rewards for every kind of player.
 
+### 0.4.8 (#67)
+
+- **The Elderwood scales for groups**: with more players near the stump when it wakes, up to
+  four, every heart takes a crack more per player past the first, and everyone who cracked a
+  heart gets a lens of their own.
+
 ### 0.4.7 (#65)
 
 - **The Gaze Banner Pattern**, the lens's eye, found in the Pale Ruin's study and hall.

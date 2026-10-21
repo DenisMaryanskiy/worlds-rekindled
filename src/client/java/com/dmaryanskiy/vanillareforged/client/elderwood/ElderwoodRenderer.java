@@ -48,6 +48,7 @@ public class ElderwoodRenderer extends MobRenderer<Elderwood, ElderwoodRenderSta
 		state.copperStage = entity.getCopperStage();
 		for (ElderwoodHeart heart : ElderwoodHeart.ALL) {
 			state.heartCracks[heart.ordinal()] = entity.getCracks(heart);
+			state.heartBroken[heart.ordinal()] = entity.isDestroyed(heart);
 			state.heartVulnerable[heart.ordinal()] = entity.isVulnerable(heart);
 		}
 		state.coreOpen = entity.isCoreOpen();

@@ -25,6 +25,7 @@ import net.minecraft.world.level.block.LevelEvent;
 import net.minecraft.world.level.block.WeatheringCopper;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 
 /**
  * The Elderwood's stump, which it grows out of when its Creaking Heart is placed last, on top, at
@@ -81,6 +82,10 @@ public final class ElderwoodSummon {
 			return false;
 		}
 		elderwood.setCopperStage(stageOf(copper));
+		Vec3 stumpCenter = Vec3.atCenterOf(logPos);
+		elderwood.setPlayers(level.getEntitiesOfClass(Player.class, new AABB(logPos).inflate(Elderwood.PLAYER_RANGE),
+				player -> !player.isSpectator() && !player.isCreative()
+						&& player.distanceToSqr(stumpCenter) <= Elderwood.PLAYER_RANGE * Elderwood.PLAYER_RANGE).size());
 		elderwood.setPersistenceRequired();
 		for (BlockPos pos : stump) {
 			BlockState state = level.getBlockState(pos);
