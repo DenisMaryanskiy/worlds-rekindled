@@ -3,17 +3,22 @@ package com.dmaryanskiy.vanillareforged;
 import java.util.function.Function;
 
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.MapItem;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.SmithingTemplateItem;
 import net.minecraft.world.item.SpawnEggItem;
+import net.minecraft.world.item.component.MapDecorations;
 import net.minecraft.world.item.equipment.ArmorType;
+import net.minecraft.world.level.saveddata.maps.MapDecorationType;
 
 public final class ModItems {
 	public static final Item ELDERWOOD_ARMOR_TRIM_SMITHING_TEMPLATE = register("elderwood_armor_trim_smithing_template",
@@ -35,10 +40,17 @@ public final class ModItems {
 	// Not in any creative tab: it only exists as the look of the Elderwood's projectile, like the fire charge
 	// is for fireballs.
 	public static final Item BURNING_RESIN = register("burning_resin", Item::new, new Item.Properties());
+	// Only from a Cartographer, as the other explorer maps: one that points at the nearest Pale Ruin.
+	public static final Item PALE_RUIN_MAP = register("pale_ruin_map",
+			MapItem::new, new Item.Properties().component(DataComponents.MAP_DECORATIONS, MapDecorations.EMPTY));
 	public static final Item HEARTWOOD_SENTRY_SPAWN_EGG = register("heartwood_sentry_spawn_egg",
 			SpawnEggItem::new, new Item.Properties().spawnEgg(ModEntities.HEARTWOOD_SENTRY));
 	public static final Item RUIN_SENTRY_SPAWN_EGG = register("ruin_sentry_spawn_egg",
 			SpawnEggItem::new, new Item.Properties().spawnEgg(ModEntities.RUIN_SENTRY));
+
+	/** The Pale Ruin's mark on an explorer map. */
+	public static final Holder<MapDecorationType> PALE_RUIN_DECORATION = Registry.registerForHolder(BuiltInRegistries.MAP_DECORATION_TYPE,
+			VanillaReforged.id("pale_ruin"), new MapDecorationType(VanillaReforged.id("pale_ruin"), true, false));
 
 	private ModItems() {
 	}
