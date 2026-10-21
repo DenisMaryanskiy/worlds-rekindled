@@ -24,7 +24,8 @@
 			"com.dmaryanskiy.vanillareforged.test.RuinSentryTest",
 			"com.dmaryanskiy.vanillareforged.test.PaleRuinTest",
 			"com.dmaryanskiy.vanillareforged.test.PaleRuinLootTest",
-			"com.dmaryanskiy.vanillareforged.test.ResinGlassTest"
+			"com.dmaryanskiy.vanillareforged.test.ResinGlassTest",
+			"com.dmaryanskiy.vanillareforged.test.TranslationTest"
 		]
 	},
 	"depends": {
