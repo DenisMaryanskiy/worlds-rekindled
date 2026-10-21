@@ -54,6 +54,7 @@ import net.minecraft.world.phys.Vec3;
  * {@link ElderwoodSlam}, the roots in {@link ElderwoodRoots}, and its death in {@link ElderwoodDecay}.
  */
 public class Elderwood extends Monster {
+	// These four are its plain copper tier's; see ElderwoodTier for the others.
 	public static final float TURN_DEGREES_PER_TICK = 1.5F;
 	public static final int GROW_STAGES = 3;
 	public static final int GROW_STAGE_TICKS = 20;
@@ -141,7 +142,7 @@ public class Elderwood extends Monster {
 	@Override
 	protected void defineSynchedData(SynchedEntityData.Builder builder) {
 		super.defineSynchedData(builder);
-		builder.define(COPPER_STAGE, WeatheringCopper.WeatherState.WEATHERED.ordinal());
+		builder.define(COPPER_STAGE, WeatheringCopper.WeatherState.UNAFFECTED.ordinal());
 		builder.define(HEART_CRACKS, 0);
 		builder.define(SLAM_PHASE, SlamPhase.NONE.ordinal());
 		builder.define(SLAM_RIGHT_BRANCH, true);
@@ -159,6 +160,12 @@ public class Elderwood extends Monster {
 
 	public void setCopperStage(WeatheringCopper.WeatherState stage) {
 		this.entityData.set(COPPER_STAGE, stage.ordinal());
+		this.showCracksOnTheBossBar();
+	}
+
+	/** How hard it fights and what it leaves, which its collar sets. */
+	public ElderwoodTier getTier() {
+		return ElderwoodTier.of(this.getCopperStage());
 	}
 
 	Vec3 facing() {
@@ -193,7 +200,7 @@ public class Elderwood extends Monster {
 	}
 
 	public boolean isDestroyed(ElderwoodHeart heart) {
-		return this.getCracks(heart) >= heart.maxCracks();
+		return this.getCracks(heart) >= this.getTier().maxCracks(heart);
 	}
 
 	/** The core only opens once every other heart is destroyed. */
@@ -229,7 +236,7 @@ public class Elderwood extends Monster {
 		for (ElderwoodHeart heart : ElderwoodHeart.ALL) {
 			cracks += this.getCracks(heart);
 		}
-		this.bossEvent.setProgress(1.0F - cracks / (float) ElderwoodHeart.TOTAL_CRACKS);
+		this.bossEvent.setProgress(1.0F - cracks / (float) this.getTier().totalCracks());
 	}
 
 	@Override
@@ -366,7 +373,7 @@ public class Elderwood extends Monster {
 		LivingEntity target = this.getTarget();
 		// It turns only while it's free: a planted branch or a stun holds it where it faced.
 		boolean free = !this.isStunned() && this.getSlamPhase() == SlamPhase.NONE;
-		this.face(free && target != null ? Mth.approachDegrees(this.yBodyRot, this.yawTo(target), TURN_DEGREES_PER_TICK) : this.yBodyRot);
+		this.face(free && target != null ? Mth.approachDegrees(this.yBodyRot, this.yawTo(target), this.getTier().turnDegreesPerTick()) : this.yBodyRot);
 		if (this.isStunned()) {
 			if (--this.stunTicks <= 0) {
 				this.entityData.set(STUNNED, false);
@@ -482,7 +489,7 @@ public class Elderwood extends Monster {
 			return;
 		}
 		if (--this.rootCooldown <= 0) {
-			this.rootCooldown = ROOT_INTERVAL_TICKS;
+			this.rootCooldown = this.getTier().rootIntervalTicks();
 			this.raiseRoots(level, target.position());
 		}
 	}
@@ -527,8 +534,13 @@ public class Elderwood extends Monster {
 	public void die(DamageSource source) {
 		boolean wasAlive = !this.dead;
 		super.die(source);
-		if (wasAlive && source.getEntity() instanceof ServerPlayer killer && !this.hasPetrified(killer)) {
-			ModCriteria.KILLED_ELDERWOOD_UNPETRIFIED.trigger(killer);
+		if (wasAlive && source.getEntity() instanceof ServerPlayer killer) {
+			if (!this.hasPetrified(killer)) {
+				ModCriteria.KILLED_ELDERWOOD_UNPETRIFIED.trigger(killer);
+			}
+			if (this.getTier() == ElderwoodTier.OXIDIZED) {
+				ModCriteria.KILLED_OXIDIZED_ELDERWOOD.trigger(killer);
+			}
 		}
 	}
 
@@ -540,6 +552,12 @@ public class Elderwood extends Monster {
 			super.dropAllDeathLoot(level, this.killedBy != null ? this.killedBy : this.damageSources().generic());
 			this.remove(RemovalReason.KILLED);
 		}
+	}
+
+	// Each tier has a loot table of its own; the entity type's is the plain copper one.
+	@Override
+	protected void dropFromLootTable(ServerLevel level, DamageSource source, boolean killedByPlayer) {
+		this.dropFromLootTable(level, source, killedByPlayer, this.getTier().lootTable());
 	}
 
 	@Override
@@ -681,7 +699,7 @@ public class Elderwood extends Monster {
 	@Override
 	protected void readAdditionalSaveData(ValueInput input) {
 		super.readAdditionalSaveData(input);
-		int stage = input.getIntOr("copper_stage", WeatheringCopper.WeatherState.WEATHERED.ordinal());
+		int stage = input.getIntOr("copper_stage", WeatheringCopper.WeatherState.UNAFFECTED.ordinal());
 		this.setCopperStage(COPPER_STAGES[Mth.clamp(stage, 0, COPPER_STAGES.length - 1)]);
 		this.entityData.set(HEART_CRACKS, input.getIntOr("heart_cracks", 0));
 		this.petrifiedThisFight.clear();

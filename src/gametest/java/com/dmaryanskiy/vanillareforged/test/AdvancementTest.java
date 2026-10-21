@@ -22,6 +22,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.WeatheringCopper;
 import net.minecraft.world.phys.Vec3;
 
 public class AdvancementTest {
@@ -81,6 +82,21 @@ public class AdvancementTest {
 					helper.assertTrue(has(helper, player, "deadwood"), "Killing the Elderwood should grant Deadwood");
 					helper.assertTrue(has(helper, player, "dont_blink"), "Killing it without being petrified should grant Don't Blink");
 					helper.assertTrue(hasVanilla(helper, player, "adventure/kill_a_mob"), "Killing the Elderwood should grant Monster Hunter");
+					helper.assertFalse(has(helper, player, "verdigris"), "Verdigris needs the oxidized tier");
+				})
+				.thenSucceed();
+	}
+
+	@GameTest(environment = ElderwoodTest.MIDNIGHT, maxTicks = 120)
+	public void killingAnOxidizedElderwoodGrantsVerdigris(GameTestHelper helper) {
+		Elderwood elderwood = ElderwoodTest.stillElderwood(helper);
+		elderwood.setCopperStage(WeatheringCopper.WeatherState.OXIDIZED);
+		Player player = helper.makeMockServerPlayer(GameType.SURVIVAL);
+
+		kill(helper, helper.startSequence(), elderwood, player)
+				.thenExecute(() -> {
+					helper.assertFalse(elderwood.isAlive(), "The Elderwood should be dead");
+					helper.assertTrue(has(helper, player, "verdigris"), "Killing an oxidized Elderwood should grant Verdigris");
 				})
 				.thenSucceed();
 	}
@@ -175,12 +191,12 @@ public class AdvancementTest {
 		sequence.thenExecute(() -> {
 			for (ElderwoodHeart heart : ElderwoodHeart.values()) {
 				if (heart != ElderwoodHeart.CORE) {
-					elderwood.setCracks(heart, heart.maxCracks());
+					elderwood.setCracks(heart, elderwood.getTier().maxCracks(heart));
 				}
 			}
 			hitCore.run();
 		});
-		for (int i = 1; i < ElderwoodHeart.CORE.maxCracks(); i++) {
+		for (int i = 1; i < elderwood.getTier().maxCracks(ElderwoodHeart.CORE); i++) {
 			sequence.thenExecuteAfter(TICKS_BETWEEN_HITS, hitCore);
 		}
 		return sequence;

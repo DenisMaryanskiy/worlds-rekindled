@@ -19,6 +19,7 @@ public final class ElderwoodLens {
 	public static final double RANGE = 24.0;
 	// It only sees this far to each side of straight ahead.
 	public static final float ARC_DEGREES = 60.0F;
+	// These three are its plain copper tier's; see ElderwoodTier for the others.
 	public static final int GAZE_RATE = 2;
 	public static final int CORE_GAZE_RATE = 3;
 	public static final double RESIN_MIN_RANGE = 6.0;
@@ -44,12 +45,12 @@ public final class ElderwoodLens {
 	// Its next glob waits a full interval: coming straight out of the stun, it punished the player
 	// who had just earned the stun by hitting the last one back.
 	void restAfterStun() {
-		this.resinCooldown = RESIN_INTERVAL_TICKS;
+		this.resinCooldown = this.tree.getTier().resinIntervalTicks();
 	}
 
 	/** One tick of holding a player it sees. */
 	void watch(ServerLevel level, Player player) {
-		Petrification.expose(player, this.tree.isCoreOpen() ? CORE_GAZE_RATE : GAZE_RATE, this.tree.getEyePosition());
+		Petrification.expose(player, this.tree.getTier().gazeRate(this.tree.isCoreOpen()), this.tree.getEyePosition());
 		if (Petrification.isPetrified(player)) {
 			this.tree.rememberPetrifying(player);
 		}
@@ -86,7 +87,7 @@ public final class ElderwoodLens {
 				|| this.tree.distanceToSqr(target) < RESIN_MIN_RANGE * RESIN_MIN_RANGE) {
 			return;
 		}
-		this.resinCooldown = RESIN_INTERVAL_TICKS;
+		this.resinCooldown = this.tree.getTier().resinIntervalTicks();
 		Vec3 from = this.tree.getEyePosition();
 		Vec3 direction = target.getEyePosition().subtract(from).normalize();
 		BurningResin resin = new BurningResin(level, this.tree, direction);

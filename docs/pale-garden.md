@@ -663,7 +663,8 @@ iron/diamond gear: a huge, rooted tree fought by moving around it.
   pattern took about 31): a real goal, renewable once a Pale Garden is known.
 - **Any copper block works, and it shows on the Elderwood** (kept): copper, exposed, weathered or
   oxidized, waxed or not. The woken tree's bands and plates take the collar's oxidation stage and
-  keep it for the whole fight.
+  keep it for the whole fight, and the stage sets its tier (see Tiers below). A tree that never
+  had a collar, from a spawn egg or a command, is the plain copper tier.
 - **It grows in three bursts** over 3 s, not smoothly: the stump's blocks break and a sprout a
   third of its size stands in their place, then twice a second later it snaps to the next size
   in a burst of wood splinters with a crack and a creak, reaching full size on the third. While
@@ -832,27 +833,33 @@ on **every kill**, as the Wither always drops its star and the Elder Guardian it
 - Decorative only: it does nothing and goes into no recipe, so it stays a trophy. Placeholder
   texture: vanilla's Creaking Heart, dulled, fading between its dormant and awake looks.
 - It's the mod's first block (`ModBlocks`).
-- **One Core per tier** (below): its cracks are rimmed in the collar's copper, plain, exposed,
-  weathered or oxidized, four blocks that never weather. A full set takes a kill at every tier.
+- **One Core per tier** (built): the Elderwood Core, and the Exposed, Weathered and Oxidized
+  Elderwood Core, its face rimmed in that stage's copper (placeholder: a one-pixel border of
+  vanilla's copper block texture). Four blocks that never weather; a full set takes a kill at
+  every tier.
 
-**Tiers: the collar sets the fight** (planned). The copper on the stump only shows on the tree
-today. It becomes the difficulty dial, so the same stump gives four fights, each harder and
-better paid than the last, as Ominous trials are to plain ones:
+**Tiers: the collar sets the fight** (built). The copper on the stump used to only show on the
+tree. It's the difficulty dial now, so the same stump gives four fights, each harder and better
+paid than the last, as Ominous trials are to plain ones:
 
 | Collar | The fight | Drops, besides its Core and the resin |
 |---|---|---|
-| Copper | as it is now | 1 lens |
+| Copper | as playtested | 1 lens |
 | Exposed | roots every 3.5 s, turns 15% faster | 1 lens, 2-4 lens shards |
 | Weathered | roots every 3 s, resin every 2.5 s, turns 30% faster, one more crack on every heart | 2 lenses |
-| Oxidized | as weathered, and its gaze fills 50% faster | 2 lenses, 4-6 lens shards |
+| Oxidized | as weathered, and its gaze fills 50% faster (3 a tick, 4 with its core open) | 2 lenses, 4-6 lens shards |
 
 - Waxed copper counts as its stage. An axe scrapes a stage off before the heart goes on, so the
   player picks the tier.
-- **The Ruin's own stump gets waxed plain copper**, so the first fight, the one the Ruin builds
-  up to, is the lowest tier, as playtested. (Its cap is oxidized copper now, which would make it
-  the hardest.)
+- **The Ruin's own stump has waxed plain copper**, so the first fight, the one the Ruin builds
+  up to, is the lowest tier, as playtested, however long the Ruin waits. Its cap was oxidized
+  copper, which would have made it the hardest.
 - The numbers are first values, for the playthroughs to tune.
-- **A challenge advancement** for felling it with an oxidized collar (feature 6).
+- **Verdigris**, a challenge advancement, for felling it with an oxidized collar (feature 6).
+- Code: `ElderwoodTier`, one per stage, holds the tier's numbers and its loot table
+  (`entities/elderwood`, `elderwood_exposed`, `elderwood_weathered`, `elderwood_oxidized`). The
+  constants on `Elderwood` and `ElderwoodLens` are the plain copper tier's. The boss bar counts
+  the tier's cracks, so it still empties exactly.
 
 **More players, more tree** (planned). With more players it's an easy fight shared out and a
 single lens for the group. The players within 24 blocks when it wakes set it, up to four:
@@ -910,7 +917,7 @@ Ruin Sentries petrify too, more slowly (feature 4).
 
 ### 6. Advancements
 
-Seven advancements in vanilla's **Adventure** tab, an eighth planned, (no tab of our own, like a Mojang update would).
+Eight advancements in vanilla's **Adventure** tab (no tab of our own, like a Mojang update would).
 Their descriptions double as the hints the mod otherwise lacks.
 
 | Advancement | Earned by | Frame | Trigger |
@@ -922,15 +929,16 @@ Their descriptions double as the hints the mod otherwise lacks.
 | **Deadwood** | Killing the Elderwood | goal | vanilla `player_killed_entity`: the core's last crack is credited to whoever dealt it |
 | **One of Them** | Wearing a Pale Mask next to a Creaking that ignores you | task | `vanillareforged:ignored_by_creaking` |
 | **Don't Blink** | Killing the Elderwood without being petrified once | challenge, 100 XP | `vanillareforged:killed_elderwood_unpetrified` |
-| **Verdigris** (planned) | Killing the Elderwood with an oxidized collar | challenge, 100 XP | vanilla `player_killed_entity`, with the tree's collar stage in the predicate |
+| **Verdigris** | Killing the Elderwood woken with an oxidized collar | challenge, 100 XP | `vanillareforged:killed_oxidized_elderwood` |
 
 - **Tree**: Old Growth hangs off vanilla's **Heart Transplanter** (placing a Creaking Heart), so
   its description, which spells out the stump, shows up for anyone who has started the Adventure
-  tab. It leads to Set in Stone and Deadwood, and Deadwood to One of Them and Don't Blink.
+  tab. It leads to Set in Stone and Deadwood, and Deadwood to One of Them, Don't Blink and
+  Verdigris.
   Buried Garden hangs off Heart Transplanter too, beside it, and so does Heartwood Guardian,
   whose description spells out the Sentry's pattern for anyone who has placed a heart, as the
   Sentry workshop shows it in the Ruin.
-- **Triggers**: the three of our own are plain vanilla `PlayerTrigger`s registered under our ids
+- **Triggers**: the four of our own are plain vanilla `PlayerTrigger`s registered under our ids
   (`ModCriteria`), like vanilla's `avoid_vibration`: the code decides when they fire.
 - **Set in Stone** is granted when the stone cracks open, by time or by a hit, if the player is
   still alive then. A meter that never filled doesn't count.
@@ -1050,7 +1058,7 @@ The loop's last step, "return for more resin and hearts", is thin once the playe
 | 1 | The lensed Sentry (built) | fighters, base guards | feature 2 |
 | 2 | The Elderwood Core (built) | collectors | feature 5 |
 | 3 | Richer chests (built) | everyone | feature 4, Rewards |
-| 4 | Tiers, a Core per tier, Verdigris | fighters, collectors | features 5 and 6 |
+| 4 | Tiers, a Core per tier, Verdigris (built) | fighters, collectors | features 5 and 6 |
 | 5 | The Pale Ruin explorer map | explorers | feature 4, Rewards |
 | 6 | Resin glass, healing a Sentry by hand | builders, farmers | feature 7 |
 | 7 | The banner pattern and the painting | collectors, explorers | feature 4, Rewards |

@@ -28,7 +28,6 @@ public enum ElderwoodHeart {
 	LEFT_BRANCH(3, -1.25, 4.5, 0.0, 0.9),
 	CORE(5, 0.0, 2.94, 1.28, 0.9);
 
-	public static final int TOTAL_CRACKS = 23;
 	// values() copies the array on every call, and the hearts are walked every tick and every frame.
 	public static final List<ElderwoodHeart> ALL = List.of(values());
 	private static final int BITS = 3;
@@ -55,6 +54,7 @@ public enum ElderwoodHeart {
 		this.size = size;
 	}
 
+	/** On the plain copper tier; see {@link ElderwoodTier#maxCracks}. */
 	public int maxCracks() {
 		return this.maxCracks;
 	}
