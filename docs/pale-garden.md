@@ -1,8 +1,8 @@
 # Pale Garden: design
 
-Status: features 1, 2, 3, 5 and 6 are implemented with placeholder art and sound; the Pale Ruin (4)
-generates with its guards and its loot. Everything still to do is collected under [What's left](#whats-left); what to
-judge in a first playthrough is in [the playtest checklist](pale-garden-playtest.md).
+Status: all seven features are implemented with placeholder art and sound, and released as 0.4.9.
+What's planned next is under [What's left](#whats-left); what to judge in a playthrough is in [the
+playtest checklist](pale-garden-playtest.md).
 
 ## Problem
 
@@ -1009,133 +1009,117 @@ the Creakings has something to feed:
 
 ## What's left
 
-Nothing in this section is implemented or agreed in detail. It's the backlog: ideas to pick from,
-roughly in the order they'd pay off.
+The plan from the first release on. What gets built moves into its feature above and into the
+[changelog](../CHANGELOG.md).
 
-### A. Advancements
+### Released: 0.4.9
 
-Seven are in (feature 6), and three of vanilla's count the mod's mobs and trim. Nothing left
-planned.
+- **The first release**, under the **MIT license**. The jar's version follows the changelog
+  (`version` in `gradle.properties`), and pushing a tag `v<version>` builds the mod, runs its
+  GameTests and publishes the jar as a GitHub Release with that version's notes
+  (`.github/workflows/release.yml`).
+- **Translations**: English, Russian, German, French, Spanish and Italian; a GameTest keeps every
+  language complete.
+- **A dedicated server run**: the mod loads and a world starts on a real dedicated server, not only
+  in GameTests and single player (`./gradlew runServer`, before 0.4.9).
+- **Ids are frozen from here**: a renamed item, block or entity now needs a migration, where
+  before 0.4.9 (Watcher to Elderwood) it cost nothing.
 
-### B. Finish what's on hold
+### Planned, in order
 
-- **The Pale Ruin** (feature 4): it generates, with its Sentries and its loot. Left: how often
-  it generates; a third playthrough from the pavilion to the Elderwood. The
-  first, in iron armor without a shield, ended in three deaths to the Sentries and four to the
-  Elderwood; the Sentries were eased after it (gazes that don't add up, a blow that breaks the
-  stone, 4 damage, the leash to the whole Ruin), and so was the Elderwood (its drawn trunk no
-  longer trails the real one, roots that armor reduces and that come every 4 s, 90 s before it
-  mends, a pause before its next resin after a stun). The second, with the same gear, took
-  two deaths to the Sentries and three to the Elderwood, in half the time at the boss; after it
-  the Sentries stopped throwing the player up and noticing them from other rooms, a critical
-  hit came to crack a Sentry's heart twice, and fire lost its bonus on a petrified player.
-- **Left as it is after the second playthrough**, to look at again if it still hurts: the
-  Elderwood's resin burns for 5 s and comes every 3 s, so in its gaze the fire never goes out;
-  its gaze covers 60 degrees to each side.
-- **Next for the Ruin**: a third playthrough. Its side chambers, the Sentry workshop, three
-  more kinds of room, the hall's mural and the loot pass are in. They answer what both
-  playthroughs found: one long corridor with nowhere to step aside, too many pale oak logs in
-  the chests, pots that all look alike, amethyst that doesn't explain itself.
-- **Left as vanilla has it**, by decision: at night the rooms' Creakings come on top of the
-  Elderwood, and dying deep in the Ruin leaves the gear under its Sentries. Both are the game's
-  own rules at work.
-- **A third playthrough** once the Ruin's new rooms are in: the changes after the second (no
-  throw, no pack, critical hits, hit-back resin) haven't been played yet. The demo video
-  predates all of it and should be re-recorded once the numbers settle.
-- **Elderwood numbers**: cracks per heart, turn speed, root damage, stun length, gaze fill rate,
-  resin damage and the summon's resin cost are first guesses.
-- **Difficulty**: the Sentry's cracks scale with difficulty, the Elderwood's nothing does.
-  Candidates: gaze fill rate, slam damage, root interval. Also what Peaceful means for it (it's
-  a monster, so it would vanish; refusing to wake may read better).
-- **Multiplayer**: whom it targets and turns to with several players around, and the gaze
-  holding only one of them. More cracks and a lens each are in (feature 5).
-  Petrification isn't saved, so relogging mid-fight clears it; fine alone, an exploit in a group.
-- **Dedicated server run**: everything so far was tested through GameTests and a single-player
-  client.
+| # | What | Who |
+|---|---|---|
+| 1 | A fourth playthrough on 0.4.9, then tuning | the user, then code |
+| 2 | Telling the player what the game doesn't | code |
+| 3 | The Elderwood by difficulty, and on Peaceful | code |
+| 4 | The fight with several players | code |
+| 5 | A compatibility pass | code, a few installs |
+| 6 | Publishing on Modrinth and CurseForge | the user, with help |
+| 7 | Art and audio | an artist |
+| 8 | Sentry quality of life | code, once decided |
+| 9 | The fight's numbers as data | code, if packs ask |
 
-### C. Discoverability
+**1. A fourth playthrough on 0.4.9, then tuning.** Everything since the third is unplayed: the
+tiers, the co-op scaling, the lensed Sentry, resin glass and mending, the map, the richer chests,
+the banner pattern and the painting. The [playtest checklist](pale-garden-playtest.md) covers them.
+After it:
+- tune the Elderwood's first guesses: cracks per heart, turn speed, root damage, stun length, gaze
+  fill rate, resin damage, the summon's resin cost, and every tier's numbers;
+- look again at what was left as it is after the second playthrough, if it still hurts: its resin
+  burns for 5 s and comes every 3 s, so in its gaze the fire never goes out; its gaze covers 60
+  degrees to each side;
+- how often the Ruin generates;
+- re-record the demo video, which predates all of it.
 
-Nothing in the game tells the player any of this exists: the Sentry and stump patterns, that only
-hearts can be hurt, that resin can be hit back, that a shield stops the gaze. Ideas, cheapest
-first:
+How the fights got here: the first playthrough, in iron armor without a shield, ended in three
+deaths to the Sentries and four to the Elderwood; the second, with the same gear, in two and three,
+in half the time at the boss; the third (iron and a shield) found the Sentries still tough, a safe
+corner in the hall and a boss that let a player stand petrified hitting its resin back. Each
+playthrough's fixes are in the changelog (0.3.2, 0.4.0).
 
-- **Advancement descriptions** as hints: done for the stump (Old Growth), the hearts (Deadwood)
-  and the mask (One of Them). Nothing yet says that resin can be hit back or that a shield stops
-  the gaze.
-- **The felled stump** stands in the Ruin's hall, whole but for its heart (feature 4): it shows
-  the pattern and is the first place to summon.
-- **The sherds and the Ruin tell it**: the Creaking sherd already shows a tree with a heart. The
-  Sentry's pattern has a chamber of its own, the Sentry workshop, and the tree with its seven
-  hearts a mural in the hall (feature 4).
-- **In-fight hints**: a hit on bark or copper that does nothing gives a dull thud and no chips, so
-  the contrast with a heart is heard at once (to check what a bark hit does today).
-- A written book in Ruin loot from the builders, if the rest isn't enough. Least vanilla-like.
+**2. Telling the player what the game doesn't.** The stump and the Sentry are explained by
+advancements, the Ruin's stump, mural and workshop and the sherds; nothing yet says that **resin
+can be hit back** or that **a shield stops the gaze**. Cheapest first:
+- **in-fight hints**: a hit on bark or copper that does nothing gives a dull thud and no chips, so
+  the contrast with a heart is heard at once (to check what a bark hit does today);
+- **two more advancements** whose descriptions say it: one for stunning the tree with its own
+  resin, one for blocking a gaze with a shield;
+- a written book in the Ruin's loot from the builders, only if the rest isn't enough: the least
+  vanilla-like.
 
-### D. More reasons to come back
+**3. The Elderwood by difficulty, and on Peaceful.** The Sentry's cracks scale with difficulty,
+the Elderwood's nothing does. Candidates: the gaze fill rate, the slam's damage, the root interval.
+On Peaceful a monster vanishes; the tree refusing to wake, with a message as in daylight, may read
+better.
 
-The loop's last step, "return for more resin and hearts", is thin once the player has a mask.
+**4. The fight with several players.** Whom it targets and turns to with several players around;
+its gaze holding only one of them. Petrification isn't saved, so relogging mid-fight clears it:
+fine alone, an exploit in a group, so the meter should be saved.
 
-**Planned**, a reason to return for every kind of player, each its own PR, in this order:
+**5. A compatibility pass.** Shaders and Sodium with the full-bright heart and lens layers and the
+JSON-loaded model; recipe viewers (EMI, REI, JEI) with the tag-based sticky piston recipe and the
+resin glass recipes; the overridden vanilla files (the sticky piston recipe, three advancements,
+tags) next to other mods that touch them.
 
-| # | What | For | Where |
-|---|---|---|---|
-| 1 | The lensed Sentry (built) | fighters, base guards | feature 2 |
-| 2 | The Elderwood Core (built) | collectors | feature 5 |
-| 3 | Richer chests (built) | everyone | feature 4, Rewards |
-| 4 | Tiers, a Core per tier, Verdigris (built) | fighters, collectors | features 5 and 6 |
-| 5 | The Pale Ruin explorer map (built) | explorers | feature 4, Rewards |
-| 6 | Resin glass, healing a Sentry by hand (built) | builders, farmers | feature 7 |
-| 7 | The banner pattern and the painting (built) | collectors, explorers | feature 4, Rewards |
-| 8 | More players, more tree (built) | multiplayer | feature 5 |
+**6. Publishing on Modrinth and CurseForge.** Their pages, screenshots and the fight video, the
+jar from the GitHub Release. Best after the art (7), or with a note that the art is placeholder.
 
-What makes each a reason to come back: a lens per Sentry, four tiers and a set of four Cores,
-a map to every next Ruin, and resin that keeps being used.
-
-- **Dropped by decision**: a spyglass set with a lens that outlines mobs; the felled tree leaving
-  its stump and collar behind; a lens block for redstone that sees mobs (the Watcher).
-- **Other lens uses**, not planned: repairing a mask with a lens shard for a big chunk of
-  durability.
-- **Sentry quality of life**: name tags showing on the statue, a visible range marker when
-  placing the pedestal, and whether a Sentry should follow orders at all (stay, or guard a wider
-  radius). Decide what's vanilla-like before adding any.
-- The power bow rule (a Power IV+ arrow cracks 2) is still open for both the Sentry and the tree.
-
-### E. Art and audio
-
-All of it is placeholder made in code or by script, and the user reviews but doesn't draw. To
-replace:
-
-- **Models**: the Elderwood (the part names in `ElderwoodModel` are the contract), its roots,
-  the burning resin glob, the Pale Mask's 3D mask.
-- **Textures**: the tree in four oxidation stages with its lens and heart overlays, the Sentry
-  (awake, statue, crack stages, glowing face), the mask, every item (lens, shard, eye, both
-  sherds, the trim template and its armor overlays), the petrification screen overlay, the mod
-  icon.
-- **Animation**: the tree only has code-driven branch poses and a shake. A real model would want
-  an idle sway, a wind-up worth reading, and growth and decay made as animations.
-- **Audio**: 15 Elderwood sound events have their own subtitles and play vanilla sounds; the
-  Sentry and the mask use vanilla events directly. Possibly boss music while the bar is up.
-- When the real tree model lands, delete `tools/elderwood_model.py` and `tools/png.py` (the
+**7. Art and audio.** All of it is placeholder made in code or by script; the user reviews but
+doesn't draw. To replace:
+- **models**: the Elderwood (the part names in `ElderwoodModel` are the contract), its roots, the
+  burning resin glob, the Pale Mask's 3D mask;
+- **textures**: the tree in four oxidation stages with its lens and heart overlays, the Sentry
+  (awake, statue, crack stages, glowing face, the lens in its chest), the mask, every item, the
+  four Elderwood Cores, resin glass, the Pale Ruin map and its mark, the Gaze banner pattern, the
+  Elderwood painting, the petrification screen overlay, the mod icon;
+- **animation**: the tree only has code-driven branch poses and a shake; a real model would want
+  an idle sway, a wind-up worth reading, and growth and decay as animations;
+- **audio**: 15 Elderwood sound events have their own subtitles and play vanilla sounds; the
+  Sentry and the mask use vanilla events directly. Possibly boss music while the bar is up;
+- when the real tree model lands, delete `tools/elderwood_model.py` and `tools/png.py` (the
   placeholder generator) and their README note. `tools/pale_ruin.py` and `tools/nbt.py` stay: the
   Ruin's pieces are meant to be generated.
 
-### F. Release
+**8. Sentry quality of life.** Name tags showing on the statue, a visible range marker when
+placing the pedestal, whether a Sentry should follow orders at all (stay, or guard a wider radius).
+Decide what's vanilla-like before adding any. With it, the power bow rule (a Power IV+ arrow
+cracks 2), still open for both the Sentry and the tree.
 
-- **License**: still "All rights reserved"; needed before publishing anywhere.
-- **Publishing**: Modrinth and CurseForge pages, versioning and a changelog, a release workflow
-  next to the CI build, screenshots and the fight video.
-- **Ids freeze at the first release**: until then renames cost nothing (as with Watcher to
-  Elderwood); after it they need migration.
-- **Translations**: only `en_us` exists.
-- **Compatibility pass**: shaders and Sodium with the full-bright heart and lens layers and the
-  JSON-loaded model; recipe viewers (EMI, REI, JEI) with the tag-based sticky piston recipe; the
-  overridden vanilla recipe and tag files next to other mods that touch them.
-- **Config**: none. The fight's numbers are constants; if packs should tune them, the natural
-  place is data (like the tags are now), not a config screen.
-- **Mixins**: four server-side ones today. Re-check each against Fabric API on every Minecraft
-  update, since a new event would let one go.
+**9. The fight's numbers as data.** None of it is configurable; the numbers are constants. If
+packs should tune them, the natural place is data (as the tags and loot are), not a config screen.
 
-### G. Housekeeping
+**Ongoing**
+- **Mixins**: four server-side ones. Re-check each against Fabric API on every Minecraft update,
+  since a new event would let one go.
+- **Housekeeping**: the Elderwood's section above still carries the history of the Watcher rework
+  ("kept", the build-order notes). Once the fight is stable, trim it to what the tree is now.
 
-- The Elderwood section above still carries the history of the Watcher rework ("kept", the
-  build-order notes). Once the fight is stable, trim it to what the tree is now.
+### Decided, not planned
+
+- **Left as vanilla has it**: at night the rooms' Creakings come on top of the Elderwood, and dying
+  deep in the Ruin leaves the gear under its Sentries. Both are the game's own rules at work.
+- **Dropped**: a spyglass set with a lens that outlines mobs; the felled tree leaving its stump and
+  collar behind; a lens block for redstone that sees mobs (the Watcher, or a gaze block).
+- **Not planned**: repairing a mask with a lens shard.
+- **Advancements**: eight of the mod's own and three of vanilla's that count it; Smithing with
+  Style and How Did We Get Here left alone (feature 6).

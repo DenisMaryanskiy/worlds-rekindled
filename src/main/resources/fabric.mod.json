@@ -7,7 +7,7 @@
 	"authors": [
 		"dmaryanskiy"
 	],
-	"license": "All-Rights-Reserved",
+	"license": "MIT",
 	"icon": "assets/vanillareforged/icon.png",
 	"environment": "*",
 	"entrypoints": {

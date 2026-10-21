@@ -38,6 +38,17 @@ python3 tools/pale_ruin.py
 ./gradlew runGameTest
 ```
 
+## Releases
+
+Pushing a version tag that matches `version` in `gradle.properties` (e.g. `v0.4.9`) builds the mod,
+runs its GameTests and publishes the jar as a GitHub Release, with that version's section of the
+changelog as its notes:
+
+```bash
+git tag v0.4.9
+git push origin v0.4.9
+```
+
 ## License
 
-All rights reserved until a license is chosen.
+MIT, see [LICENSE](LICENSE).

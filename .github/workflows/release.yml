@@ -1,0 +1,46 @@
+# Pushing a version tag (v0.4.9) builds the mod, runs its GameTests and publishes the jar as a
+# GitHub Release, with that version's section of the changelog as its notes.
+
+name: release
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v6
+      - name: validate gradle wrapper
+        uses: gradle/actions/wrapper-validation@v6
+      - name: setup jdk
+        uses: actions/setup-java@v5
+        with:
+          java-version: '25'
+          distribution: 'microsoft'
+      - name: make gradle wrapper executable
+        run: chmod +x ./gradlew
+      - name: build
+        run: ./gradlew build
+      # The tag and the jar have to agree, or the release would hand out a jar of another version.
+      - name: check the tag matches the version
+        run: |
+          version=$(grep '^version=' gradle.properties | cut -d= -f2)
+          if [ "v$version" != "$GITHUB_REF_NAME" ]; then
+            echo "Tag $GITHUB_REF_NAME doesn't match version $version in gradle.properties" >&2
+            exit 1
+          fi
+      - name: take this version's notes from the changelog
+        run: |
+          version=${GITHUB_REF_NAME#v}
+          awk -v header="### $version " 'index($0, header) == 1 { found = 1; next } found && /^#/ { exit } found { print }' CHANGELOG.md > notes.md
+          printf '\nEverything the mod has gained so far: https://github.com/%s/blob/%s/CHANGELOG.md\n' \
+            "$GITHUB_REPOSITORY" "$GITHUB_REF_NAME" >> notes.md
+      - name: publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" build/libs/vanillareforged-${GITHUB_REF_NAME#v}.jar --title "Vanilla Reforged ${GITHUB_REF_NAME#v}" --notes-file notes.md
