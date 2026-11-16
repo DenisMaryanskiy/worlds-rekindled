@@ -1,0 +1,146 @@
+"""Hand-authored 16x16 item sprites. Each character is exactly one unfiltered pixel."""
+from pathlib import Path
+
+import png
+
+
+PALETTE = {
+    ".": (0, 0, 0, 0),
+    # Cut pale oak and the darker grain of its bark.
+    "q": "39352f",
+    "d": "56524b",
+    "s": "827d72",
+    "b": "aba697",
+    "l": "cec9b5",
+    "h": "e4dfc9",
+    # Vanilla resin-clump colors; the eye alone has a dark pupil.
+    "r": "802a1a",
+    "o": "b54006",
+    "a": "e05504",
+    "t": "f3791b",
+    "y": "fab326",
+    "i": "ffdbb1",
+    "p": "4e260d",
+    # Weathered copper, with small spots of the original metal.
+    "c": "356753",
+    "g": "4c9078",
+    "v": "6bb499",
+    "w": "98ccb1",
+    "k": "b97a58",
+    # Chipped stone and traces of moss on the smithing template.
+    "D": "414248",
+    "S": "64656b",
+    "B": "84848b",
+    "L": "aaa9aa",
+    "H": "c4c1b8",
+    "m": "626b42",
+}
+
+SPRITES = {
+    "pale_mask": [
+        "................",
+        "...l............",
+        "...bs......l....",
+        "....b......bs...",
+        "...slbbsllbbd...",
+        "..shbbsbbslbbd..",
+        "..blbsqyadbbbd..",
+        "..bsbsqtaqbsbd..",
+        "..bsbsqqqqbsbd..",
+        "..dsblbsbbbsbd..",
+        "...sblbsbblbd...",
+        "...dblbsbblbd...",
+        "....sbbsbbbd....",
+        ".....sbbbsd.....",
+        "......sbsd......",
+        "................",
+    ],
+    "creaking_eye": [
+        "................",
+        "................",
+        "......rrr.......",
+        "....royytor.....",
+        "...royiitttor...",
+        "..royytttttaor..",
+        "..oyttappataar..",
+        ".rotttappaaaar..",
+        ".rottaappaaaor..",
+        "..oataappaaor...",
+        "..roaaaaoaor....",
+        "...roaaaorr.....",
+        "....rooorr......",
+        "......rrr.......",
+        "................",
+        "................",
+    ],
+    "elderwood_armor_trim_smithing_template": [
+        "................",
+        ".......HL.......",
+        "......HLBS......",
+        ".....HLBBBS.....",
+        ".....LBBBmBS....",
+        "....HLBSBBmBS...",
+        "...HLBBSBBBBSD..",
+        "..HLBBByyoBSSD..",
+        "..LBBBytppyoSD..",
+        ".HLBByttppaoSD..",
+        ".LBBBBytaaoSD...",
+        "..SmmBBooBSD....",
+        "...SmmBBBSD.....",
+        "....SSBBSD......",
+        "......SSD.......",
+        "................",
+    ],
+    "elderwood_lens_shard": [
+        "................",
+        "................",
+        "..........gc....",
+        ".........gvkc...",
+        "........gvyooc..",
+        ".......gvytaor..",
+        "......gviytaor..",
+        ".....gviytaaor..",
+        "....gviytaaar...",
+        "....cyttaaar....",
+        "....oytaoar.....",
+        "...oytaor.......",
+        "...otaar........",
+        "...oar..........",
+        "...r............",
+        "................",
+    ],
+    "elderwood_lens": [
+        "................",
+        "................",
+        ".....cggggc.....",
+        "...cgvvvgggcc...",
+        "..cgvwytttogkc..",
+        "..gvgyiitttagc..",
+        ".cvgoyttttaaogc.",
+        ".cgoytttaaaaagc.",
+        ".cgoattaaaaaogc.",
+        ".cgoaaaaoooaogc.",
+        "..cgaaaaaooogc..",
+        "..cggooooogggc..",
+        "...cgggkgggcc...",
+        ".....cccccc.....",
+        "................",
+        "................",
+    ],
+}
+
+
+def generate():
+    target = Path(__file__).resolve().parents[1] / "src/main/resources/assets/vanillareforged/textures/item"
+    colors = {
+        key: (*bytes.fromhex(value), 255) if isinstance(value, str) else value
+        for key, value in PALETTE.items()
+    }
+    for name, rows in SPRITES.items():
+        assert len(rows) == 16 and all(len(row) == 16 for row in rows), name
+        pixels = [[colors[key] for key in row] for row in rows]
+        png.write(target / f"{name}.png", pixels)
+
+
+if __name__ == "__main__":
+    generate()
