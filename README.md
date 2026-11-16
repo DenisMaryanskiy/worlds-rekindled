@@ -29,6 +29,13 @@ always agree. After changing the spec, regenerate both (plain Python 3, no depen
 python3 tools/elderwood_model.py
 ```
 
+The Pale Mask, Creaking Eye, Elderwood Lens, Lens Shard and smithing template inventory icons
+are hand-authored 16×16 pixel grids in `tools/item_textures.py`. After editing their grids or palettes:
+
+```bash
+python3 tools/item_textures.py
+```
+
 The Pale Ruin's structure templates and worldgen files are generated too, from
 `tools/pale_ruin.py`. After changing it, regenerate them and let the GameTests check that the Ruin
 still assembles:

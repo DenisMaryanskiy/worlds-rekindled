@@ -10,6 +10,12 @@ The design behind all of it is in [docs/pale-garden.md](docs/pale-garden.md).
 
 After the third playtest: the fights tuned once more, and rewards for every kind of player.
 
+### 0.4.10 (unreleased)
+
+- **New inventory textures** for the Pale Mask, Creaking Eye, Elderwood Lens, Lens Shard and
+  Elderwood armor trim smithing template: hand-authored 16×16 sprites with pale oak grain, amber
+  resin, weathered copper and a carved eye on the template.
+
 ### 0.4.9 (#68, #70)
 
 The first release, under the MIT license.

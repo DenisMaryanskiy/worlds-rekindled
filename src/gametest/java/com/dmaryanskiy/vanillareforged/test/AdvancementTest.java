@@ -13,8 +13,11 @@ import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.gametest.framework.GameTestSequence;
+import net.minecraft.network.Connection;
+import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.network.CommonListenerCookie;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.monster.creaking.Creaking;
@@ -25,16 +28,15 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.WeatheringCopper;
 import net.minecraft.world.phys.Vec3;
 
+import io.netty.channel.embedded.EmbeddedChannel;
+
 public class AdvancementTest {
 	private static final int TICKS_BETWEEN_HITS = 12;
 	private static final Vec3 CREAKING = new Vec3(5.5, 1.0, 3.5);
 
 	@GameTest(environment = ElderwoodTest.MIDNIGHT, skyAccess = true)
-	// The summon looks for players in the level, and this is the only mock player that's in it. Vanilla
-	// has it marked for removal without a replacement so far.
-	@SuppressWarnings("removal")
 	public void wakingTheElderwoodGrantsOldGrowth(GameTestHelper helper) {
-		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		ServerPlayer player = playerInLevel(helper);
 		try {
 			player.snapTo(helper.absoluteVec(ElderwoodTest.ELDERWOOD.add(0.0, 0.0, 3.0)), 0.0F, 0.0F);
 			ElderwoodTest.buildStump(helper, Blocks.COPPER_BLOCK.weathering().weathered());
@@ -155,11 +157,8 @@ public class AdvancementTest {
 	}
 
 	@GameTest
-	// The builder credits the players around it in the level, and this is the only mock player that's
-	// in it. Vanilla has it marked for removal without a replacement so far.
-	@SuppressWarnings("removal")
 	public void buildingAHeartwoodSentryGrantsHeartwoodGuardian(GameTestHelper helper) {
-		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		ServerPlayer player = playerInLevel(helper);
 		try {
 			player.snapTo(helper.absoluteVec(new Vec3(3.5, 1.0, 1.5)), 0.0F, 0.0F);
 			helper.setBlock(new BlockPos(1, 1, 1), Blocks.PALE_OAK_LOG);
@@ -206,6 +205,16 @@ public class AdvancementTest {
 		Creaking creaking = helper.spawn(EntityTypes.CREAKING, CREAKING);
 		creaking.setNoAi(true);
 		return creaking;
+	}
+
+	/** Summoning and building credit nearby players in the level, so the mock needs to join it. */
+	private static ServerPlayer playerInLevel(GameTestHelper helper) {
+		ServerPlayer player = (ServerPlayer) helper.makeMockServerPlayer(GameType.CREATIVE);
+		CommonListenerCookie cookie = CommonListenerCookie.createInitial(player.getGameProfile(), false);
+		Connection connection = new Connection(PacketFlow.SERVERBOUND);
+		new EmbeddedChannel(connection);
+		helper.getLevel().getServer().getPlayerList().placeNewPlayer(connection, player, cookie);
+		return player;
 	}
 
 	private static Player playerNear(GameTestHelper helper, double distance) {

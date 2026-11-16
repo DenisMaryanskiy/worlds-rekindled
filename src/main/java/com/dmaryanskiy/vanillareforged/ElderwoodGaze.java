@@ -62,7 +62,7 @@ public final class ElderwoodGaze {
 
 	/** Whether the mob is one of the bosses, which a gaze only slows a little. */
 	public static boolean resists(LivingEntity mob) {
-		return mob.getType().builtInRegistryHolder().is(GAZE_RESISTANT);
+		return mob.is(GAZE_RESISTANT);
 	}
 
 	/** One tick of a slowing gaze from {@code source} holding the mob: Slowness II, a boss Slowness I and a drag. */
