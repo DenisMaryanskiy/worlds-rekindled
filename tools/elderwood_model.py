@@ -18,22 +18,15 @@ import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
 import png
+from texture_materials import COPPER, bark_pixel, copper_pixel
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SIZE = 512
 CLEAR = (0, 0, 0, 0)
-BARK = [(125, 114, 112), (110, 100, 98), (94, 83, 80), (78, 67, 64), (67, 59, 57), (58, 51, 49)]
-SPECK = (199, 184, 184)
 MOSS = [(150, 160, 150), (120, 132, 122), (96, 108, 100)]
 HUSK = [(46, 36, 33), (60, 46, 41), (34, 27, 25)]
 DULL = [(92, 70, 58), (78, 58, 48), (64, 48, 40)]
 GLOW = [(255, 236, 170), (250, 179, 38), (243, 121, 27), (224, 85, 4), (150, 52, 8)]
-COPPER = {  # light, mid, dark, rivet
-    "unaffected": [(231, 145, 96), (192, 105, 66), (138, 70, 45), (255, 206, 160)],
-    "exposed": [(196, 152, 124), (164, 120, 98), (120, 86, 70), (226, 196, 170)],
-    "weathered": [(116, 178, 148), (78, 140, 115), (52, 96, 82), (176, 220, 192)],
-    "oxidized": [(96, 196, 166), (62, 156, 130), (40, 106, 92), (158, 230, 206)],
-}
 
 # part: (name, parent, pivot xyz, rotation xyz, boxes); box: (kind, x, y, z, w, h, d[, heart name])
 PARTS = []
@@ -51,15 +44,16 @@ def twig(name, parent, at, rot, length, thick=4):
 def main_branch(side, sign):
     """sign -1 = the entity's right. Points straight up at rest; the model rotates it."""
     name = f"{side}_branch"
+    base = 14 if side == "right" else 12
     part(name, "crown", (20 * sign, -72, 0), (0, 0, 0), [
-        ("bark", -5, -92, -5, 10, 92, 10),
-        ("copper", -6, -30, -6, 12, 6, 12),
-        ("copper", -6, -54, -6, 12, 5, 12),
+        ("bark", -base / 2, -30, -base / 2, base, 30, base),
+        ("bark", -5, -82, -5, 10, 54, 10),
+        ("bark", -3, -92, -3, 6, 14, 6),
+        ("copper", -base / 2 - 1, -28, -base / 2 - 1, base + 2, 5, base + 2),
         ("heart", -6, -69, -6, 12, 9, 12, f"{side}_branch"),
     ])
-    twig(f"{side}_branch_twig_low", name, 44, (0.3, 0, 0.8 * sign), 26)
-    twig(f"{side}_branch_twig_mid", name, 78, (-0.5, 0, -0.6 * sign), 22)
-    twig(f"{side}_branch_twig_tip", name, 90, (0.2, 0, 0.5 * sign), 20, 3)
+    twig(f"{side}_branch_twig_low", name, 49 if sign < 0 else 54, (0.25, 0, 0.8 * sign), 19, 4)
+    twig(f"{side}_branch_twig_tip", name, 82, (-0.35, 0, -0.65 * sign), 16, 3)
 
 
 def crown(name, pivot, rot, length, thick, twigs):
@@ -69,43 +63,66 @@ def crown(name, pivot, rot, length, thick, twigs):
         twig(f"{name}_twig_{i}", name, at, twig_rot, twig_length, 3)
 
 
+def trunk_section(width, height, depth, top, corner):
+    # Three touching strips make a chamfered log without overlapping coplanar faces.
+    return [
+        ("bark", -width / 2 + corner, top, -depth / 2, width - 2 * corner, height, depth),
+        ("bark", -width / 2, top, -depth / 2 + corner, corner, height, depth - 2 * corner),
+        ("bark", width / 2 - corner, top, -depth / 2 + corner, corner, height, depth - 2 * corner),
+    ]
+
+
+def band(width, height, depth, top):
+    # The wood passes through the collar; its top is a rim rather than a solid copper shelf.
+    return [
+        ("copper", -width / 2, top, -depth / 2, width, height, 2),
+        ("copper", -width / 2, top, depth / 2 - 2, width, height, 2),
+        ("copper", -width / 2, top, -depth / 2 + 2, 2, height, depth - 4),
+        ("copper", width / 2 - 2, top, -depth / 2 + 2, 2, height, depth - 4),
+    ]
+
+
 # Three layers, so the dying tree can lose its crown, then its upper half, and leave a stump.
-part("tree", None, (0, 24, 0), (0, 0, 0), [
-    ("bark", -24, -32, -24, 48, 32, 48),
-    ("bark", -20, -56, -20, 40, 24, 40),
-    # roots
-    ("bark", -7, -12, -44, 14, 12, 20), ("bark", -7, -12, 24, 14, 12, 20),
-    ("bark", -44, -12, -7, 20, 12, 14), ("bark", 24, -12, -7, 20, 12, 14),
-    ("bark", -36, -8, -36, 13, 8, 13), ("bark", 23, -8, -36, 13, 8, 13),
-    ("bark", -36, -8, 23, 13, 8, 13), ("bark", 23, -8, 23, 13, 8, 13),
-    ("copper", -21, -40, -21, 42, 5, 42),
+part("tree", None, (0, 24, 0), (0, 0, 0),
+     trunk_section(48, 32, 48, -32, 8) + trunk_section(40, 24, 40, -56, 6) + band(42, 5, 42, -40) + [
     ("heart", -7, -54, -21, 14, 14, 1, "core"),
     ("heart", -5, -30, -25, 10, 10, 1, "trunk_front"), ("heart", -5, -30, 24, 10, 10, 1, "trunk_back"),
     ("heart", -25, -30, -5, 1, 10, 10, "trunk_right"), ("heart", 24, -30, -5, 1, 10, 10, "trunk_left"),
 ])
-part("upper", "tree", (0, 0, 0), (0, 0, 0), [
-    ("bark", -20, -96, -20, 40, 40, 40),
-    ("bark", -16, -124, -16, 32, 28, 32),
-    ("bark", -10, -134, -10, 20, 10, 20),
+for name, pivot, angle, length, width in [
+    ("root_front_right", (-14, -7, -16), 0.4, 27, 14),
+    ("root_front_left", (14, -7, -16), -0.4, 23, 13),
+    ("root_back_right", (-14, -7, 16), 2.65, 24, 13),
+    ("root_back_left", (14, -7, 16), -2.65, 29, 15),
+]:
+    # The local Y grain follows the root's length; its far end sinks slightly into the ground.
+    part(name, "tree", pivot, (math.pi / 2 + 0.12, angle, 0), [
+        ("bark", -width / 2, -length, -width / 2, width, length + 4, width),
+        ("bark", -width / 2 + 2, -length - 8, -width / 2 + 2, width - 4, 12, width - 4),
+    ])
+part("upper", "tree", (0, 0, 0), (0, 0, 0),
+     trunk_section(40, 46, 40, -102, 6) + trunk_section(32, 24, 32, -126, 5) + [
+    ("bark", -12, -138, -9, 22, 12, 20),
+    ] + band(42, 5, 42, -88) + [
     # the builders' copper: bands, plates over old wounds, the lens's collar
-    ("copper", -21, -88, -21, 42, 5, 42),
-    ("copper", -17, -112, -17, 34, 4, 34),
     ("copper", -21, -78, -8, 1, 20, 16),
     ("copper", 20, -72, -2, 1, 14, 12),
     ("copper", -8, -80, 20, 16, 22, 1),
-    ("copper", -9, -73, -22, 18, 18, 2),
+    ("copper", -9, -73, -24, 3, 18, 4),
+    ("copper", 6, -73, -24, 3, 18, 4),
+    ("copper", -6, -73, -24, 12, 3, 4),
+    ("copper", -6, -58, -24, 12, 3, 4),
     ("lens", -6, -70, -23, 12, 12, 1),
 ])
 part("crown", "upper", (0, 0, 0), (0, 0, 0), [
     # hanging moss
-    ("moss", -40, -150, 6, 16, 34, 0), ("moss", 22, -146, -4, 16, 30, 0), ("moss", -6, -140, 34, 14, 28, 0),
+    ("moss", -30, -138, 9, 13, 27, 0), ("moss", 20, -132, 1, 11, 23, 0),
 ])
 main_branch("right", -1)
 main_branch("left", 1)
-crown("crown_back", (0, -116, 10), (-0.7, 0, 0), 46, 8, [(26, (0, 0, 0.7), 18), (40, (0.5, 0, -0.6), 16)])
-crown("crown_right", (-10, -120, 0), (0.15, 0, -0.65), 44, 8, [(24, (-0.6, 0, 0.3), 18), (38, (0.4, 0, -0.5), 16)])
-crown("crown_left", (10, -120, 0), (0.15, 0, 0.65), 44, 8, [(24, (-0.6, 0, -0.3), 18), (38, (0.4, 0, 0.5), 16)])
-crown("crown_front", (0, -124, -8), (0.4, 0, 0.1), 36, 6, [(20, (0, 0, -0.7), 14), (32, (0.3, 0, 0.6), 12)])
+crown("crown_back", (-3, -119, 9), (-0.48, 0, 0.08), 40, 10, [(30, (0, 0, 0.65), 14)])
+crown("crown_right", (-10, -122, -1), (0.12, 0, -0.65), 36, 8, [(25, (-0.45, 0, 0.3), 16)])
+crown("crown_left", (10, -121, 1), (-0.1, 0, 0.65), 31, 6, [(23, (0.3, 0, -0.6), 13)])
 
 
 def uv_size(w, h, d):
@@ -149,25 +166,22 @@ def paint(img, rect, fn):
 
 
 def bark(rng):
-    def fn(px, py, w, h):
-        if rng.random() < 0.04:
-            return SPECK
-        groove = (px + (py // 7) % 2) % 5 == 0
-        return BARK[rng.choice((3, 4, 5)) if groove else rng.choice((0, 1, 1, 2, 2, 2))]
-    return fn
+    offset_x, offset_y = rng.randrange(16), rng.randrange(16)
+    return lambda px, py, w, h: bark_pixel(px + offset_x, py + offset_y)
 
 
 def copper(stage, rng):
-    light, mid, dark, rivet = COPPER[stage]
+    light, _, dark, rivet = COPPER[stage]
+    offset_x, offset_y = rng.randrange(16), rng.randrange(16)
 
     def fn(px, py, w, h):
         if w >= 6 and h >= 4 and px in (1, w - 2) and py in (1, h - 2):
             return rivet
-        if py == 0:
+        if py == 0 or px == 0:
             return light
         if py == h - 1 or px == w - 1:
             return dark
-        return mid if rng.random() < 0.8 else light
+        return copper_pixel(stage, px + offset_x, py + offset_y)
     return fn
 
 
