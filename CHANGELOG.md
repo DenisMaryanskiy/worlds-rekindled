@@ -8,7 +8,7 @@ The design behind all of it is in [docs/pale-garden.md](docs/pale-garden.md).
 
 ## 0.5: The complete Pale Garden beta
 
-### 0.5.0 (unreleased)
+### 0.5.0 (#74)
 
 The first feature-complete beta of the Pale Garden improvement: exploration, dungeon combat,
 the Elderwood, useful rewards and repeatable challenges form a complete survival loop.
