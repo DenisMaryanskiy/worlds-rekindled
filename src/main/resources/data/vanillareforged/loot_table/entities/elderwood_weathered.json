@@ -6,10 +6,23 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "vanillareforged:elderwood_lens",
+          "name": "vanillareforged:elderwood_lens"
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "vanillareforged:elderwood_lens_shard",
           "modifier": {
             "type": "minecraft:set_count",
-            "count": 2.0
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 2,
+              "max": 4
+            }
           }
         }
       ]

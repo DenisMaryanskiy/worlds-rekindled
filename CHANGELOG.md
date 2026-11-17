@@ -10,6 +10,22 @@ The design behind all of it is in [docs/pale-garden.md](docs/pale-garden.md).
 
 After the third playtest: the fights tuned once more, and rewards for every kind of player.
 
+### 0.4.12 (unreleased)
+
+- **Any melee item can crack hearts**: the Elderwood and both Sentries now accept axes, pickaxes,
+  other tools, ordinary items and bare hands as well as swords. Heart aiming and the half-second
+  cooldown still apply.
+- **Cleaner copper, stronger Elderwood**: oxidation now weakens the boss. Fully oxidized copper
+  starts the introductory fight; fresh copper starts the hardest, with the best lens and shard
+  drops. Each Core still matches its copper stage.
+- **The Pale Ruin's summoning stump** now has a waxed oxidized copper cap, fitting its aged
+  surroundings. Scrape it before summoning to choose a harder fight.
+- **Untarnished** replaces Verdigris as the hardest-fight challenge, earned with fresh copper.
+  Existing advancement progress is retained.
+- **Restore the original mob textures**: the Sentries, their statue variants and the Elderwood's
+  roots use their earlier artwork again. The Elderwood keeps its reworked model with the original
+  rough bark and copper texture generation.
+
 ### 0.4.11 (#72)
 
 - **The Elderwood's model** has a chamfered trunk, splayed buttress roots, tapered branches and a

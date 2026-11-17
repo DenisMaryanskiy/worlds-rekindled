@@ -99,8 +99,9 @@ slowing it, done.
 - One crack per:
   - fully charged arrow on the heart (crossbow bolts count; partly charged arrows bounce off);
   - thrown trident on the heart;
-  - sword hit on the heart, at any charge (riskier because of the Sentry's reach and launch).
-    Swords are the item tag `vanillareforged:cracks_sentry_hearts`, so packs can add weapons.
+  - player melee hit on the heart, with any tool, weapon, ordinary item or empty hand
+    (riskier because of the Sentry's reach and launch). The old `vanillareforged:cracks_sentry_hearts`
+    item tag is retained for datapacks, but no longer restricts which items can crack a heart.
 - At most one crack per 0.5 s, so multishot volleys and quick double hits count once.
 - Crack count:
 
@@ -449,7 +450,7 @@ mural, done; (4) the loot pass (see Rewards), done. A playthrough after all four
 - Hostile to players and ignoring other mobs, same as the vanilla Creaking (which only targets
   players). Two ways to beat them:
   - aim: bow or trident at the heart;
-  - melee: Pale Mask to slow them, then a sword on the heart.
+  - melee: Pale Mask to slow them, then any melee hit on the heart.
 - **Leashed to the Ruin**: it never chases the player outside the structure, so it can't be
   lured away from it.
 - Implemented, as its own entity (`ruin_sentry`, with a spawn egg) sharing the Heartwood Sentry's
@@ -481,7 +482,7 @@ mural, done; (4) the loot pass (see Rewards), done. A playthrough after all four
     beside it;
   - **cracks**: 3 on Easy and Peaceful, 4 on Normal, 5 on Hard, as in the table above (one
     fewer since the third playthrough, in iron armor with a shield, still found them tough). A
-    **critical hit** (a sword swung while falling) **cracks it twice**, on the player's own
+    **critical hit** (a melee swing while falling) **cracks it twice**, on the player's own
     Sentry too. The Elderwood's hearts take one crack a hit either way;
   - **drops**: 1-3 resin clumps, 1-2 Elderwood Lens Shards and 10 XP;
   - it isn't a monster by vanilla's rules (a golem, like the player's Sentry), so it stays on
@@ -677,7 +678,7 @@ iron/diamond gear: a huge, rooted tree fought by moving around it.
 - **Any copper block works, and it shows on the Elderwood** (kept): copper, exposed, weathered or
   oxidized, waxed or not. The woken tree's bands and plates take the collar's oxidation stage and
   keep it for the whole fight, and the stage sets its tier (see Tiers below). A tree that never
-  had a collar, from a spawn egg or a command, is the plain copper tier.
+  had a collar, from a spawn egg or a command, is the plain copper tier, the hardest fight.
 - **It grows in three bursts** over 3 s, not smoothly: the stump's blocks break and a sprout a
   third of its size stands in their place, then twice a second later it snaps to the next size
   in a burst of wood splinters with a crack and a creak, reaching full size on the third. While
@@ -753,11 +754,11 @@ all around the trunk, so the player has to keep moving between the two.
     builds before or during the fight;
   - **the Pale Mask** (see Pale Mask).
 - **Hearts**: it can only be hurt through its hearts, each with crack stages like the Sentry's and
-  traced the same way (kept: a sword, a charged arrow or a trident, at most one
+  traced the same way (any player melee hit, a charged arrow or a trident, at most one
   crack per 0.5 s, players only). A glowing heart is one that can be hit right now; a destroyed
-  heart is a dark husk. Any sword swing counts, however charged: the first version asked for a
-  full-strength swing, which in a fight read as misses with the crosshair on the heart. The
-  half-second between cracks is what paces it, on the Sentry too.
+  heart is a dark husk. Tools, weapons, ordinary items and empty hands all count. The half-second
+  cooldown between cracks paces hits on the Elderwood and both Sentries; changing the held item
+  cannot bypass it.
   **Seven hearts, 23 cracks**; the boss bar shows how many are left:
   - **4 trunk hearts** (3 cracks each) at sword height: front, back, left and right. **Always
     open**, each from its own side. The danger is where you have to stand: the front one is in
@@ -854,27 +855,27 @@ on **every kill**, as the Wither always drops its star and the Elder Guardian it
   vanilla's copper block texture). Four blocks that never weather; a full set takes a kill at
   every tier.
 
-**Tiers: the collar sets the fight** (built). The copper on the stump used to only show on the
-tree. It's the difficulty dial now, so the same stump gives four fights, each harder and better
-paid than the last, as Ominous trials are to plain ones:
+**Tiers: the collar sets the fight** (built). Oxidation stiffens the builders' metalwork.
+Scraping the copper restores the tree's strength, so the same stump gives four fights, each
+harder and better paid than the last:
 
 | Collar | The fight | Drops, besides its Core and the resin |
 |---|---|---|
-| Copper | as playtested | 1 lens |
-| Exposed | roots every 3.5 s, turns 15% faster | 1 lens, 2-4 lens shards |
-| Weathered | roots every 3 s, resin every 2.5 s, turns 30% faster, one more crack on every heart | 2 lenses |
-| Oxidized | as weathered, and its gaze fills 50% faster (3 a tick, 4 with its core open) | 2 lenses, 4-6 lens shards |
+| Oxidized | base fight: roots every 4 s, resin every 3 s, turns 1.5° per tick, gaze fills 2 per tick (3 with its core open) | 1 lens |
+| Weathered | roots every 3.5 s, turns 15% faster | 1 lens, 2-4 lens shards |
+| Exposed | roots every 3 s, resin every 2.5 s, turns 30% faster, one more crack on every heart | 2 lenses |
+| Copper | as exposed, and its gaze fills 50% faster (3 a tick, 4 with its core open) | 2 lenses, 4-6 lens shards |
 
-- Waxed copper counts as its stage. An axe scrapes a stage off before the heart goes on, so the
-  player picks the tier.
-- **The Ruin's own stump has waxed plain copper**, so the first fight, the one the Ruin builds
-  up to, is the lowest tier, as playtested, however long the Ruin waits. Its cap was oxidized
-  copper, which would have made it the hardest.
+- Waxed copper counts as its stage. An axe removes wax first, then scrapes off an oxidation
+  stage; doing this before placing the heart lets the player choose a harder fight.
+- **The Ruin's own stump has waxed oxidized copper**, matching its aged surroundings and
+  starting the lowest tier however long the Ruin waits. This affects newly generated halls;
+  existing halls keep their cap until a player replaces it.
 - The numbers are first values, for the playthroughs to tune.
-- **Verdigris**, a challenge advancement, for felling it with an oxidized collar (feature 6).
+- **Untarnished**, a challenge advancement, for felling it with an unoxidized collar (feature 6).
 - Code: `ElderwoodTier`, one per stage, holds the tier's numbers and its loot table
   (`entities/elderwood`, `elderwood_exposed`, `elderwood_weathered`, `elderwood_oxidized`). The
-  constants on `Elderwood` and `ElderwoodLens` are the plain copper tier's. The boss bar counts
+  constants on `Elderwood` and `ElderwoodLens` are the oxidized copper tier's. The boss bar counts
   the tier's cracks, so it still empties exactly.
 
 **More players, more tree** (built). With more players it was an easy fight shared out and a
@@ -952,17 +953,20 @@ Their descriptions double as the hints the mod otherwise lacks.
 | **Deadwood** | Killing the Elderwood | goal | vanilla `player_killed_entity`: the core's last crack is credited to whoever dealt it |
 | **One of Them** | Wearing a Pale Mask next to a Creaking that ignores you | task | `vanillareforged:ignored_by_creaking` |
 | **Don't Blink** | Killing the Elderwood without being petrified once | challenge, 100 XP | `vanillareforged:killed_elderwood_unpetrified` |
-| **Verdigris** | Killing the Elderwood woken with an oxidized collar | challenge, 100 XP | `vanillareforged:killed_oxidized_elderwood` |
+| **Untarnished** | Killing the Elderwood woken with an unoxidized collar | challenge, 100 XP | `vanillareforged:killed_fresh_elderwood` |
 
 - **Tree**: Old Growth hangs off vanilla's **Heart Transplanter** (placing a Creaking Heart), so
   its description, which spells out the stump, shows up for anyone who has started the Adventure
   tab. It leads to Set in Stone and Deadwood, and Deadwood to One of Them, Don't Blink and
-  Verdigris.
+  Untarnished.
   Buried Garden hangs off Heart Transplanter too, beside it, and so does Heartwood Guardian,
   whose description spells out the Sentry's pattern for anyone who has placed a heart, as the
   Sentry workshop shows it in the Ruin.
-- **Triggers**: the four of our own are plain vanilla `PlayerTrigger`s registered under our ids
+- **Triggers**: our custom triggers are plain vanilla `PlayerTrigger`s registered under our ids
   (`ModCriteria`), like vanilla's `avoid_vibration`: the code decides when they fire.
+- **Untarnished** keeps the released `adventure/verdigris` advancement ID and criterion key so
+  existing progress survives. The old `killed_oxidized_elderwood` trigger still fires for
+  oxidized kills for datapack compatibility; the advancement now uses `killed_fresh_elderwood`.
 - **Set in Stone** is granted when the stone cracks open, by time or by a hit, if the player is
   still alive then. A meter that never filled doesn't count.
 - **One of Them** needs the Creaking to be one that would otherwise attack (so not in Creative)

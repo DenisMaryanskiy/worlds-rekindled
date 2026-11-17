@@ -1,47 +1,15 @@
-"""Refresh the remaining placeholder materials and painting without changing any model UVs."""
+"""Generate the Pale Ruin map marker and Elderwood painting."""
 from pathlib import Path
 
 import png
-from texture_materials import BARK, bark_pixel
 
 
 ROOT = Path(__file__).resolve().parents[1] / "src/main/resources/assets/vanillareforged/textures"
 CLEAR = (0, 0, 0, 0)
-STONE = [(62, 63, 59), (82, 82, 78), (106, 106, 99), (133, 133, 122), (160, 160, 146)]
 
 
 def write(name, pixels):
     png.write(ROOT / f"{name}.png", pixels)
-
-
-def sentries():
-    # Replace only the old bark palette; the pumpkin, heart and UV cutouts retain their pixels.
-    old_bark = {*BARK, (199, 184, 184)}
-    for name in ("heartwood_sentry", "heartwood_sentry_jack_o_lantern", "ruin_sentry"):
-        _, _, pixels = png.read(ROOT / f"entity/heartwood_sentry/{name}.png")
-        for y, row in enumerate(pixels):
-            for x, color in enumerate(row):
-                if color[3] and color[:3] in old_bark:
-                    row[x] = (*bark_pixel(x, y + 7), color[3])
-        write(f"entity/heartwood_sentry/{name}", pixels)
-        if name == "heartwood_sentry_jack_o_lantern":
-            continue
-        statue = []
-        for row in pixels:
-            stone_row = []
-            for r, g, b, alpha in row:
-                brightness = (r * 3 + g * 6 + b) // 10
-                shade = min(4, max(0, (brightness - 25) // 34))
-                stone_row.append((*STONE[shade], alpha) if alpha else CLEAR)
-            statue.append(stone_row)
-        statue_name = "heartwood_sentry_statue" if name == "heartwood_sentry" else "ruin_sentry_statue"
-        write(f"entity/heartwood_sentry/{statue_name}", statue)
-
-
-def roots():
-    write("entity/elderwood/elderwood_roots", [
-        [(*bark_pixel(x, y), 255) for x in range(64)] for y in range(64)
-    ])
 
 
 def ruin_marker():
@@ -163,7 +131,5 @@ def painting():
 
 
 if __name__ == "__main__":
-    sentries()
-    roots()
     ruin_marker()
     painting()

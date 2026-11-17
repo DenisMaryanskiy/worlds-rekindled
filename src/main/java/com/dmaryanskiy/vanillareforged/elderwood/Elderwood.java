@@ -56,7 +56,7 @@ import net.minecraft.world.phys.Vec3;
  * {@link ElderwoodSlam}, the roots in {@link ElderwoodRoots}, and its death in {@link ElderwoodDecay}.
  */
 public class Elderwood extends Monster {
-	// These four are its plain copper tier's; see ElderwoodTier for the others.
+	// These four are its oxidized copper tier's; see ElderwoodTier for the others.
 	public static final float TURN_DEGREES_PER_TICK = 1.5F;
 	public static final int GROW_STAGES = 3;
 	public static final int GROW_STAGE_TICKS = 20;
@@ -569,7 +569,10 @@ public class Elderwood extends Monster {
 				ModCriteria.KILLED_ELDERWOOD_UNPETRIFIED.trigger(killer);
 			}
 			if (this.getTier() == ElderwoodTier.OXIDIZED) {
+				// Keep the released trigger working for datapacks that still use it.
 				ModCriteria.KILLED_OXIDIZED_ELDERWOOD.trigger(killer);
+			} else if (this.getTier() == ElderwoodTier.COPPER) {
+				ModCriteria.KILLED_FRESH_ELDERWOOD.trigger(killer);
 			}
 		}
 	}

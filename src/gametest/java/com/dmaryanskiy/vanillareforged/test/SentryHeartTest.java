@@ -1,7 +1,14 @@
 package com.dmaryanskiy.vanillareforged.test;
 
+import java.util.List;
+
 import com.dmaryanskiy.vanillareforged.ModEntities;
+import com.dmaryanskiy.vanillareforged.elderwood.Elderwood;
+import com.dmaryanskiy.vanillareforged.elderwood.ElderwoodHeart;
+import com.dmaryanskiy.vanillareforged.sentry.AbstractSentry;
 import com.dmaryanskiy.vanillareforged.sentry.HeartwoodSentry;
+import com.dmaryanskiy.vanillareforged.sentry.RuinSentry;
+import com.dmaryanskiy.vanillareforged.sentry.SentryHeart;
 
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
@@ -9,7 +16,9 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.gametest.framework.GameTestSequence;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.skeleton.Skeleton;
 import net.minecraft.world.entity.monster.zombie.Zombie;
@@ -66,15 +75,67 @@ public class SentryHeartTest {
 	}
 
 	@GameTest(environment = MIDNIGHT)
-	public void bareHandDoesNotCrack(GameTestHelper helper) {
+	public void bareHandCracksTheHeart(GameTestHelper helper) {
 		HeartwoodSentry sentry = sentry(helper);
 		Player player = swordsman(helper, IN_FRONT, 180.0F);
 		player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
 
 		sentry.hurtServer(helper.getLevel(), helper.getLevel().damageSources().playerAttack(player), fullDamage(player));
 
-		helper.assertValueEqual(sentry.getCracks(), 0, "cracks");
+		helper.assertValueEqual(sentry.getCracks(), 1, "cracks");
 		helper.succeed();
+	}
+
+	@GameTest(environment = MIDNIGHT)
+	public void anyItemOrBareHandCanCrackEveryMobsHeart(GameTestHelper helper) {
+		List<EntityType<? extends Mob>> types = List.of(ModEntities.HEARTWOOD_SENTRY, ModEntities.RUIN_SENTRY, ModEntities.ELDERWOOD);
+		List<ItemStack> heldItems = List.of(new ItemStack(Items.IRON_AXE), new ItemStack(Items.IRON_PICKAXE),
+				new ItemStack(Items.IRON_SHOVEL), new ItemStack(Items.IRON_HOE), new ItemStack(Items.STICK), ItemStack.EMPTY);
+		for (EntityType<? extends Mob> type : types) {
+			for (ItemStack held : heldItems) {
+				Mob mob = helper.spawn(type, SENTRY);
+				mob.setNoAi(true);
+				mob.setYRot(0.0F);
+				mob.setYHeadRot(0.0F);
+				mob.setYBodyRot(0.0F);
+				if (mob instanceof RuinSentry ruin) {
+					ruin.setPost(mob.blockPosition());
+				}
+				Vec3 heart = mob instanceof Elderwood elderwood ? ElderwoodHeart.TRUNK_FRONT.box(elderwood).getCenter()
+						: SentryHeart.box((AbstractSentry) mob).getCenter();
+				Player player = helper.makeMockServerPlayer(GameType.SURVIVAL);
+				player.snapTo(heart.add(0.0, -player.getEyeHeight(), 2.0), 180.0F, 0.0F);
+				player.setYHeadRot(180.0F);
+				player.setItemInHand(InteractionHand.MAIN_HAND, held.copy());
+				player.attack(mob);
+				int cracks = mob instanceof Elderwood elderwood ? elderwood.getCracks(ElderwoodHeart.TRUNK_FRONT)
+						: ((AbstractSentry) mob).getCracks();
+				helper.assertValueEqual(cracks, 1, type + " cracks after attacking with " + held);
+				player.attack(mob);
+				int repeatedCracks = mob instanceof Elderwood elderwood ? elderwood.getCracks(ElderwoodHeart.TRUNK_FRONT)
+						: ((AbstractSentry) mob).getCracks();
+				helper.assertValueEqual(repeatedCracks, 1, type + " must still enforce its crack cooldown with " + held);
+				mob.discard();
+			}
+		}
+		helper.succeed();
+	}
+
+	@GameTest(environment = MIDNIGHT, maxTicks = 30)
+	public void changingFromAnAxeToAnEmptyHandWaitsForTheCrackCooldown(GameTestHelper helper) {
+		HeartwoodSentry sentry = sentry(helper);
+		Player player = swordsman(helper, IN_FRONT, 180.0F);
+		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.IRON_AXE));
+		player.attack(sentry);
+		helper.assertValueEqual(sentry.getCracks(), 1, "axe cracks");
+		player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+		player.attack(sentry);
+		helper.assertValueEqual(sentry.getCracks(), 1, "changing held items cannot bypass the cooldown");
+		helper.runAfterDelay(15, () -> {
+			player.attack(sentry);
+			helper.assertValueEqual(sentry.getCracks(), 2, "an empty hand cracks it again after the cooldown");
+			helper.succeed();
+		});
 	}
 
 	@GameTest(environment = MIDNIGHT, maxTicks = 40)

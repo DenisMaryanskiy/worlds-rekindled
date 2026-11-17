@@ -18,15 +18,22 @@ import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
 import png
-from texture_materials import COPPER, bark_pixel, copper_pixel
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SIZE = 512
 CLEAR = (0, 0, 0, 0)
+BARK = [(125, 114, 112), (110, 100, 98), (94, 83, 80), (78, 67, 64), (67, 59, 57), (58, 51, 49)]
+SPECK = (199, 184, 184)
 MOSS = [(150, 160, 150), (120, 132, 122), (96, 108, 100)]
 HUSK = [(46, 36, 33), (60, 46, 41), (34, 27, 25)]
 DULL = [(92, 70, 58), (78, 58, 48), (64, 48, 40)]
 GLOW = [(255, 236, 170), (250, 179, 38), (243, 121, 27), (224, 85, 4), (150, 52, 8)]
+COPPER = {  # light, mid, dark, rivet
+    "unaffected": [(231, 145, 96), (192, 105, 66), (138, 70, 45), (255, 206, 160)],
+    "exposed": [(196, 152, 124), (164, 120, 98), (120, 86, 70), (226, 196, 170)],
+    "weathered": [(116, 178, 148), (78, 140, 115), (52, 96, 82), (176, 220, 192)],
+    "oxidized": [(96, 196, 166), (62, 156, 130), (40, 106, 92), (158, 230, 206)],
+}
 
 # part: (name, parent, pivot xyz, rotation xyz, boxes); box: (kind, x, y, z, w, h, d[, heart name])
 PARTS = []
@@ -166,22 +173,25 @@ def paint(img, rect, fn):
 
 
 def bark(rng):
-    offset_x, offset_y = rng.randrange(16), rng.randrange(16)
-    return lambda px, py, w, h: bark_pixel(px + offset_x, py + offset_y)
+    def fn(px, py, w, h):
+        if rng.random() < 0.04:
+            return SPECK
+        groove = (px + (py // 7) % 2) % 5 == 0
+        return BARK[rng.choice((3, 4, 5)) if groove else rng.choice((0, 1, 1, 2, 2, 2))]
+    return fn
 
 
 def copper(stage, rng):
-    light, _, dark, rivet = COPPER[stage]
-    offset_x, offset_y = rng.randrange(16), rng.randrange(16)
+    light, mid, dark, rivet = COPPER[stage]
 
     def fn(px, py, w, h):
         if w >= 6 and h >= 4 and px in (1, w - 2) and py in (1, h - 2):
             return rivet
-        if py == 0 or px == 0:
+        if py == 0:
             return light
         if py == h - 1 or px == w - 1:
             return dark
-        return copper_pixel(stage, px + offset_x, py + offset_y)
+        return mid if rng.random() < 0.8 else light
     return fn
 
 
