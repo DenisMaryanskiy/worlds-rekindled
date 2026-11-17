@@ -10,7 +10,7 @@ The design behind all of it is in [docs/pale-garden.md](docs/pale-garden.md).
 
 After the third playtest: the fights tuned once more, and rewards for every kind of player.
 
-### 0.4.12 (unreleased)
+### 0.4.12 (#73)
 
 - **Any melee item can crack hearts**: the Elderwood and both Sentries now accept axes, pickaxes,
   other tools, ordinary items and bare hands as well as swords. Heart aiming and the half-second
