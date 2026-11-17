@@ -103,8 +103,9 @@ what to write down. Tick what's fine, note what isn't.
 - [ ] The Elderwood Core it drops: does it read as a trophy, placed in your base?
 - [ ] With friends: does the tree with a crack more per player feel as long as alone? Did
       everyone who cracked a heart get a lens?
-- [ ] A second fight at home on an exposed, weathered or oxidized collar: does each feel harder
-      than the last, and is the extra lens or shards worth it? Is the oxidized tree beatable?
+- [ ] After the oxidized fight, try weathered, exposed and finally unoxidized copper collars:
+      does each feel harder than the last, and is the extra lens or shards worth it? Is the
+      fresh-copper tree beatable, and does it grant **Untarnished**?
 - [ ] Resin glass: does it look like amber next to orange stained glass? Did you mend your Sentry
       with resin clumps?
 - [ ] Is there a reason to come back for a second Elderwood, or a second Ruin?

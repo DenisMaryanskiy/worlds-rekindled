@@ -2,7 +2,7 @@
   "parent": "vanillareforged:adventure/deadwood",
   "criteria": {
     "killed_oxidized_elderwood": {
-      "trigger": "vanillareforged:killed_oxidized_elderwood"
+      "trigger": "vanillareforged:killed_fresh_elderwood"
     }
   },
   "display": {
@@ -11,7 +11,7 @@
     },
     "frame": "challenge",
     "icon": {
-      "id": "vanillareforged:oxidized_elderwood_core"
+      "id": "vanillareforged:elderwood_core"
     },
     "title": {
       "translate": "advancements.vanillareforged.verdigris.title"

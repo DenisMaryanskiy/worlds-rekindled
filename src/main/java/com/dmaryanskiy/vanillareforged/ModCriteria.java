@@ -14,6 +14,7 @@ public final class ModCriteria {
 	public static final PlayerTrigger IGNORED_BY_CREAKING = register("ignored_by_creaking");
 	public static final PlayerTrigger KILLED_ELDERWOOD_UNPETRIFIED = register("killed_elderwood_unpetrified");
 	public static final PlayerTrigger KILLED_OXIDIZED_ELDERWOOD = register("killed_oxidized_elderwood");
+	public static final PlayerTrigger KILLED_FRESH_ELDERWOOD = register("killed_fresh_elderwood");
 
 	private ModCriteria() {
 	}

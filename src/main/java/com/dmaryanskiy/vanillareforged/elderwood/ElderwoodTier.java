@@ -11,17 +11,17 @@ import net.minecraft.world.level.storage.loot.LootTable;
 
 /**
  * How hard the Elderwood fights and what it leaves, set by the copper collar it was woken with.
- * Plain copper is the fight as playtested; every stage of oxidation makes it harder and pays more,
- * as Ominous trials are to plain ones. Waxed copper counts as its stage.
+ * Oxidized copper is the base fight; cleaner copper restores its strength and pays more.
+ * Waxed copper counts as its stage.
  */
 public enum ElderwoodTier {
-	COPPER(Elderwood.ROOT_INTERVAL_TICKS, ElderwoodLens.RESIN_INTERVAL_TICKS, Elderwood.TURN_DEGREES_PER_TICK, 0,
-			ElderwoodLens.GAZE_RATE, ElderwoodLens.CORE_GAZE_RATE),
-	EXPOSED(70, ElderwoodLens.RESIN_INTERVAL_TICKS, Elderwood.TURN_DEGREES_PER_TICK * 1.15F, 0,
-			ElderwoodLens.GAZE_RATE, ElderwoodLens.CORE_GAZE_RATE),
-	WEATHERED(60, 50, Elderwood.TURN_DEGREES_PER_TICK * 1.3F, 1, ElderwoodLens.GAZE_RATE, ElderwoodLens.CORE_GAZE_RATE),
 	// Its gaze fills half as fast again, as near as whole meter points get.
-	OXIDIZED(60, 50, Elderwood.TURN_DEGREES_PER_TICK * 1.3F, 1, 3, 4);
+	COPPER(60, 50, Elderwood.TURN_DEGREES_PER_TICK * 1.3F, 1, 3, 4),
+	EXPOSED(60, 50, Elderwood.TURN_DEGREES_PER_TICK * 1.3F, 1, ElderwoodLens.GAZE_RATE, ElderwoodLens.CORE_GAZE_RATE),
+	WEATHERED(70, ElderwoodLens.RESIN_INTERVAL_TICKS, Elderwood.TURN_DEGREES_PER_TICK * 1.15F, 0,
+			ElderwoodLens.GAZE_RATE, ElderwoodLens.CORE_GAZE_RATE),
+	OXIDIZED(Elderwood.ROOT_INTERVAL_TICKS, ElderwoodLens.RESIN_INTERVAL_TICKS, Elderwood.TURN_DEGREES_PER_TICK, 0,
+			ElderwoodLens.GAZE_RATE, ElderwoodLens.CORE_GAZE_RATE);
 
 	private final int rootIntervalTicks;
 	private final int resinIntervalTicks;
@@ -69,7 +69,7 @@ public enum ElderwoodTier {
 		return coreOpen ? this.coreGazeRate : this.gazeRate;
 	}
 
-	/** What it drops: its lens or lenses, shards on the exposed and oxidized tiers, resin, and its Core. */
+	/** What it drops: its lens or lenses, shards on the copper and weathered tiers, resin, and its Core. */
 	public ResourceKey<LootTable> lootTable() {
 		String suffix = this == COPPER ? "" : "_" + this.name().toLowerCase(Locale.ROOT);
 		return ResourceKey.create(Registries.LOOT_TABLE, VanillaReforged.id("entities/elderwood" + suffix));

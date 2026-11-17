@@ -19,7 +19,7 @@ public final class ElderwoodLens {
 	public static final double RANGE = 24.0;
 	// It only sees this far to each side of straight ahead.
 	public static final float ARC_DEGREES = 60.0F;
-	// These three are its plain copper tier's; see ElderwoodTier for the others.
+	// These three are its oxidized copper tier's; see ElderwoodTier for the others.
 	public static final int GAZE_RATE = 2;
 	public static final int CORE_GAZE_RATE = 3;
 	public static final double RESIN_MIN_RANGE = 6.0;

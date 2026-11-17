@@ -79,7 +79,7 @@ public class PaleRuinTest {
 		int stumpCaps = 0;
 		for (BlockPos pos : buildTheHall(level, new ChunkPos(3100, 3100), false)) {
 			BlockEntity blockEntity = level.getBlockEntity(pos);
-			stumpCaps += level.getBlockState(pos).is(Blocks.COPPER_BLOCK.waxed().unaffected()) ? 1 : 0;
+			stumpCaps += level.getBlockState(pos).is(Blocks.COPPER_BLOCK.waxed().oxidized()) ? 1 : 0;
 			if (blockEntity instanceof ChestBlockEntity chest) {
 				chests++;
 				helper.assertValueEqual(chest.getLootTable().identifier(), VanillaReforged.id("chests/pale_ruin/hall"), "the chest's loot table");
@@ -99,7 +99,7 @@ public class PaleRuinTest {
 		helper.assertValueEqual(chests, 1, "chests in the hall");
 		helper.assertValueEqual(pots, 2, "pots in the hall");
 		helper.assertValueEqual(heaps, 4, "heaps to brush in the hall");
-		helper.assertValueEqual(stumpCaps, 1, "waxed plain copper caps: the Ruin's own fight is the lowest tier");
+		helper.assertValueEqual(stumpCaps, 1, "waxed oxidized copper caps: the Ruin's own fight is the lowest tier");
 		helper.assertValueEqual(withTheTrim, 1, "heaps that hold the trim");
 		helper.succeed();
 	}

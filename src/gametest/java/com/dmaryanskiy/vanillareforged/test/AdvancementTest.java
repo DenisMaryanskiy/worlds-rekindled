@@ -84,21 +84,21 @@ public class AdvancementTest {
 					helper.assertTrue(has(helper, player, "deadwood"), "Killing the Elderwood should grant Deadwood");
 					helper.assertTrue(has(helper, player, "dont_blink"), "Killing it without being petrified should grant Don't Blink");
 					helper.assertTrue(hasVanilla(helper, player, "adventure/kill_a_mob"), "Killing the Elderwood should grant Monster Hunter");
-					helper.assertFalse(has(helper, player, "verdigris"), "Verdigris needs the oxidized tier");
+					helper.assertFalse(has(helper, player, "verdigris"), "Untarnished needs fresh copper, not the oxidized tier");
 				})
 				.thenSucceed();
 	}
 
 	@GameTest(environment = ElderwoodTest.MIDNIGHT, maxTicks = 120)
-	public void killingAnOxidizedElderwoodGrantsVerdigris(GameTestHelper helper) {
+	public void killingAFreshCopperElderwoodGrantsUntarnished(GameTestHelper helper) {
 		Elderwood elderwood = ElderwoodTest.stillElderwood(helper);
-		elderwood.setCopperStage(WeatheringCopper.WeatherState.OXIDIZED);
+		elderwood.setCopperStage(WeatheringCopper.WeatherState.UNAFFECTED);
 		Player player = helper.makeMockServerPlayer(GameType.SURVIVAL);
 
 		kill(helper, helper.startSequence(), elderwood, player)
 				.thenExecute(() -> {
 					helper.assertFalse(elderwood.isAlive(), "The Elderwood should be dead");
-					helper.assertTrue(has(helper, player, "verdigris"), "Killing an oxidized Elderwood should grant Verdigris");
+					helper.assertTrue(has(helper, player, "verdigris"), "Killing a fresh copper Elderwood should grant Untarnished");
 				})
 				.thenSucceed();
 	}

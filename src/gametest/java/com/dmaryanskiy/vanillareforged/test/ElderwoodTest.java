@@ -89,33 +89,56 @@ public class ElderwoodTest {
 		buildStump(helper, Blocks.COPPER_BLOCK.waxed().oxidized());
 		helper.setBlock(HEART, Blocks.CREAKING_HEART);
 
-		helper.assertValueEqual(findElderwood(helper).getCopperStage(), WeatheringCopper.WeatherState.OXIDIZED, "copper stage");
+		Elderwood elderwood = findElderwood(helper);
+		helper.assertValueEqual(elderwood.getCopperStage(), WeatheringCopper.WeatherState.OXIDIZED, "copper stage");
+		helper.assertValueEqual(elderwood.maxCracks(ElderwoodHeart.CORE), ElderwoodHeart.CORE.maxCracks() + elderwood.getPlayers() - 1,
+				"the aged stump starts the base fight");
 		helper.succeed();
 	}
 
 	@GameTest(environment = MIDNIGHT)
 	public void aTreeWokenWithoutACollarStageIsThePlainCopperTier(GameTestHelper helper) {
-		helper.assertValueEqual(stillElderwood(helper).getTier(), ElderwoodTier.COPPER, "tier");
+		helper.assertValueEqual(helper.spawn(ModEntities.ELDERWOOD, ELDERWOOD).getTier(), ElderwoodTier.COPPER, "tier");
 		helper.succeed();
 	}
 
 	@GameTest(environment = MIDNIGHT)
-	public void fromWeatheredOnItsHeartsTakeOneMoreCrack(GameTestHelper helper) {
+	public void freshAndExposedHeartsTakeOneMoreCrack(GameTestHelper helper) {
 		Elderwood elderwood = stillElderwood(helper);
-		elderwood.setCopperStage(WeatheringCopper.WeatherState.WEATHERED);
-		int plain = ElderwoodHeart.TRUNK_FRONT.maxCracks();
+		for (WeatheringCopper.WeatherState stage : WeatheringCopper.WeatherState.values()) {
+			elderwood.setCopperStage(stage);
+			boolean stronger = stage == WeatheringCopper.WeatherState.UNAFFECTED || stage == WeatheringCopper.WeatherState.EXPOSED;
+			for (ElderwoodHeart heart : ElderwoodHeart.values()) {
+				elderwood.setCracks(heart, heart.maxCracks());
+				helper.assertValueEqual(elderwood.isDestroyed(heart), !stronger, stage + " " + heart + " at base cracks");
+				elderwood.setCracks(heart, heart.maxCracks() + 1);
+				helper.assertTrue(elderwood.isDestroyed(heart), stage + " " + heart + " should break with one more crack");
+				elderwood.setCracks(heart, 0);
+			}
+		}
+		helper.succeed();
+	}
 
-		elderwood.setCracks(ElderwoodHeart.TRUNK_FRONT, plain);
-		helper.assertFalse(elderwood.isDestroyed(ElderwoodHeart.TRUNK_FRONT), "A weathered tree's heart should hold one more crack");
-		elderwood.setCracks(ElderwoodHeart.TRUNK_FRONT, plain + 1);
-		helper.assertTrue(elderwood.isDestroyed(ElderwoodHeart.TRUNK_FRONT), "One more crack should break it");
+	@GameTest(environment = MIDNIGHT)
+	public void cleanerCopperRestoresStrongerAttacks(GameTestHelper helper) {
+		int[][] intervalsAndGaze = {{60, 50, 3, 4}, {60, 50, 2, 3}, {70, 60, 2, 3}, {80, 60, 2, 3}};
+		float[] turnSpeeds = {1.95F, 1.95F, 1.725F, 1.5F};
+		for (WeatheringCopper.WeatherState stage : WeatheringCopper.WeatherState.values()) {
+			ElderwoodTier tier = ElderwoodTier.of(stage);
+			int[] expected = intervalsAndGaze[stage.ordinal()];
+			helper.assertValueEqual(tier.rootIntervalTicks(), expected[0], stage + " root interval");
+			helper.assertValueEqual(tier.resinIntervalTicks(), expected[1], stage + " resin interval");
+			helper.assertValueEqual(tier.gazeRate(false), expected[2], stage + " gaze rate");
+			helper.assertValueEqual(tier.gazeRate(true), expected[3], stage + " open-core gaze rate");
+			helper.assertTrue(Math.abs(tier.turnDegreesPerTick() - turnSpeeds[stage.ordinal()]) < 0.001F, stage + " turn speed");
+		}
 		helper.succeed();
 	}
 
 	@GameTest(environment = MIDNIGHT)
 	public void everyTierDropsItsOwnLensesShardsAndCore(GameTestHelper helper) {
 		Elderwood elderwood = stillElderwood(helper);
-		int[][] lensesAndShards = {{1, 0, 0}, {1, 2, 4}, {2, 0, 0}, {2, 4, 6}};
+		int[][] lensesAndShards = {{2, 4, 6}, {2, 0, 0}, {1, 2, 4}, {1, 0, 0}};
 		Block[] cores = {ModBlocks.ELDERWOOD_CORE, ModBlocks.EXPOSED_ELDERWOOD_CORE, ModBlocks.WEATHERED_ELDERWOOD_CORE,
 				ModBlocks.OXIDIZED_ELDERWOOD_CORE};
 		for (ElderwoodTier tier : ElderwoodTier.values()) {
@@ -219,7 +242,7 @@ public class ElderwoodTest {
 		helper.runAfterDelay(20, () -> {
 			float turned = Math.abs(Mth.degreesDifference(0.0F, elderwood.yBodyRot));
 			helper.assertTrue(turned > 10.0F, "It should be turning towards the player, turned " + turned);
-			helper.assertTrue(turned <= 20 * Elderwood.TURN_DEGREES_PER_TICK + 0.5F, "It should turn slowly, turned " + turned);
+			helper.assertTrue(turned <= 20 * elderwood.getTier().turnDegreesPerTick() + 0.5F, "It should turn slowly, turned " + turned);
 			helper.succeed();
 		});
 	}
@@ -550,7 +573,7 @@ public class ElderwoodTest {
 	@GameTest(environment = MIDNIGHT, maxTicks = Elderwood.DORMANT_AFTER_TICKS + 2 * Elderwood.HEAL_INTERVAL_TICKS + 40)
 	public void leftAloneItFallsDormantAndItsHeartsMend(GameTestHelper helper) {
 		Elderwood elderwood = facingSouth(helper.spawn(ModEntities.ELDERWOOD, ELDERWOOD));
-		elderwood.setCracks(ElderwoodHeart.TRUNK_BACK, ElderwoodHeart.TRUNK_BACK.maxCracks());
+		elderwood.setCracks(ElderwoodHeart.TRUNK_BACK, elderwood.maxCracks(ElderwoodHeart.TRUNK_BACK));
 
 		helper.runAfterDelay(Elderwood.DORMANT_AFTER_TICKS - 20, () -> {
 			helper.assertFalse(elderwood.isDormant(), "It shouldn't fall dormant so soon");
@@ -558,7 +581,7 @@ public class ElderwoodTest {
 		});
 		helper.runAfterDelay(Elderwood.DORMANT_AFTER_TICKS + Elderwood.HEAL_INTERVAL_TICKS + 20, () -> {
 			helper.assertTrue(elderwood.isDormant(), "It should be dormant by now");
-			helper.assertValueEqual(elderwood.getCracks(ElderwoodHeart.TRUNK_BACK), ElderwoodHeart.TRUNK_BACK.maxCracks() - 2,
+			helper.assertValueEqual(elderwood.getCracks(ElderwoodHeart.TRUNK_BACK), elderwood.maxCracks(ElderwoodHeart.TRUNK_BACK) - 2,
 					"cracks after two mends");
 			helper.succeed();
 		});
@@ -587,7 +610,7 @@ public class ElderwoodTest {
 		helper.assertValueEqual(elderwood.maxCracks(ElderwoodHeart.CORE), alone + 2, "core cracks with three players");
 		elderwood.setPlayers(9);
 		helper.assertValueEqual(elderwood.getPlayers(), Elderwood.MAX_PLAYERS, "players, which stop at four");
-		elderwood.setCopperStage(WeatheringCopper.WeatherState.OXIDIZED);
+		elderwood.setCopperStage(WeatheringCopper.WeatherState.UNAFFECTED);
 		elderwood.setCracks(ElderwoodHeart.CORE, elderwood.maxCracks(ElderwoodHeart.CORE) - 1);
 		helper.assertValueEqual(elderwood.getCracks(ElderwoodHeart.CORE), elderwood.maxCracks(ElderwoodHeart.CORE) - 1,
 				"cracks the hardest core holds, which must fit in its share of the synced number");
@@ -849,7 +872,7 @@ public class ElderwoodTest {
 					helper.assertTrue(elderwood.isStunned(), "It should be stunned");
 				})
 				.thenWaitUntil(() -> helper.assertFalse(elderwood.isStunned(), "The stun should wear off"))
-				.thenExecuteFor(ElderwoodLens.RESIN_INTERVAL_TICKS - 10, () -> helper.assertEntityNotPresent(ModEntities.BURNING_RESIN))
+				.thenExecuteFor(elderwood.getTier().resinIntervalTicks() - 10, () -> helper.assertEntityNotPresent(ModEntities.BURNING_RESIN))
 				.thenSucceed();
 	}
 
@@ -870,6 +893,7 @@ public class ElderwoodTest {
 
 	static Elderwood stillElderwood(GameTestHelper helper) {
 		Elderwood elderwood = facingSouth(helper.spawn(ModEntities.ELDERWOOD, ELDERWOOD));
+		elderwood.setCopperStage(WeatheringCopper.WeatherState.OXIDIZED);
 		elderwood.setNoAi(true);
 		return elderwood;
 	}

@@ -56,7 +56,7 @@ public enum ElderwoodHeart {
 		this.size = size;
 	}
 
-	/** On the plain copper tier; see {@link ElderwoodTier#maxCracks}. */
+	/** On the oxidized copper tier; see {@link ElderwoodTier#maxCracks}. */
 	public int maxCracks() {
 		return this.maxCracks;
 	}
