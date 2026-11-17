@@ -1,8 +1,8 @@
 # Pale Garden: playthrough checklist
 
-For one sitting from finding a Pale Garden to killing the Elderwood, in survival on Normal. Every
-number in the mod is a first guess (see `pale-garden.md`); this is the list of what to judge and
-what to write down. Tick what's fine, note what isn't.
+Reusable checks for the **0.5.0 Pale Garden beta**, from discovering the biome to killing the
+Elderwood in survival on Normal. Recent playtests informed the current tuning. Tick what is
+fine and note what still needs adjustment, especially with a player who has not read the design.
 
 ## Before you start
 
@@ -48,8 +48,10 @@ what to write down. Tick what's fine, note what isn't.
 - [ ] Being petrified (stuck for 3 s or until a Sentry's blow breaks the stone; that blow lands
       50% harder): frightening, or just annoying? Did it kill you?
 - [ ] A blow is 4 damage, about a heart through iron armor. Still too much without a shield?
-- [ ] 5 cracks to kill one on Normal, at most one every half second, two for a critical hit.
+- [ ] 4 cracks to kill one on Normal, at most one every half second, two for a critical hit.
       How long did one take with a sword, and with a bow? Is the critical hit worth jumping for?
+- [ ] Blocking a gaze gives a shield sound and sparks, and grants **Stonewall**. Does its
+      advancement hint help you discover the counter?
 - [ ] Two at once in a room: manageable? Do Sentries from other rooms still join in?
 - [ ] They hunt anywhere in the Ruin, up to the pavilion, and walk back to their post afterwards.
       Is there still a spot to cheese them from? Does one ever stand and watch you hit it?
@@ -85,6 +87,9 @@ what to write down. Tick what's fine, note what isn't.
 - [ ] How long was the fight, and how many tries? Does walking away (it mends after 90 s) feel
       right as the way to reset? After a death, was it still as you left it when you got back?
 - [ ] Do hits on a heart you can see land every time, also while the trunk turns?
+- [ ] Returning resin gives a sound and sparks, and a successful stun grants **Back to Your
+      Roots**. Can a first-time player learn this from the hint and feedback?
+- [ ] Body hits sound dull and heart hits crack: can you tell which attack counted?
 - [ ] Its death: does the staged collapse read, and is the lens where you expect it?
 - [ ] **Deadwood** granted; **Set in Stone** if you were petrified and lived; **Don't Blink** if
       you never were.
@@ -106,6 +111,11 @@ what to write down. Tick what's fine, note what isn't.
 - [ ] After the oxidized fight, try weathered, exposed and finally unoxidized copper collars:
       does each feel harder than the last, and is the extra lens or shards worth it? Is the
       fresh-copper tree beatable, and does it grant **Untarnished**?
+- [ ] Fresh copper while wearing the mask: do the quicker slam recovery and resin throws
+      still distinguish it from exposed copper, without making the heart openings feel unfair?
+- [ ] On Peaceful, trying to wake it gives a message and leaves the entire stump intact.
+- [ ] Reconnect with partial petrification and while fully turned to stone: does the state
+      survive? Does dying still clear it? Try on a server with another player present.
 - [ ] Resin glass: does it look like amber next to orange stained glass? Did you mend your Sentry
       with resin clumps?
 - [ ] Is there a reason to come back for a second Elderwood, or a second Ruin?

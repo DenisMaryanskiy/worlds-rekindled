@@ -60,7 +60,8 @@ public final class ElderwoodLens {
 
 	private void showGaze(ServerLevel level, Player player) {
 		if (this.tree.tickCount % TRAIL_INTERVAL_TICKS == 0) {
-			showTrail(level, this.tree.getEyePosition().add(this.tree.facing().scale(1.6)), player.getEyePosition(), this.tree.getRandom());
+			showTrail(level, this.tree.getEyePosition().add(this.tree.facing().scale(1.6)),
+					Petrification.gazeTarget(player, this.tree.getEyePosition()), this.tree.getRandom());
 		}
 	}
 

@@ -3,6 +3,10 @@
 A vanilla+ Fabric mod that gives recent Minecraft updates (starting with the Pale Garden)
 meaningful rewards: new items, ingredients and mechanics that fit the base game.
 
+**0.5.0 — Pale Garden beta** is the first feature-complete biome improvement: discover the Pale
+Ruin, learn its guards' gaze and heart mechanics, wake the Elderwood, and bring home masks,
+Sentries, building materials and trophies. Cleaner summoning copper selects a stronger boss.
+
 - Minecraft: 26.3 (Java Edition)
 - Loader: Fabric Loader 0.19.5 + Fabric API
 - Java: 25
@@ -22,7 +26,7 @@ What each version added is in [CHANGELOG.md](CHANGELOG.md).
 ./gradlew vscode       # regenerate VS Code launch configurations
 ```
 
-The Elderwood's placeholder model and textures are generated from one spec, so their boxes and UVs
+The Elderwood's model and textures are generated from one spec, so their boxes and UVs
 always agree. After changing the spec, regenerate both (plain Python 3, no dependencies):
 
 ```bash
@@ -54,13 +58,14 @@ python3 tools/pale_ruin.py
 
 ## Releases
 
-Pushing a version tag that matches `version` in `gradle.properties` (e.g. `v0.4.9`) builds the mod,
+Pushing a version tag that matches `version` in `gradle.properties` (e.g. `v0.5.0`) builds the mod,
 runs its GameTests and publishes the jar as a GitHub Release, with that version's section of the
-changelog as its notes:
+changelog as its notes. Versions before 1.0 are published as beta prereleases. Tag the merged
+release commit on `main`:
 
 ```bash
-git tag v0.4.9
-git push origin v0.4.9
+git tag v0.5.0
+git push origin v0.5.0
 ```
 
 ## License

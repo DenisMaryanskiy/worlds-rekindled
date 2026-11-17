@@ -36,7 +36,8 @@ public final class SentryLens {
 		}
 		Vec3 lens = sentry.position().add(0.0, LENS_HEIGHT, 0.0).add(Vec3.directionFromRotation(0.0F, sentry.yBodyRot).scale(0.3));
 		if (sentry.tickCount % ElderwoodLens.TRAIL_INTERVAL_TICKS == 0) {
-			ElderwoodLens.showTrail(level, lens, target.getEyePosition(), sentry.getRandom());
+			Vec3 at = target instanceof Player player ? Petrification.gazeTarget(player, lens) : target.getEyePosition();
+			ElderwoodLens.showTrail(level, lens, at, sentry.getRandom());
 		}
 		if (target instanceof Player player) {
 			Petrification.expose(player, RuinSentry.GAZE_RATE, lens);

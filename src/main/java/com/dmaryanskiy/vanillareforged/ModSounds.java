@@ -20,6 +20,7 @@ public final class ModSounds {
 	public static final SoundEvent ELDERWOOD_SLAM = register("entity.elderwood.slam");
 	public static final SoundEvent ELDERWOOD_STUN = register("entity.elderwood.stun");
 	public static final SoundEvent ELDERWOOD_THROW = register("entity.elderwood.throw");
+	public static final SoundEvent RESIN_DEFLECT = register("entity.elderwood.resin_deflect");
 	public static final SoundEvent ELDERWOOD_MEND = register("entity.elderwood.mend");
 	public static final SoundEvent ELDERWOOD_ROOTS_CRACK = register("entity.elderwood.roots_crack");
 	public static final SoundEvent ELDERWOOD_ROOTS_ERUPT = register("entity.elderwood.roots_erupt");

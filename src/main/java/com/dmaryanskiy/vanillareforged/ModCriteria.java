@@ -15,6 +15,8 @@ public final class ModCriteria {
 	public static final PlayerTrigger KILLED_ELDERWOOD_UNPETRIFIED = register("killed_elderwood_unpetrified");
 	public static final PlayerTrigger KILLED_OXIDIZED_ELDERWOOD = register("killed_oxidized_elderwood");
 	public static final PlayerTrigger KILLED_FRESH_ELDERWOOD = register("killed_fresh_elderwood");
+	public static final PlayerTrigger BLOCKED_PETRIFYING_GAZE = register("blocked_petrifying_gaze");
+	public static final PlayerTrigger RETURNED_BURNING_RESIN = register("returned_burning_resin");
 
 	private ModCriteria() {
 	}

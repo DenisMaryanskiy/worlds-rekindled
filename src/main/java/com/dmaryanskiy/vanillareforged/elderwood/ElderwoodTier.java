@@ -16,24 +16,27 @@ import net.minecraft.world.level.storage.loot.LootTable;
  */
 public enum ElderwoodTier {
 	// Its gaze fills half as fast again, as near as whole meter points get.
-	COPPER(60, 50, Elderwood.TURN_DEGREES_PER_TICK * 1.3F, 1, 3, 4),
-	EXPOSED(60, 50, Elderwood.TURN_DEGREES_PER_TICK * 1.3F, 1, ElderwoodLens.GAZE_RATE, ElderwoodLens.CORE_GAZE_RATE),
-	WEATHERED(70, ElderwoodLens.RESIN_INTERVAL_TICKS, Elderwood.TURN_DEGREES_PER_TICK * 1.15F, 0,
+	COPPER(60, 40, 30, Elderwood.TURN_DEGREES_PER_TICK * 1.3F, 1, 3, 4),
+	EXPOSED(60, 50, ElderwoodSlam.COOLDOWN_TICKS, Elderwood.TURN_DEGREES_PER_TICK * 1.3F, 1,
 			ElderwoodLens.GAZE_RATE, ElderwoodLens.CORE_GAZE_RATE),
-	OXIDIZED(Elderwood.ROOT_INTERVAL_TICKS, ElderwoodLens.RESIN_INTERVAL_TICKS, Elderwood.TURN_DEGREES_PER_TICK, 0,
+	WEATHERED(70, ElderwoodLens.RESIN_INTERVAL_TICKS, ElderwoodSlam.COOLDOWN_TICKS, Elderwood.TURN_DEGREES_PER_TICK * 1.15F, 0,
+			ElderwoodLens.GAZE_RATE, ElderwoodLens.CORE_GAZE_RATE),
+	OXIDIZED(Elderwood.ROOT_INTERVAL_TICKS, ElderwoodLens.RESIN_INTERVAL_TICKS, ElderwoodSlam.COOLDOWN_TICKS, Elderwood.TURN_DEGREES_PER_TICK, 0,
 			ElderwoodLens.GAZE_RATE, ElderwoodLens.CORE_GAZE_RATE);
 
 	private final int rootIntervalTicks;
 	private final int resinIntervalTicks;
+	private final int slamCooldownTicks;
 	private final float turnDegreesPerTick;
 	private final int extraCracks;
 	private final int gazeRate;
 	private final int coreGazeRate;
 
-	ElderwoodTier(int rootIntervalTicks, int resinIntervalTicks, float turnDegreesPerTick, int extraCracks, int gazeRate,
+	ElderwoodTier(int rootIntervalTicks, int resinIntervalTicks, int slamCooldownTicks, float turnDegreesPerTick, int extraCracks, int gazeRate,
 			int coreGazeRate) {
 		this.rootIntervalTicks = rootIntervalTicks;
 		this.resinIntervalTicks = resinIntervalTicks;
+		this.slamCooldownTicks = slamCooldownTicks;
 		this.turnDegreesPerTick = turnDegreesPerTick;
 		this.extraCracks = extraCracks;
 		this.gazeRate = gazeRate;
@@ -55,6 +58,10 @@ public enum ElderwoodTier {
 
 	public int resinIntervalTicks() {
 		return this.resinIntervalTicks;
+	}
+
+	public int slamCooldownTicks() {
+		return this.slamCooldownTicks;
 	}
 
 	public float turnDegreesPerTick() {

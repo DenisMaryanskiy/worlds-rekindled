@@ -296,52 +296,52 @@ public class PaleRuinTest {
 				continue;
 			}
 			fitted++;
-		boolean sawTheLongest = false;
-		Set<String> windings = new HashSet<>();
-		String entrance = null;
-		for (int layout = 0; layout < LAYOUTS; layout++) {
-			StructureStart start = atDepth.generate(ruin, level.dimension(), level.registryAccess(), chunks.getGenerator(),
-					chunks.getGenerator().getBiomeSource(), chunks.randomState().createClimateSampler(SamplerContext.EMPTY_UNCACHED), chunks.randomState(),
-					level.getStructureTemplateManager(), layout * 7919L, new ChunkPos(layout * 40, 0), 0, level, biome -> true);
-			List<String> pieces = start.getPieces().stream().map(PaleRuinTest::template).toList();
-			List<StructurePiece> rooms = start.getPieces().stream().filter(piece -> template(piece).startsWith("pale_ruin/room_")).toList();
-			List<StructurePiece> interiors = start.getPieces().stream().filter(piece -> template(piece).startsWith("pale_ruin/interior/"))
-					.toList();
+			boolean sawTheLongest = false;
+			Set<String> windings = new HashSet<>();
+			String entrance = null;
+			for (int layout = 0; layout < LAYOUTS; layout++) {
+				StructureStart start = atDepth.generate(ruin, level.dimension(), level.registryAccess(), chunks.getGenerator(),
+						chunks.getGenerator().getBiomeSource(), chunks.randomState().createClimateSampler(SamplerContext.EMPTY_UNCACHED), chunks.randomState(),
+						level.getStructureTemplateManager(), layout * 7919L, new ChunkPos(layout * 40, 0), 0, level, biome -> true);
+				List<String> pieces = start.getPieces().stream().map(PaleRuinTest::template).toList();
+				List<StructurePiece> rooms = start.getPieces().stream().filter(piece -> template(piece).startsWith("pale_ruin/room_")).toList();
+				List<StructurePiece> interiors = start.getPieces().stream().filter(piece -> template(piece).startsWith("pale_ruin/interior/"))
+						.toList();
 
-			List<StructurePiece> chambers = start.getPieces().stream().filter(piece -> template(piece).startsWith("pale_ruin/chamber/"))
-					.toList();
+				List<StructurePiece> chambers = start.getPieces().stream().filter(piece -> template(piece).startsWith("pale_ruin/chamber/"))
+						.toList();
 
-			helper.assertValueEqual(pieces.size(), 3 * ROOMS + 3, "pieces in layout " + layout + " " + pieces);
-			helper.assertTrue(pieces.getFirst().startsWith("pale_ruin/entrance"), "The first piece of layout " + layout + " should be the entrance " + pieces);
-			helper.assertTrue(entrance == null || entrance.equals(pieces.getFirst()), "One depth should have one entrance");
-			entrance = pieces.getFirst();
-			helper.assertTrue(pieces.contains("pale_ruin/descent"), "Layout " + layout + " should have its way down " + pieces);
-			helper.assertTrue(pieces.contains("pale_ruin/hall"), "Layout " + layout + " should end in the hall " + pieces);
-			helper.assertValueEqual(rooms.size(), ROOMS, "rooms in layout " + layout + " " + pieces);
-			for (int room = 1; room <= ROOMS; room++) {
-				helper.assertTrue(template(rooms.get(room - 1)).startsWith("pale_ruin/room_" + room + "_"),
-						"room " + room + " of layout " + layout + " " + pieces);
+				helper.assertValueEqual(pieces.size(), 3 * ROOMS + 3, "pieces in layout " + layout + " " + pieces);
+				helper.assertTrue(pieces.getFirst().startsWith("pale_ruin/entrance"), "The first piece of layout " + layout + " should be the entrance " + pieces);
+				helper.assertTrue(entrance == null || entrance.equals(pieces.getFirst()), "One depth should have one entrance");
+				entrance = pieces.getFirst();
+				helper.assertTrue(pieces.contains("pale_ruin/descent"), "Layout " + layout + " should have its way down " + pieces);
+				helper.assertTrue(pieces.contains("pale_ruin/hall"), "Layout " + layout + " should end in the hall " + pieces);
+				helper.assertValueEqual(rooms.size(), ROOMS, "rooms in layout " + layout + " " + pieces);
+				for (int room = 1; room <= ROOMS; room++) {
+					helper.assertTrue(template(rooms.get(room - 1)).startsWith("pale_ruin/room_" + room + "_"),
+							"room " + room + " of layout " + layout + " " + pieces);
+				}
+				// Every room is furnished, from inside its own walls.
+				helper.assertValueEqual(interiors.size(), ROOMS, "furnished rooms in layout " + layout + " " + pieces);
+				for (StructurePiece interior : interiors) {
+					helper.assertTrue(rooms.stream().anyMatch(room -> contains(room.getBoundingBox(), interior.getBoundingBox())),
+							template(interior) + " should lie inside a room in layout " + layout);
+				}
+				helper.assertValueEqual(interiors.stream().filter(interior -> template(interior).endsWith("_tools")).count(), 1L,
+						"rooms with the tool chest in layout " + layout);
+				// A side chamber hangs off every room: a door that opened on bare rock would be worse than none.
+				helper.assertValueEqual(chambers.size(), ROOMS, "side chambers in layout " + layout + " " + pieces);
+				// The one chamber that teaches something is in every Ruin.
+				helper.assertTrue(pieces.contains("pale_ruin/chamber/sentry_workshop"), "Layout " + layout + " should have the Sentry workshop " + pieces);
+				sawTheLongest |= rooms.stream().allMatch(room -> template(room).endsWith("_straight"));
+				windings.add(rooms.stream().map(PaleRuinTest::template).collect(Collectors.joining(" ")));
 			}
-			// Every room is furnished, from inside its own walls.
-			helper.assertValueEqual(interiors.size(), ROOMS, "furnished rooms in layout " + layout + " " + pieces);
-			for (StructurePiece interior : interiors) {
-				helper.assertTrue(rooms.stream().anyMatch(room -> contains(room.getBoundingBox(), interior.getBoundingBox())),
-						template(interior) + " should lie inside a room in layout " + layout);
-			}
-			helper.assertValueEqual(interiors.stream().filter(interior -> template(interior).endsWith("_tools")).count(), 1L,
-					"rooms with the tool chest in layout " + layout);
-			// A side chamber hangs off every room: a door that opened on bare rock would be worse than none.
-			helper.assertValueEqual(chambers.size(), ROOMS, "side chambers in layout " + layout + " " + pieces);
-			// The one chamber that teaches something is in every Ruin.
-			helper.assertTrue(pieces.contains("pale_ruin/chamber/sentry_workshop"), "Layout " + layout + " should have the Sentry workshop " + pieces);
-			sawTheLongest |= rooms.stream().allMatch(room -> template(room).endsWith("_straight"));
-			windings.add(rooms.stream().map(PaleRuinTest::template).collect(Collectors.joining(" ")));
-		}
-		// A chamber is placed before the rooms two on and must never be in their way, however the line winds.
-		helper.assertValueEqual(windings.size(), WINDINGS, "ways the line wound in the layouts tried");
-		entrances.add(entrance);
-		// With every exit straight the line is at its longest, which is the one that could outgrow jigsaw's reach.
-		helper.assertTrue(sawTheLongest, "The layouts tried should include the straight line");
+			// A chamber is placed before the rooms two on and must never be in their way, however the line winds.
+			helper.assertValueEqual(windings.size(), WINDINGS, "ways the line wound in the layouts tried");
+			entrances.add(entrance);
+			// With every exit straight the line is at its longest, which is the one that could outgrow jigsaw's reach.
+			helper.assertTrue(sawTheLongest, "The layouts tried should include the straight line");
 		}
 		helper.assertTrue(fitted >= 2, "At least two depths should fit in the test world, not " + fitted);
 		helper.assertValueEqual(entrances.size(), fitted, "different entrances " + entrances);

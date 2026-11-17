@@ -1,4 +1,4 @@
-# Pushing a version tag (v0.4.9) builds the mod, runs its GameTests and publishes the jar as a
+# Pushing a version tag (v0.5.0) builds the mod, runs its GameTests and publishes the jar as a
 # GitHub Release, with that version's section of the changelog as its notes.
 
 name: release
@@ -43,4 +43,12 @@ jobs:
       - name: publish the release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "$GITHUB_REF_NAME" build/libs/vanillareforged-${GITHUB_REF_NAME#v}.jar --title "Vanilla Reforged ${GITHUB_REF_NAME#v}" --notes-file notes.md
+        run: |
+          title="Vanilla Reforged ${GITHUB_REF_NAME#v}"
+          flags=()
+          if [[ "$GITHUB_REF_NAME" == v0.* ]]; then
+            title+=" Beta"
+            flags+=(--prerelease)
+          fi
+          gh release create "$GITHUB_REF_NAME" "build/libs/vanillareforged-${GITHUB_REF_NAME#v}.jar" \
+            --title "$title" --notes-file notes.md "${flags[@]}"

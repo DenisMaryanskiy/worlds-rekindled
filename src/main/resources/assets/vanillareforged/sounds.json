@@ -133,5 +133,14 @@
         "type": "event"
       }
     ]
+  },
+  "entity.elderwood.resin_deflect": {
+    "subtitle": "subtitles.vanillareforged.entity.elderwood.resin_deflect",
+    "sounds": [
+      {
+        "name": "minecraft:entity.player.attack.strong",
+        "type": "event"
+      }
+    ]
   }
 }

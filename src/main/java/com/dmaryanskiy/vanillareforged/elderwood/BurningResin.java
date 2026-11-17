@@ -2,10 +2,13 @@ package com.dmaryanskiy.vanillareforged.elderwood;
 
 import com.dmaryanskiy.vanillareforged.ModEntities;
 import com.dmaryanskiy.vanillareforged.ModItems;
+import com.dmaryanskiy.vanillareforged.ModCriteria;
+import com.dmaryanskiy.vanillareforged.ModSounds;
 
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -51,7 +54,11 @@ public class BurningResin extends Fireball {
 		Entity owner = this.getOwner();
 		if (target instanceof Elderwood elderwood) {
 			if (owner instanceof Player) {
+				boolean wasStunned = elderwood.isStunned();
 				elderwood.stun();
+				if (!wasStunned && elderwood.isStunned() && owner instanceof ServerPlayer player) {
+					ModCriteria.RETURNED_BURNING_RESIN.trigger(player);
+				}
 			}
 			return;
 		}
@@ -60,6 +67,15 @@ public class BurningResin extends Fireball {
 		DamageSource source = this.damageSources().fireball(this, owner);
 		if (!target.hurtServer(level, source, DAMAGE)) {
 			target.setRemainingFireTicks(fireTicks);
+		}
+	}
+
+	@Override
+	protected void onDeflection(boolean byAttack) {
+		super.onDeflection(byAttack);
+		if (byAttack && this.getOwner() instanceof Player && this.level() instanceof ServerLevel level) {
+			this.playSound(ModSounds.RESIN_DEFLECT, 1.0F, 1.0F);
+			level.sendParticles(ParticleTypes.CRIT, this.getX(), this.getY(), this.getZ(), 6, 0.15, 0.15, 0.15, 0.1);
 		}
 	}
 

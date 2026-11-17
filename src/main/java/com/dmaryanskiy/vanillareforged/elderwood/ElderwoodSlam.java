@@ -36,7 +36,7 @@ public final class ElderwoodSlam {
 	public static final int WINDUP_TICKS = 15;
 	public static final int STUCK_TICKS = 30;
 	public static final TagKey<Block> BREAKABLE = TagKey.create(Registries.BLOCK, VanillaReforged.id("elderwood_breakable"));
-	private static final int COOLDOWN_TICKS = 40;
+	public static final int COOLDOWN_TICKS = 40;
 	private static final double HIT_RADIUS = 2.2;
 	private static final double SMASH_RADIUS = 1.5;
 	private static final int SMASH_HEIGHT = 4;
@@ -91,7 +91,7 @@ public final class ElderwoodSlam {
 		} else if (phase == Elderwood.SlamPhase.STUCK && this.ticks >= STUCK_TICKS) {
 			this.tree.setSlamPhase(Elderwood.SlamPhase.NONE);
 			this.tree.switchSlamBranch();
-			this.cooldown = COOLDOWN_TICKS;
+			this.cooldown = this.tree.getTier().slamCooldownTicks();
 		}
 	}
 

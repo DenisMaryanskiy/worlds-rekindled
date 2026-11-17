@@ -6,6 +6,7 @@ import com.dmaryanskiy.vanillareforged.PaleMaskStealth;
 import com.dmaryanskiy.vanillareforged.VanillaReforged;
 import com.dmaryanskiy.vanillareforged.elderwood.Elderwood;
 import com.dmaryanskiy.vanillareforged.elderwood.ElderwoodHeart;
+import com.dmaryanskiy.vanillareforged.elderwood.BurningResin;
 import com.dmaryanskiy.vanillareforged.petrification.Petrification;
 
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
@@ -13,30 +14,79 @@ import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.gametest.framework.GameTestSequence;
-import net.minecraft.network.Connection;
-import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.network.CommonListenerCookie;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.monster.creaking.Creaking;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.WeatheringCopper;
 import net.minecraft.world.phys.Vec3;
 
-import io.netty.channel.embedded.EmbeddedChannel;
-
 public class AdvancementTest {
 	private static final int TICKS_BETWEEN_HITS = 12;
 	private static final Vec3 CREAKING = new Vec3(5.5, 1.0, 3.5);
 
+	@GameTest(maxTicks = 40)
+	public void blockingAGazeGrantsStonewallOnlyFromTheShieldedSide(GameTestHelper helper) {
+		ServerPlayer player = TestPlayers.connect(helper, GameType.SURVIVAL);
+		try {
+			player.snapTo(helper.absoluteVec(new Vec3(3.5, 1.0, 3.5)), 0.0F, 0.0F);
+			player.setNoGravity(true);
+			player.setItemInHand(InteractionHand.OFF_HAND, new ItemStack(Items.SHIELD));
+			player.startUsingItem(InteractionHand.OFF_HAND);
+			// A real client drives doTick through movement packets; this embedded connection has none.
+			for (int tick = 0; tick < 10; tick++) {
+				player.doTick();
+			}
+			helper.assertTrue(player.isBlocking(), "the shield is raised");
+			Petrification.expose(player, 10, player.getEyePosition().add(0.0, 0.0, -6.0));
+			helper.assertFalse(has(helper, player, "stonewall"), "a gaze from behind does not grant Stonewall");
+			Petrification.expose(player, 10, player.getEyePosition().add(0.0, 0.0, 6.0));
+			helper.assertTrue(has(helper, player, "stonewall"), "blocking a gaze grants Stonewall");
+		} finally {
+			helper.getLevel().getServer().getPlayerList().remove(player);
+		}
+		helper.succeed();
+	}
+
+	@GameTest(environment = ElderwoodTest.MIDNIGHT, maxTicks = 60)
+	public void returningResinGrantsBackToYourRootsWhenItStunsTheTree(GameTestHelper helper) {
+		Elderwood elderwood = ElderwoodTest.stillElderwood(helper);
+		Player player = helper.makeMockServerPlayer(GameType.SURVIVAL);
+		player.snapTo(elderwood.getEyePosition().add(0.0, -player.getEyeHeight(), 5.0), 180.0F, 0.0F);
+		player.setYHeadRot(180.0F);
+		BurningResin resin = new BurningResin(helper.getLevel(), elderwood, new Vec3(0.0, 0.0, 1.0));
+		resin.setPos(player.getEyePosition().add(0.0, 0.0, -1.5));
+		helper.getLevel().addFreshEntity(resin);
+
+		player.attack(resin);
+		helper.assertTrue(resin.getOwner() == player, "the player returned the resin");
+		helper.assertFalse(has(helper, player, "back_to_your_roots"), "deflection alone does not grant the advancement");
+		helper.succeedWhen(() -> {
+			helper.assertTrue(elderwood.isStunned(), "the returned resin reached the tree");
+			helper.assertTrue(has(helper, player, "back_to_your_roots"), "stunning it with returned resin grants Back to Your Roots");
+		});
+	}
+
+	@GameTest
+	public void combatHintsAreVisibleFromBuriedGarden(GameTestHelper helper) {
+		for (String name : new String[] {"stonewall", "back_to_your_roots"}) {
+			AdvancementHolder hint = helper.getLevel().getServer().getAdvancements().get(VanillaReforged.id("adventure/" + name));
+			helper.assertValueEqual(hint.value().parent().orElseThrow(), VanillaReforged.id("adventure/buried_garden"), name + " parent");
+			helper.assertFalse(hint.value().display().orElseThrow().hidden(), name + " is a visible hint before the boss");
+		}
+		helper.succeed();
+	}
+
 	@GameTest(environment = ElderwoodTest.MIDNIGHT, skyAccess = true)
 	public void wakingTheElderwoodGrantsOldGrowth(GameTestHelper helper) {
-		ServerPlayer player = playerInLevel(helper);
+		ServerPlayer player = TestPlayers.connect(helper, GameType.CREATIVE);
 		try {
 			player.snapTo(helper.absoluteVec(ElderwoodTest.ELDERWOOD.add(0.0, 0.0, 3.0)), 0.0F, 0.0F);
 			ElderwoodTest.buildStump(helper, Blocks.COPPER_BLOCK.weathering().weathered());
@@ -158,7 +208,7 @@ public class AdvancementTest {
 
 	@GameTest
 	public void buildingAHeartwoodSentryGrantsHeartwoodGuardian(GameTestHelper helper) {
-		ServerPlayer player = playerInLevel(helper);
+		ServerPlayer player = TestPlayers.connect(helper, GameType.CREATIVE);
 		try {
 			player.snapTo(helper.absoluteVec(new Vec3(3.5, 1.0, 1.5)), 0.0F, 0.0F);
 			helper.setBlock(new BlockPos(1, 1, 1), Blocks.PALE_OAK_LOG);
@@ -205,16 +255,6 @@ public class AdvancementTest {
 		Creaking creaking = helper.spawn(EntityTypes.CREAKING, CREAKING);
 		creaking.setNoAi(true);
 		return creaking;
-	}
-
-	/** Summoning and building credit nearby players in the level, so the mock needs to join it. */
-	private static ServerPlayer playerInLevel(GameTestHelper helper) {
-		ServerPlayer player = (ServerPlayer) helper.makeMockServerPlayer(GameType.CREATIVE);
-		CommonListenerCookie cookie = CommonListenerCookie.createInitial(player.getGameProfile(), false);
-		Connection connection = new Connection(PacketFlow.SERVERBOUND);
-		new EmbeddedChannel(connection);
-		helper.getLevel().getServer().getPlayerList().placeNewPlayer(connection, player, cookie);
-		return player;
 	}
 
 	private static Player playerNear(GameTestHelper helper, double distance) {

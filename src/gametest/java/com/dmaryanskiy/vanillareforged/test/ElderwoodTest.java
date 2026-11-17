@@ -121,16 +121,59 @@ public class ElderwoodTest {
 
 	@GameTest(environment = MIDNIGHT)
 	public void cleanerCopperRestoresStrongerAttacks(GameTestHelper helper) {
-		int[][] intervalsAndGaze = {{60, 50, 3, 4}, {60, 50, 2, 3}, {70, 60, 2, 3}, {80, 60, 2, 3}};
+		int[][] intervalsAndGaze = {{60, 40, 3, 4}, {60, 50, 2, 3}, {70, 60, 2, 3}, {80, 60, 2, 3}};
 		float[] turnSpeeds = {1.95F, 1.95F, 1.725F, 1.5F};
 		for (WeatheringCopper.WeatherState stage : WeatheringCopper.WeatherState.values()) {
 			ElderwoodTier tier = ElderwoodTier.of(stage);
 			int[] expected = intervalsAndGaze[stage.ordinal()];
 			helper.assertValueEqual(tier.rootIntervalTicks(), expected[0], stage + " root interval");
 			helper.assertValueEqual(tier.resinIntervalTicks(), expected[1], stage + " resin interval");
+			helper.assertValueEqual(tier.slamCooldownTicks(), stage == WeatheringCopper.WeatherState.UNAFFECTED ? 30 : 40,
+					stage + " slam recovery");
 			helper.assertValueEqual(tier.gazeRate(false), expected[2], stage + " gaze rate");
 			helper.assertValueEqual(tier.gazeRate(true), expected[3], stage + " open-core gaze rate");
 			helper.assertTrue(Math.abs(tier.turnDegreesPerTick() - turnSpeeds[stage.ordinal()]) < 0.001F, stage + " turn speed");
+		}
+		helper.succeed();
+	}
+
+	@GameTest(environment = "vanillareforged-test:midnight_tiers", maxTicks = 100)
+	public void freshCopperRecoversFromASlamBeforeExposedCopper(GameTestHelper helper) {
+		Elderwood fresh = facingSouth(helper.spawn(ModEntities.ELDERWOOD, ELDERWOOD));
+		Elderwood exposed = facingSouth(helper.spawn(ModEntities.ELDERWOOD, ELDERWOOD.add(3.0, 0.0, 0.0)));
+		exposed.setCopperStage(WeatheringCopper.WeatherState.EXPOSED);
+		fresh.startSlam();
+		exposed.startSlam();
+		helper.startSequence()
+				.thenWaitUntil(() -> {
+					helper.assertValueEqual(fresh.getSlamPhase(), Elderwood.SlamPhase.STUCK, "fresh branch is planted");
+					helper.assertValueEqual(exposed.getSlamPhase(), Elderwood.SlamPhase.STUCK, "exposed branch is planted");
+				})
+				.thenWaitUntil(() -> {
+					helper.assertValueEqual(fresh.getSlamPhase(), Elderwood.SlamPhase.NONE, "fresh branch has lifted");
+					helper.assertValueEqual(exposed.getSlamPhase(), Elderwood.SlamPhase.NONE, "exposed branch has lifted");
+				})
+				.thenExecuteAfter(30, () -> {
+					fresh.startSlam();
+					exposed.startSlam();
+					helper.assertValueEqual(fresh.getSlamPhase(), Elderwood.SlamPhase.WINDUP, "fresh copper is ready to slam again");
+					helper.assertValueEqual(exposed.getSlamPhase(), Elderwood.SlamPhase.NONE, "exposed copper still needs recovery time");
+				})
+				.thenSucceed();
+	}
+
+	@GameTest(environment = "vanillareforged-test:peaceful", skyAccess = true, maxTicks = 10)
+	public void peacefulSummoningLeavesEveryStumpBlockIntact(GameTestHelper helper) {
+		buildStump(helper, Blocks.COPPER_BLOCK.waxed().oxidized());
+		helper.setBlock(HEART, Blocks.CREAKING_HEART);
+
+		helper.assertFalse(ElderwoodSummon.trySummon(helper.getLevel(), helper.absolutePos(HEART)), "The tree cannot wake on Peaceful");
+		helper.assertEntityNotPresent(ModEntities.ELDERWOOD);
+		helper.assertBlockPresent(Blocks.CREAKING_HEART, HEART);
+		helper.assertBlockPresent(Blocks.COPPER_BLOCK.waxed().oxidized(), HEART.below());
+		helper.assertBlockPresent(Blocks.PALE_OAK_LOG, LOG);
+		for (Direction side : Direction.Plane.HORIZONTAL) {
+			helper.assertBlockPresent(Blocks.RESIN_BLOCK, LOG.relative(side));
 		}
 		helper.succeed();
 	}
@@ -790,17 +833,19 @@ public class ElderwoodTest {
 	}
 
 	// A stunned tree's branch hearts droop far outside its own box, where an arrow would fly past it.
-	@GameTest(environment = MIDNIGHT, skyAccess = true, maxTicks = 60)
+	@GameTest(environment = "vanillareforged-test:midnight_projectiles", structure = "vanillareforged-test:elderwood_projectiles",
+			skyAccess = true, maxTicks = 60)
 	public void anArrowCracksAStunnedBranchHeartWhereItHangs(GameTestHelper helper) {
-		Elderwood elderwood = facingSouth(helper.spawn(ModEntities.ELDERWOOD, ELDERWOOD));
+		// The whole tree, both heart entities and the arrow's flight must stay in loaded test chunks.
+		Elderwood elderwood = facingSouth(helper.spawn(ModEntities.ELDERWOOD, new Vec3(10.0, 1.0, 10.0)));
+		elderwood.setNoGravity(true);
 		Player player = helper.makeMockServerPlayer(GameType.SURVIVAL);
 		helper.runAfterDelay(2, () -> {
 			helper.assertValueEqual(branchHeartParts(helper, elderwood).stream().filter(Entity::isPickable).count(), 0L,
 					"branch heart parts open at rest");
 			elderwood.stun();
 		});
-		// The parts hang past this test's walls, where a neighbouring test's cleanup can remove one for a
-		// tick before the tree replaces it, so this waits for both instead of checking one moment.
+		// Wait for the separate heart entities to receive their open state before firing.
 		helper.startSequence().thenIdle(3).thenWaitUntil(() -> helper.assertValueEqual(
 				branchHeartParts(helper, elderwood).stream().filter(Entity::isPickable).count(), 2L,
 				"branch heart parts open while stunned")).thenExecute(() -> {
