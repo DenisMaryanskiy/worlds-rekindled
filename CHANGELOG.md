@@ -6,7 +6,32 @@ boss was first called the Watcher, and its lens, trim and gaze were named after 
 
 The design behind all of it is in [docs/pale-garden.md](docs/pale-garden.md).
 
-## 0.4: More reasons to come back (in progress)
+## 0.5: The complete Pale Garden beta
+
+### 0.5.0 (unreleased)
+
+The first feature-complete beta of the Pale Garden improvement: exploration, dungeon combat,
+the Elderwood, useful rewards and repeatable challenges form a complete survival loop.
+
+- **Fresh copper keeps its edge against the Pale Mask**: it recovers between slams in 1.5 seconds
+  instead of 2, and throws resin every 2 seconds instead of 2.5. Slam warnings, planted-branch
+  openings, damage and the mask's gaze protection stay the same.
+- **Stonewall** and **Back to Your Roots**, two advancements visible after finding a Pale Ruin,
+  explain blocking petrifying gazes with a shield and stunning the Elderwood with returned resin.
+  Untarnished now hints at scraping copper to awaken the strongest tree.
+- **Clearer combat feedback**: a blocked gaze gives shield sounds and sparks, returned resin
+  gives a distinct sound and sparks, and hits on the wooden body give a dull knock. Gaze trails
+  stop before a raised shield. All new text is available in all six languages.
+- **Peaceful summoning preserves the stump**: the Elderwood refuses to wake with a message,
+  leaving the heart, copper, log and resin blocks intact.
+- **Petrification survives reconnects**: buildup and remaining stone time are saved, movement
+  restrictions return on login, and the recovery immunity keeps its original expiry. Death
+  clears these states as normal.
+- **Code cleanup** consolidates gaze bookkeeping, counts overlapping gazes only once for shield
+  and mask wear, avoids rebuilding unchanged movement modifiers, and reuses the rendered Sentry
+  lens instead of allocating an item every frame.
+
+## 0.4: More reasons to come back
 
 After the third playtest: the fights tuned once more, and rewards for every kind of player.
 

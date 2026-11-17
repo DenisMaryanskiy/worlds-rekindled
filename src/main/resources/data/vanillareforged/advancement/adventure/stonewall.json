@@ -1,0 +1,24 @@
+{
+  "parent": "vanillareforged:adventure/buried_garden",
+  "criteria": {
+    "blocked_petrifying_gaze": {
+      "trigger": "vanillareforged:blocked_petrifying_gaze"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.vanillareforged.stonewall.description"
+    },
+    "icon": {
+      "id": "minecraft:shield"
+    },
+    "title": {
+      "translate": "advancements.vanillareforged.stonewall.title"
+    }
+  },
+  "requirements": [
+    [
+      "blocked_petrifying_gaze"
+    ]
+  ]
+}

@@ -26,6 +26,7 @@ public class HeartwoodSentryRenderer extends MobRenderer<HeartwoodSentry, Heartw
 	private static final Identifier JACK_O_LANTERN_GLOW = texture("heartwood_sentry_jack_o_lantern_glow");
 	static final List<Identifier> CRACKS = List.of(texture("heartwood_sentry_cracks_1"), texture("heartwood_sentry_cracks_2"),
 			texture("heartwood_sentry_cracks_3"), texture("heartwood_sentry_cracks_4"));
+	private ItemStack lensItem = ItemStack.EMPTY;
 
 	public HeartwoodSentryRenderer(EntityRendererProvider.Context context) {
 		super(context, new HeartwoodSentryModel(context.bakeLayer(LAYER)), 0.6F);
@@ -52,8 +53,11 @@ public class HeartwoodSentryRenderer extends MobRenderer<HeartwoodSentry, Heartw
 		state.cracks = entity.getCracks();
 		state.canMove = !state.statue;
 		if (entity.isLensed()) {
-			// Not a constant: renderers are made before item components are bound.
-			this.itemModelResolver.updateForLiving(state.lens, new ItemStack(ModItems.ELDERWOOD_LENS), ItemDisplayContext.FIXED, entity);
+			// Create it lazily: renderers are made before item components are bound.
+			if (this.lensItem.isEmpty()) {
+				this.lensItem = new ItemStack(ModItems.ELDERWOOD_LENS);
+			}
+			this.itemModelResolver.updateForLiving(state.lens, this.lensItem, ItemDisplayContext.FIXED, entity);
 		} else {
 			state.lens.clear();
 		}

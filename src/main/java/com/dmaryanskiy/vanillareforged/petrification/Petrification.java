@@ -3,6 +3,8 @@ package com.dmaryanskiy.vanillareforged.petrification;
 import java.util.Map;
 import java.util.WeakHashMap;
 
+import com.mojang.serialization.Codec;
+
 import com.dmaryanskiy.vanillareforged.ModCriteria;
 import com.dmaryanskiy.vanillareforged.ModItems;
 import com.dmaryanskiy.vanillareforged.VanillaReforged;
@@ -12,9 +14,13 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -46,20 +52,28 @@ public final class Petrification {
 	public static final float MAX_EXTRA_DAMAGE = 0.5F;
 
 	public static final AttachmentType<Integer> METER = AttachmentRegistry.create(VanillaReforged.id("petrification"),
-			builder -> builder.initializer(() -> 0).syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.targetOnly()));
+			builder -> builder.initializer(() -> 0).persistent(Codec.intRange(0, FULL + PETRIFIED_TICKS))
+					.syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.targetOnly()));
+	private static final AttachmentType<Long> IMMUNE_UNTIL = AttachmentRegistry.create(VanillaReforged.id("petrification_immunity"),
+			builder -> builder.persistent(Codec.LONG));
 
 	private static final Identifier MODIFIER_ID = VanillaReforged.id("petrification");
-	private static final Map<Player, Long> LAST_EXPOSED = new WeakHashMap<>();
-	private static final Map<Player, Integer> EXPOSED_BY = new WeakHashMap<>();
-	private static final Map<Player, Integer> MASK_TICKS = new WeakHashMap<>();
-	private static final Map<Player, Integer> SHIELD_TICKS = new WeakHashMap<>();
-	private static final Map<Player, Long> IMMUNE_UNTIL = new WeakHashMap<>();
+	private static final Map<Player, ExposureState> EXPOSURES = new WeakHashMap<>();
+
+	private static final class ExposureState {
+		long lastExposed = -1;
+		int strongestGaze;
+		int maskTicks;
+		long lastShieldBlock = Long.MIN_VALUE;
+		int shieldTicks;
+	}
 
 	private Petrification() {
 	}
 
 	public static void initialize() {
 		ServerTickEvents.END_LEVEL_TICK.register(level -> level.players().forEach(Petrification::tick));
+		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> updateModifiers(handler.player));
 	}
 
 	public static int getMeter(Player player) {
@@ -81,7 +95,22 @@ public final class Petrification {
 
 	/** Whether the player has just broken free and no gaze takes hold of them yet. */
 	public static boolean isImmune(Player player) {
-		return IMMUNE_UNTIL.getOrDefault(player, 0L) > player.level().getGameTime();
+		return player.getAttachedOrElse(IMMUNE_UNTIL, 0L) > player.level().getGameTime();
+	}
+
+	public static boolean blocksGaze(Player player, Vec3 eye) {
+		Vec3 toEye = eye.subtract(player.getEyePosition()).multiply(1.0, 0.0, 1.0);
+		return player.getItemBlockingWith() != null && !player.getItemBySlot(EquipmentSlot.HEAD).is(ModItems.PALE_MASK)
+				&& toEye.dot(player.getViewVector(1.0F)) > 0.0;
+	}
+
+	/** End the gaze at the raised shield, instead of drawing it through the player's face. */
+	public static Vec3 gazeTarget(Player player, Vec3 eye) {
+		return blocksGaze(player, eye) ? shieldPosition(player) : player.getEyePosition();
+	}
+
+	private static Vec3 shieldPosition(Player player) {
+		return player.getEyePosition().add(player.getViewVector(1.0F).scale(0.6)).add(0.0, -0.2, 0.0);
 	}
 
 	/**
@@ -89,17 +118,38 @@ public final class Petrification {
 	 * it blocks the gaze, which wears the shield down, and the meter drains behind it.
 	 */
 	public static void expose(Player player, int amount, Vec3 eye) {
-		ItemStack shield = player.getItemBlockingWith();
-		Vec3 toEye = eye.subtract(player.getEyePosition()).multiply(1.0, 0.0, 1.0);
-		if (shield != null && !player.getItemBySlot(EquipmentSlot.HEAD).is(ModItems.PALE_MASK)
-				&& toEye.dot(player.getViewVector(1.0F)) > 0.0) {
-			if (SHIELD_TICKS.merge(player, 1, Integer::sum) >= SHIELD_TICKS_PER_DURABILITY) {
-				SHIELD_TICKS.put(player, 0);
-				shield.hurtAndBreak(1, player, player.getUsedItemHand());
-			}
+		if (blocksGaze(player, eye)) {
+			blockWithShield(player);
 			return;
 		}
 		expose(player, amount);
+	}
+
+	private static void blockWithShield(Player player) {
+		long now = player.level().getGameTime();
+		ExposureState state = EXPOSURES.computeIfAbsent(player, ignored -> new ExposureState());
+		if (state.lastShieldBlock == now) {
+			return;
+		}
+		if (state.lastShieldBlock < now - 1) {
+			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SHIELD_BLOCK.value(),
+					player.getSoundSource(), 0.6F, 1.0F);
+			if (player instanceof ServerPlayer serverPlayer) {
+				ModCriteria.BLOCKED_PETRIFYING_GAZE.trigger(serverPlayer);
+			}
+		}
+		state.lastShieldBlock = now;
+		if (now % 4 == 0 && player.level() instanceof ServerLevel level) {
+			Vec3 shield = shieldPosition(player);
+			level.sendParticles(ParticleTypes.CRIT, shield.x, shield.y, shield.z, 2, 0.1, 0.1, 0.1, 0.0);
+		}
+		if (++state.shieldTicks >= SHIELD_TICKS_PER_DURABILITY) {
+			state.shieldTicks = 0;
+			ItemStack shield = player.getItemBlockingWith();
+			if (shield != null) {
+				shield.hurtAndBreak(1, player, player.getUsedItemHand());
+			}
+		}
 	}
 
 	/**
@@ -113,17 +163,18 @@ public final class Petrification {
 			return;
 		}
 		long now = player.level().getGameTime();
-		int already = LAST_EXPOSED.getOrDefault(player, -1L) == now ? EXPOSED_BY.getOrDefault(player, 0) : 0;
+		ExposureState state = EXPOSURES.computeIfAbsent(player, ignored -> new ExposureState());
+		int already = state.lastExposed == now ? state.strongestGaze : 0;
 		if (amount <= already) {
 			return;
 		}
-		LAST_EXPOSED.put(player, now);
-		EXPOSED_BY.put(player, amount);
+		state.lastExposed = now;
+		state.strongestGaze = amount;
 		amount -= already;
 		ItemStack mask = player.getItemBySlot(EquipmentSlot.HEAD);
 		if (mask.is(ModItems.PALE_MASK)) {
-			if (MASK_TICKS.merge(player, 1, Integer::sum) >= ElderwoodGaze.TICKS_PER_DURABILITY) {
-				MASK_TICKS.put(player, 0);
+			if (already == 0 && ++state.maskTicks >= ElderwoodGaze.TICKS_PER_DURABILITY) {
+				state.maskTicks = 0;
 				mask.hurtAndBreak(1, player, EquipmentSlot.HEAD);
 			}
 			return;
@@ -144,7 +195,7 @@ public final class Petrification {
 	private static void breakFree(Player player) {
 		boolean wasPetrified = isPetrified(player);
 		setMeter(player, 0);
-		IMMUNE_UNTIL.put(player, player.level().getGameTime() + IMMUNE_TICKS);
+		player.setAttached(IMMUNE_UNTIL, player.level().getGameTime() + IMMUNE_TICKS);
 		// The hit that shatters the stone lands first, and may have killed them.
 		if (wasPetrified && player.isAlive() && player instanceof ServerPlayer serverPlayer) {
 			ModCriteria.SURVIVED_PETRIFICATION.trigger(serverPlayer);
@@ -152,12 +203,16 @@ public final class Petrification {
 	}
 
 	public static void tick(Player player) {
+		if (player.hasAttached(IMMUNE_UNTIL) && !isImmune(player)) {
+			player.removeAttached(IMMUNE_UNTIL);
+		}
 		int meter = getMeter(player);
+		ExposureState state = EXPOSURES.get(player);
 		if (meter - 1 == FULL) {
 			breakFree(player);
 		} else if (meter > FULL) {
 			setMeter(player, meter - 1);
-		} else if (meter > 0 && LAST_EXPOSED.getOrDefault(player, -1L) != player.level().getGameTime()) {
+		} else if (meter > 0 && (state == null || state.lastExposed != player.level().getGameTime())) {
 			setMeter(player, Math.max(0, meter - DRAIN_PER_TICK));
 		}
 	}
@@ -183,7 +238,13 @@ public final class Petrification {
 		if (attribute == null) {
 			return;
 		}
-		attribute.removeModifier(MODIFIER_ID);
+		AttributeModifier current = attribute.getModifier(MODIFIER_ID);
+		if (current != null && current.amount() == amount) {
+			return;
+		}
+		if (current != null) {
+			attribute.removeModifier(MODIFIER_ID);
+		}
 		if (amount != 0.0) {
 			attribute.addTransientModifier(new AttributeModifier(MODIFIER_ID, amount, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
 		}

@@ -21,6 +21,7 @@ import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.BossEvent;
@@ -271,7 +272,14 @@ public class Elderwood extends Monster {
 			return super.hurtServer(level, source, damage);
 		}
 		// Only players can hurt it, and only through a heart that's open to them.
-		ElderwoodHeart heart = HeartHit.of(source, false).map(this::intoTheTrunk).map(this::openHeartOn).orElse(null);
+		HeartHit hit = HeartHit.of(source, false).orElse(null);
+		if (hit == null) {
+			return false;
+		}
+		ElderwoodHeart heart = this.openHeartOn(this.intoTheTrunk(hit));
+		if (heart == null && this.crackCooldown == 0) {
+			this.playSound(SoundEvents.WOOD_HIT, 0.6F, 0.6F);
+		}
 		return heart != null && this.crackCooldown == 0 && this.crack(level, source, heart);
 	}
 

@@ -115,7 +115,15 @@ public abstract class AbstractSentry extends AbstractGolem {
 	 * The last crack destroys the heart and kills the Sentry.
 	 */
 	protected boolean hurtHeart(ServerLevel level, DamageSource source) {
-		if (this.crackCooldown > 0 || !SentryHeart.isCrackedBy(this, source)) {
+		if (this.crackCooldown > 0) {
+			return false;
+		}
+		HeartHit hit = HeartHit.of(source, true).orElse(null);
+		if (hit == null) {
+			return false;
+		}
+		if (!SentryHeart.isHitBy(this, hit)) {
+			this.playSound(SoundEvents.WOOD_HIT, 0.6F, 0.6F);
 			return false;
 		}
 		this.crackCooldown = CRACK_COOLDOWN_TICKS;

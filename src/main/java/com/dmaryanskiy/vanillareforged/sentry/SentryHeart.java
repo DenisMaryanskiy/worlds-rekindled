@@ -22,9 +22,11 @@ public final class SentryHeart {
 
 	/** Whether a hit cracks the heart: a player's cracking hit, or any mob's arrow or trident, on the heart. */
 	public static boolean isCrackedBy(AbstractSentry sentry, DamageSource source) {
-		return HeartHit.of(source, true)
-				.filter(hit -> hit.comesFromTheFrontOf(forward(sentry)) && hit.passesThrough(box(sentry)))
-				.isPresent();
+		return HeartHit.of(source, true).filter(hit -> isHitBy(sentry, hit)).isPresent();
+	}
+
+	public static boolean isHitBy(AbstractSentry sentry, HeartHit hit) {
+		return hit.comesFromTheFrontOf(forward(sentry)) && hit.passesThrough(box(sentry));
 	}
 
 	private static Vec3 forward(AbstractSentry sentry) {

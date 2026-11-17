@@ -1,0 +1,24 @@
+{
+  "parent": "vanillareforged:adventure/buried_garden",
+  "criteria": {
+    "returned_burning_resin": {
+      "trigger": "vanillareforged:returned_burning_resin"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.vanillareforged.back_to_your_roots.description"
+    },
+    "icon": {
+      "id": "vanillareforged:burning_resin"
+    },
+    "title": {
+      "translate": "advancements.vanillareforged.back_to_your_roots.title"
+    }
+  },
+  "requirements": [
+    [
+      "returned_burning_resin"
+    ]
+  ]
+}

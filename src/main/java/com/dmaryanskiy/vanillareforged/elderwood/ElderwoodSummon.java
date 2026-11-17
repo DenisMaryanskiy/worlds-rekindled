@@ -17,6 +17,7 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.HoneycombItem;
 import net.minecraft.world.level.block.Block;
@@ -45,6 +46,7 @@ public final class ElderwoodSummon {
 	public static final TagKey<Block> COPPER = TagKey.create(Registries.BLOCK, VanillaReforged.id("elderwood_copper"));
 	public static final String ASLEEP_MESSAGE = "block.vanillareforged.creaking_heart.elderwood_asleep";
 	public static final String NO_ROOM_MESSAGE = "block.vanillareforged.creaking_heart.elderwood_no_room";
+	public static final String PEACEFUL_MESSAGE = "block.vanillareforged.creaking_heart.elderwood_peaceful";
 	public static final int ROOM_WIDTH = 5;
 	public static final int ROOM_HEIGHT = 10;
 	private static final double MESSAGE_RANGE = 8.0;
@@ -69,6 +71,10 @@ public final class ElderwoodSummon {
 			stump.add(root);
 		}
 		// Like a bed in daytime: tell the builder why nothing happened.
+		if (level.getDifficulty() == Difficulty.PEACEFUL) {
+			tell(level, heartPos, PEACEFUL_MESSAGE);
+			return false;
+		}
 		if (level.isBrightOutside() && level.canSeeSky(heartPos.above())) {
 			tell(level, heartPos, ASLEEP_MESSAGE);
 			return false;
