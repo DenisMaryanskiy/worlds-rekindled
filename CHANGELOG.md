@@ -10,7 +10,7 @@ The design behind all of it is in [docs/pale-garden.md](docs/pale-garden.md).
 
 After the third playtest: the fights tuned once more, and rewards for every kind of player.
 
-### 0.4.11 (unreleased)
+### 0.4.11 (#72)
 
 - **The Elderwood's model** has a chamfered trunk, splayed buttress roots, tapered branches and a
   more distinct crown. The copper collars wrap around the wood, and the lens sits inside its
