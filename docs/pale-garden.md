@@ -692,14 +692,17 @@ iron/diamond gear: a huge, rooted tree fought by moving around it.
   between two logs) or the Sentry (log + heart + pumpkin).
 
 **The woken Elderwood**
-- **An old pale oak about 10 blocks tall**: a thick trunk about 3 blocks across, spreading roots,
-  and a crown of bare branches and twigs with hanging moss, about 7 blocks wide at the top.
+- **An old pale oak about 10 blocks tall**: a thick, chamfered trunk about 3 blocks across, four
+  splayed buttress roots, and a crown of bare branches with hanging moss, about 7 blocks wide at
+  the top. The main branches taper from thick joins to narrower tips; fewer small forks give the
+  crown a clear hierarchy. The original rough bark, copper and heart texture styles are retained.
   Placeholder model and textures built from boxes, generated from one spec by
   `tools/elderwood_model.py` so the geometry (`geometry/elderwood.json`) and the UVs agree; the
   part names are a contract so an artist can replace the look later without touching the fight.
-- **Metal everywhere**, so it reads as the builders' work: copper bands around the trunk, riveted
-  plates over old wounds, a collar holding the lens in a hollow about 4 blocks up, braces on the
-  two main branches and a plate over the core. Four texture variants, one per oxidation stage.
+- **The builders' metalwork**: open copper collars around the trunk, riveted plates over old
+  wounds, a rim around the recessed lens about 4 blocks up, a cuff on each main branch and a plate
+  over the core. Four texture variants, one per oxidation stage. The heart positions, branch
+  pivots and three layers used by the death animation are unchanged.
 - **Only weak points glow** (kept): the lens and the hearts that can be hit right now, full-bright
   so they read in the dark.
 - **Rooted**: it never leaves the spot it grew on. It can't be pushed, knocked back or moved by

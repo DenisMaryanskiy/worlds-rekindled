@@ -10,6 +10,18 @@ The design behind all of it is in [docs/pale-garden.md](docs/pale-garden.md).
 
 After the third playtest: the fights tuned once more, and rewards for every kind of player.
 
+### 0.4.11 (unreleased)
+
+- **The Elderwood's model** has a chamfered trunk, splayed buttress roots, tapered branches and a
+  more distinct crown. The copper collars wrap around the wood, and the lens sits inside its
+  mounting. Its rough bark and copper textures, seven hearts and animation pivots are retained.
+- **Sentry spawn eggs** now have shaded shells and larger resin and weathered-copper markings.
+- **Sentries, the Elderwood and its roots** have connected bark grain instead of pixel noise;
+  the Elderwood's copper has small patina patches, and the Sentry statues keep their carved details.
+- **The Elderwood painting** now depicts the tree in the woods, framed by the builders' columns,
+  with its copper bands, lens and seven hearts.
+- **Pale Ruin maps** have a folded parchment icon and a small ruin symbol on the map.
+
 ### 0.4.10 (#71)
 
 - **New inventory textures** for the Pale Mask, Creaking Eye, Elderwood Lens, Lens Shard and

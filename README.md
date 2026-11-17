@@ -29,11 +29,20 @@ always agree. After changing the spec, regenerate both (plain Python 3, no depen
 python3 tools/elderwood_model.py
 ```
 
-The Pale Mask, Creaking Eye, Elderwood Lens, Lens Shard and smithing template inventory icons
+The inventory icons for the mask, eye, lenses, smithing template, spawn eggs and explorer map
 are hand-authored 16×16 pixel grids in `tools/item_textures.py`. After editing their grids or palettes:
 
 ```bash
 python3 tools/item_textures.py
+```
+
+The Sentries' bark and statue textures, roots, map marker and Elderwood painting are authored in
+`tools/detail_textures.py`. It shares the bark and copper tiles in `tools/texture_materials.py` with
+the Elderwood generator. After editing those tiles, regenerate both sets:
+
+```bash
+python3 tools/detail_textures.py
+python3 tools/elderwood_model.py
 ```
 
 The Pale Ruin's structure templates and worldgen files are generated too, from
