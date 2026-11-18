@@ -7,7 +7,7 @@
 - **Summary:** Expand the Pale Garden with underground ruins, a new boss, craftable guardians and useful survival rewards, all in a vanilla style.
 - **Description:** paste [description.md](description.md) into the Markdown editor.
 - **Avatar:** [icon.png](icon.png), 400×400, opaque PNG.
-- **Gallery:** use the eight existing images in [screenshots/](screenshots/), unchanged.
+- **Gallery:** use the eight optimized PNGs in [screenshots/](screenshots/), each below 2 MB.
 - **Game / class:** Minecraft: Java Edition / Mods
 - **Suggested categories:** Adventure and RPG; World Gen; Mobs; Structures (choose the available equivalents).
 - **License:** MIT
@@ -33,7 +33,12 @@ with existing 0.5.0 worlds; no registered content IDs or saved-data formats chan
 
 ## Gallery titles
 
-Upload the existing files without cropping or retouching. Suggested order and public titles:
+Upload these exports without further cropping or retouching.
+
+The exports retain their original 2880×1800 resolution and color profiles. Three use lossless
+RGB compression; the other five use optimized palettes. All are below 2,000,000 bytes.
+
+Suggested order and public titles:
 
 1. `Elderwood.png` — The Elderwood
 2. `Pale Ruin Entrance.png` — Discover the Pale Ruin
