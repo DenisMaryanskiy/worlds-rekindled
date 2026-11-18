@@ -1,0 +1,71 @@
+# CurseForge listing kit
+
+## Project fields
+
+- **Name:** Vanilla Reforged
+- **Suggested slug:** `vanilla-reforged` (availability must be checked when creating the project)
+- **Summary:** Expand the Pale Garden with underground ruins, a new boss, craftable guardians and useful survival rewards, all in a vanilla style.
+- **Description:** paste [description.md](description.md) into the Markdown editor.
+- **Avatar:** [icon.png](icon.png), 400×400, opaque PNG.
+- **Gallery:** use the eight existing images in [screenshots/](screenshots/), unchanged.
+- **Game / class:** Minecraft: Java Edition / Mods
+- **Suggested categories:** Adventure and RPG; World Gen; Mobs; Structures (choose the available equivalents).
+- **License:** MIT
+- **Source:** https://github.com/DenisMaryanskiy/vanilla-reforged
+- **Issues:** https://github.com/DenisMaryanskiy/vanilla-reforged/issues
+
+## First file
+
+- **File:** `build/libs/vanillareforged-0.5.1.jar`, not a sources or test JAR. After the merged
+  release is tagged, the same version is also available from the GitHub release.
+- **Display name:** Vanilla Reforged 0.5.1 — Pale Garden Beta
+- **Release type:** Beta
+- **Minecraft:** 26.3 only
+- **Loader:** Fabric
+- **Environment:** client and server
+- **Java:** 25
+- **Required dependency:** Fabric API
+- **Changelog:** paste [release-notes.md](release-notes.md), which introduces the complete beta
+  to first-time CurseForge users and explains the change since 0.5.0.
+
+Version 0.5.1 includes the replacement embedded icon and keeps 0.5.0's gameplay. It is compatible
+with existing 0.5.0 worlds; no registered content IDs or saved-data formats changed.
+
+## Gallery titles
+
+Upload the existing files without cropping or retouching. Suggested order and public titles:
+
+1. `Elderwood.png` — The Elderwood
+2. `Pale Ruin Entrance.png` — Discover the Pale Ruin
+3. `Sentries.png` — Guardians of the Ruin
+4. `Pale Mask.png` — The Pale Mask
+5. `Freiendly Sentry.png` — A Heartwood Sentry of Your Own
+6. `Pavillion.png` — The Summoning Hall
+7. `Treasury.png` — Archaeology in the Ruin
+8. `Dungeon Trunk.png` — Roots Through the Ruin
+
+## Artwork source and provenance
+
+The icon depicts a grass block resting on an anvil, with an amber seam and a spark. Its 40×40
+source is defined in [tools/mod_icon.py](../../../tools/mod_icon.py); the export uses integer
+nearest-neighbor scaling, with no smoothing or extracted Minecraft textures. Regenerate it with:
+
+```sh
+python3 tools/mod_icon.py
+```
+
+It writes this 400×400 avatar and the 160×160 embedded mod icon. The design and pixel placement
+were authored with Codex assistance; this is AI-assisted artwork, even though it uses an explicit
+pixel grid rather than an image-generation model. The description and suggested summary were
+also prepared with Codex. Review both before publishing.
+
+## Readiness
+
+- The author accepted the existing eight gameplay screenshots for the first listing.
+- The author confirmed the asset-origin/credit review and installed-JAR/client/server checks
+  were completed before finalizing these release files. Version 0.5.1 changes packaging and
+  presentation only.
+- The full build runs the automated checks before the release files are handed over.
+
+This kit targets CurseForge only. Creating the project, uploading its files and submitting it
+for moderation are handled by the author.

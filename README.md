@@ -3,7 +3,7 @@
 A vanilla+ Fabric mod that gives recent Minecraft updates (starting with the Pale Garden)
 meaningful rewards: new items, ingredients and mechanics that fit the base game.
 
-**0.5.0 — Pale Garden beta** is the first feature-complete biome improvement: discover the Pale
+**0.5.1 — Pale Garden beta** contains the first feature-complete biome improvement: discover the Pale
 Ruin, learn its guards' gaze and heart mechanics, wake the Elderwood, and bring home masks,
 Sentries, building materials and trophies. Cleaner summoning copper selects a stronger boss.
 
@@ -58,14 +58,18 @@ python3 tools/pale_ruin.py
 
 ## Releases
 
-Pushing a version tag that matches `version` in `gradle.properties` (e.g. `v0.5.0`) builds the mod,
+The [CurseForge listing kit](docs/publishing/curseforge/README.md) contains the player-facing
+description, project fields and avatar. Regenerate the pixel-art avatar and embedded mod icon
+with `python3 tools/mod_icon.py`.
+
+Pushing a version tag that matches `version` in `gradle.properties` (e.g. `v0.5.1`) builds the mod,
 runs its GameTests and publishes the jar as a GitHub Release, with that version's section of the
 changelog as its notes. Versions before 1.0 are published as beta prereleases. Tag the merged
 release commit on `main`:
 
 ```bash
-git tag v0.5.0
-git push origin v0.5.0
+git tag -a v0.5.1 -m "Vanilla Reforged 0.5.1 - Pale Garden beta"
+git push origin v0.5.1
 ```
 
 ## License
