@@ -8,7 +8,7 @@ The design behind all of it is in [docs/pale-garden.md](docs/pale-garden.md).
 
 ## 0.5: The complete Pale Garden beta
 
-### 0.5.1 (Release preparation)
+### 0.5.1 (#75)
 
 - Replace the default mod icon with an original pixel-art grass block and anvil mark, and
   prepare a CurseForge description, 400×400 project avatar and gameplay screenshot gallery.
