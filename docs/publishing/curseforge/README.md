@@ -11,8 +11,8 @@
 - **Game / class:** Minecraft: Java Edition / Mods
 - **Suggested categories:** Adventure and RPG; World Gen; Mobs; Structures (choose the available equivalents).
 - **License:** MIT
-- **Source:** https://github.com/DenisMaryanskiy/vanilla-reforged
-- **Issues:** https://github.com/DenisMaryanskiy/vanilla-reforged/issues
+- **Source:** https://github.com/DenisMaryanskiy/worlds-rekindled
+- **Issues:** https://github.com/DenisMaryanskiy/worlds-rekindled/issues
 
 ## First file
 
@@ -32,10 +32,10 @@ Version 0.5.1 includes the replacement embedded icon and keeps 0.5.0's gameplay.
 with existing 0.5.0 worlds; no registered content IDs or saved-data formats changed.
 
 Use **Worlds Rekindled** as the project title. The version and beta label belong in the file's
-display name and release fields. The JAR's display name is updated too; its internal mod ID,
-content namespace and source repository URL retain `vanillareforged` / `vanilla-reforged` for
-compatibility. Replace an already-uploaded file with the newly built JAR if it still shows the
-old name in its metadata. The public rename does not change the version or create a release.
+display name and release fields. The JAR's display name is updated too; its internal mod ID
+and content namespace retain `vanillareforged` for compatibility. Replace an already-uploaded
+file with the newly built JAR if it still shows the old name in its metadata. The public rename
+does not change the version or create a release.
 
 ## Gallery titles
 

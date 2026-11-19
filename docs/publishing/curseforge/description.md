@@ -63,9 +63,9 @@ Available in **English, Russian, German, French, Spanish and Italian**.
 Found a bug? Please include your Minecraft and mod versions, other installed mods, steps to
 reproduce the problem, and a crash report or relevant log if available.
 
-- [Report a bug or suggest a feature](https://github.com/DenisMaryanskiy/vanilla-reforged/issues)
-- [Source code and changelog](https://github.com/DenisMaryanskiy/vanilla-reforged)
-- [MIT license](https://github.com/DenisMaryanskiy/vanilla-reforged/blob/main/LICENSE)
+- [Report a bug or suggest a feature](https://github.com/DenisMaryanskiy/worlds-rekindled/issues)
+- [Source code and changelog](https://github.com/DenisMaryanskiy/worlds-rekindled)
+- [MIT license](https://github.com/DenisMaryanskiy/worlds-rekindled/blob/main/LICENSE)
 
 ## Development
 
