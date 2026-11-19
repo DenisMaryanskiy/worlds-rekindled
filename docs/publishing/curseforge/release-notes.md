@@ -1,6 +1,6 @@
-# Vanilla Reforged 0.5.1 — Pale Garden Beta
+# Worlds Rekindled 0.5.1 — Pale Garden Beta
 
-The first CurseForge beta contains Vanilla Reforged's complete Pale Garden expansion:
+The first CurseForge beta contains Worlds Rekindled's complete Pale Garden expansion:
 
 - Discover underground Pale Ruins with varied rooms, archaeology and Ruin Sentry guards.
 - Awaken the Elderwood, a copper-bound tree boss with seven hearts and a petrifying gaze.
@@ -13,8 +13,9 @@ The first CurseForge beta contains Vanilla Reforged's complete Pale Garden expan
 
 Available in English, Russian, German, French, Spanish and Italian.
 
-**Changed since 0.5.0:** replaced the placeholder mod icon with the Vanilla Reforged pixel-art
-mark and prepared the CurseForge listing and screenshot gallery. Gameplay is unchanged, and
+**Changed since 0.5.0:** updated the public name to Worlds Rekindled, replaced the placeholder
+mod icon with the pixel-art mark and prepared the CurseForge listing and screenshot gallery.
+Gameplay is unchanged, and
 existing 0.5.0 worlds remain compatible.
 
 Requires **Minecraft Java Edition 26.3**, **Fabric Loader 0.19.5 or newer**, **Fabric API for 26.3**

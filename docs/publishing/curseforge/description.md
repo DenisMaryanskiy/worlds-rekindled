@@ -1,6 +1,6 @@
-# Vanilla Reforged
+# Worlds Rekindled
 
-Vanilla Reforged gives Minecraft's newer content more reasons to explore, fight, build and return.
+Worlds Rekindled gives Minecraft's newer content more reasons to explore, fight, build and return.
 It builds on familiar materials and mechanics, with rewards that belong in a vanilla survival world.
 
 **The first expansion brings new life to the Pale Garden.** Beneath its quiet woods lie forgotten
@@ -46,7 +46,7 @@ Advancements help introduce the ruin's mechanics and guide you through its chall
 - **Required dependency:** Fabric API for Minecraft 26.3
 - **Java:** 25 or newer
 
-Install Fabric, then place Vanilla Reforged and Fabric API in your instance's `mods` folder.
+Install Fabric, then place Worlds Rekindled and Fabric API in your instance's `mods` folder.
 For multiplayer, install both mods on the server and on every player's client.
 
 Pale Ruins generate in newly explored terrain containing Pale Gardens. In an existing world,
@@ -63,13 +63,13 @@ Available in **English, Russian, German, French, Spanish and Italian**.
 Found a bug? Please include your Minecraft and mod versions, other installed mods, steps to
 reproduce the problem, and a crash report or relevant log if available.
 
-- [Report a bug or suggest a feature](https://github.com/DenisMaryanskiy/vanilla-reforged/issues)
-- [Source code and changelog](https://github.com/DenisMaryanskiy/vanilla-reforged)
-- [MIT license](https://github.com/DenisMaryanskiy/vanilla-reforged/blob/main/LICENSE)
+- [Report a bug or suggest a feature](https://github.com/DenisMaryanskiy/worlds-rekindled/issues)
+- [Source code and changelog](https://github.com/DenisMaryanskiy/worlds-rekindled)
+- [MIT license](https://github.com/DenisMaryanskiy/worlds-rekindled/blob/main/LICENSE)
 
 ## Development
 
-Vanilla Reforged is developed with substantial assistance from Claude and Codex, including code,
+Worlds Rekindled is developed with substantial assistance from Claude and Codex, including code,
 artwork tooling and translations (EN, RU & DE verified since author speaks those languages). Its design is directed and playtested
 by the author. The project icon is original pixel artwork authored with Codex assistance.
 

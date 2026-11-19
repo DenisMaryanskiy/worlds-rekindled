@@ -1,4 +1,4 @@
-"""Draw the Vanilla Reforged mark on a 40px grid; export without interpolation."""
+"""Draw the Worlds Rekindled mark on a 40px grid; export without interpolation."""
 from pathlib import Path
 
 import png

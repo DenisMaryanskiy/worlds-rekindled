@@ -1,4 +1,4 @@
-# Vanilla Reforged
+# Worlds Rekindled
 
 Vanilla+ Fabric mod (Minecraft 26.3, Java 25). Build commands are in `README.md`, feature designs in
 `docs/` (e.g. `docs/pale-garden.md`).
