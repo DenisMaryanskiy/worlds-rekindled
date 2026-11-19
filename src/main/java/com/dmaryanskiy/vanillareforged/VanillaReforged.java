@@ -33,7 +33,7 @@ public class VanillaReforged implements ModInitializer {
 		ElderwoodGaze.initialize();
 		Petrification.initialize();
 
-		LOGGER.info("Vanilla Reforged loaded");
+		LOGGER.info("Worlds Rekindled loaded");
 	}
 
 	public static Identifier id(String path) {

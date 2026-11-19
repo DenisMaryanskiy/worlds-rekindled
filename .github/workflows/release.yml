@@ -44,11 +44,11 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          title="Vanilla Reforged ${GITHUB_REF_NAME#v}"
+          title="Worlds Rekindled ${GITHUB_REF_NAME#v}"
           flags=()
           if [[ "$GITHUB_REF_NAME" == v0.* ]]; then
             title+=" Beta"
             flags+=(--prerelease)
           fi
-          gh release create "$GITHUB_REF_NAME" "build/libs/vanillareforged-${GITHUB_REF_NAME#v}.jar" \
+          gh release create "$GITHUB_REF_NAME" "build/libs/worlds-rekindled-${GITHUB_REF_NAME#v}.jar" \
             --title "$title" --notes-file notes.md "${flags[@]}"

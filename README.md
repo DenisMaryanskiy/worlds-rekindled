@@ -1,4 +1,4 @@
-# Vanilla Reforged
+# Worlds Rekindled
 
 A vanilla+ Fabric mod that gives recent Minecraft updates (starting with the Pale Garden)
 meaningful rewards: new items, ingredients and mechanics that fit the base game.
@@ -14,6 +14,9 @@ Sentries, building materials and trophies. Cleaner summoning copper selects a st
 - Languages: English, Russian, German, French, Spanish, Italian
 
 What each version added is in [CHANGELOG.md](CHANGELOG.md).
+
+The internal mod ID and content namespace remain `vanillareforged` for compatibility with
+existing worlds. The downloadable JAR is named `worlds-rekindled-<version>.jar`.
 
 ## Development
 
@@ -68,7 +71,7 @@ changelog as its notes. Versions before 1.0 are published as beta prereleases. T
 release commit on `main`:
 
 ```bash
-git tag -a v0.5.1 -m "Vanilla Reforged 0.5.1 - Pale Garden beta"
+git tag -a v0.5.1 -m "Worlds Rekindled 0.5.1 - Pale Garden beta"
 git push origin v0.5.1
 ```
 
